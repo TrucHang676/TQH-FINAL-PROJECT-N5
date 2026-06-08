@@ -25,6 +25,11 @@ env/
 !data/processed/.gitkeep
 !data/metadata/.gitkeep
 
+# Cho phép crawler source files và dataset chính
+!crawler/output/*.json
+!crawler/html_input/*.html
+!data/vietnam_it_jobs_raw.csv
+
 # Logs
 logs/
 *.log
