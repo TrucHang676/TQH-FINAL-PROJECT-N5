@@ -14,7 +14,7 @@ env/
 .env
 .env.local
 
-# Data files - nếu dữ liệu quá nặng thì không push
+# Data files
 *.csv
 *.xlsx
 *.json
