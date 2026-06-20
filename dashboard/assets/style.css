@@ -1,0 +1,77 @@
+/* 
+   IT Recruitment Analysis Dashboard - Common Stylesheet
+   Imports fonts, sets up design variables, resets defaults.
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Color system - Slate Light Theme */
+  --bg-color: #f1f5f9;        /* Slate 100 */
+  --card-bg: #ffffff;
+  --text-primary: #0f172a;    /* Slate 900 */
+  --text-secondary: #475569;  /* Slate 600 */
+  --text-muted: #94a3b8;      /* Slate 400 */
+  
+  --border-color: #e2e8f0;    /* Slate 200 */
+  --primary: #3b82f6;         /* Blue 500 */
+  --primary-hover: #2563eb;   /* Blue 600 */
+  --primary-light: #eff6ff;   /* Blue 50 */
+  
+  /* Region Colors matching implementation plan */
+  --color-bac: #3b82f6;       /* Blue */
+  --color-trung: #f59e0b;     /* Amber */
+  --color-nam: #10b981;       /* Emerald */
+  --color-remote: #06b6d4;    /* Teal */
+  --color-khac: #8b5cf6;      /* Purple */
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.08);
+
+  /* Fonts */
+  --font-family: 'Outfit', sans-serif;
+  
+  /* Transitions */
+  --transition-fast: all 0.15s ease-in-out;
+  --transition-normal: all 0.25s ease-in-out;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body, html {
+  font-family: var(--font-family);
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden; /* Prevent scrolling on the entire page */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hide standard Dash debug / loading elements when not debugging */
+._dash-loading {
+  display: none;
+}
+
+/* Custom scrollbars inside components if any */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
