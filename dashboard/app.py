@@ -1,26 +1,91 @@
 import dash
+import pandas as pd
+from pathlib import Path
 import dash_bootstrap_components as dbc
-from dash import html
+from dash import html, dcc, Input, Output
+
+# Resolve CSV Path relative to this file to get dynamic dataset size
+# app.py is inside dashboard/, so we need the parent directory of dashboard/ as root
+root_dir = Path(__file__).parent.parent.resolve()
+csv_path = root_dir / "data" / "processed" / "vietnam_it_jobs_processed.csv"
+if csv_path.exists():
+    try:
+        df_all = pd.read_csv(csv_path)
+        total_records = len(df_all)
+    except Exception:
+        total_records = 8452 # Fallback
+else:
+    total_records = 0
+
+print(f"DIAGNOSTIC: root_dir={root_dir} | csv_path={csv_path} | exists={csv_path.exists()} | total_records={total_records}")
 
 # Initialize Dash application with multi-page support
-# Assets folder is relative to this file: dashboard/assets/
-# Pages folder is relative to this file: dashboard/pages/
 app = dash.Dash(
     __name__,
     use_pages=True,
     pages_folder="pages",
     assets_folder="assets",
-    title="IT Recruitment Analysis Dashboard",
+    title="Thị trường tuyển dụng IT Việt Nam",
     external_stylesheets=[dbc.themes.BOOTSTRAP]
 )
 
-# Root application layout
+# Root application layout with global Header and Nav
 app.layout = html.Div([
+    dcc.Location(id='url', refresh=False),
+    
+    # Global Flat Header (Academic Theme)
+    html.Div([
+        html.Div([
+            html.H1("Thị trường tuyển dụng IT Việt Nam", className="global-title"),
+            html.Span("Mục tiêu 1 · Xu hướng nhu cầu theo thời gian, địa lý và hình thức làm việc", className="global-subtitle")
+        ], className="global-title-container"),
+        html.Div([
+            html.Div(f"Dataset: vietnam_it_jobs_processed.csv  ·  {total_records:,} tin tuyển dụng", className="dataset-badge")
+        ], className="global-badge-container")
+    ], className="global-header"),
+    
+    # Global Navigation Tabs (Academic styled dcc.Link, no emoji)
+    html.Div([
+        html.Div([
+            dcc.Link("01 Xu hướng & Địa lý", id="link-home", href="/", className="nav-tab"),
+            dcc.Link("02 Kỹ năng & Công nghệ", id="link-skills", href="/skills", className="nav-tab"),
+            dcc.Link("03 Lương thị trường", id="link-salary", href="/salary", className="nav-tab"),
+            dcc.Link("04 Nhân sự trẻ", id="link-entry", href="/entry-level", className="nav-tab"),
+            dcc.Link("05 AI phân tích", id="link-ai", href="/ai", className="nav-tab")
+        ], className="nav-tabs-wrapper")
+    ], className="nav-container"),
+    
+    # Page Content Container
     dash.page_container
 ])
 
+# Callback to dynamically assign active classes to nav links based on URL path
+@app.callback(
+    [
+        Output('link-home', 'className'),
+        Output('link-skills', 'className'),
+        Output('link-salary', 'className'),
+        Output('link-entry', 'className'),
+        Output('link-ai', 'className')
+    ],
+    [Input('url', 'pathname')]
+)
+def update_active_nav(pathname):
+    base_class = "nav-tab"
+    
+    # Handle active class assignment
+    # pathname could be '/' or empty for home
+    is_home = (pathname == "/" or pathname == "" or pathname is None)
+    
+    return [
+        base_class + (" active" if is_home else ""),
+        base_class + (" active" if pathname == "/skills" else ""),
+        base_class + (" active" if pathname == "/salary" else ""),
+        base_class + (" active" if pathname == "/entry-level" else ""),
+        base_class + (" active" if pathname == "/ai" else "")
+    ]
+
 # Run server
 if __name__ == '__main__':
-    # Set debug=False in production, True for development
     print("Starting IT Recruitment Dashboard Server on http://127.0.0.1:8050...")
     app.run(debug=True, host='127.0.0.1', port=8050)

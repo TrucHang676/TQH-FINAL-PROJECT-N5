@@ -1,41 +1,36 @@
 /* 
-   IT Recruitment Analysis Dashboard - Common Stylesheet
-   Imports fonts, sets up design variables, resets defaults.
+   IT Recruitment Analysis Dashboard - Global Stylesheet (Refactored)
+   Clean, Academic, Professional Theme. System fonts, minimal spacing, flat panels.
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
-
 :root {
-  /* Color system - Slate Light Theme */
-  --bg-color: #f1f5f9;        /* Slate 100 */
+  /* Color system - Clean Slate Academic Theme */
+  --bg-color: #f8fafc;        /* Slate 50 */
   --card-bg: #ffffff;
-  --text-primary: #0f172a;    /* Slate 900 */
-  --text-secondary: #475569;  /* Slate 600 */
-  --text-muted: #94a3b8;      /* Slate 400 */
+  --text-primary: #111827;    /* Slate 900 */
+  --text-secondary: #4b5563;  /* Slate 600 */
+  --text-muted: #9ca3af;      /* Slate 400 */
   
-  --border-color: #e2e8f0;    /* Slate 200 */
-  --primary: #3b82f6;         /* Blue 500 */
-  --primary-hover: #2563eb;   /* Blue 600 */
+  --border-color: #e5e7eb;    /* Slate 200 */
+  --primary: #1d4ed8;         /* Blue 700 */
+  --primary-hover: #1e40af;   /* Blue 800 */
   --primary-light: #eff6ff;   /* Blue 50 */
   
-  /* Region Colors matching implementation plan */
-  --color-bac: #3b82f6;       /* Blue */
-  --color-trung: #f59e0b;     /* Amber */
-  --color-nam: #10b981;       /* Emerald */
-  --color-remote: #06b6d4;    /* Teal */
-  --color-khac: #8b5cf6;      /* Purple */
+  /* Region Colors - Professional Theme */
+  --color-bac: #1d4ed8;       /* Blue */
+  --color-nam: #16a34a;       /* Green */
+  --color-trung: #ea580c;     /* Orange */
+  --color-remote: #0d9488;    /* Teal */
+  --color-khac: #9ca3af;      /* Neutral Grey */
 
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
-  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.08);
+  /* Shadows (Extremely light borders preferred, minimal shadow) */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
 
-  /* Fonts */
-  --font-family: 'Outfit', sans-serif;
+  /* Fonts - Neutral Offline-friendly System Font Stack */
+  --font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   
-  /* Transitions */
   --transition-fast: all 0.15s ease-in-out;
-  --transition-normal: all 0.25s ease-in-out;
 }
 
 * {
@@ -50,9 +45,131 @@ body, html {
   color: var(--text-primary);
   height: 100vh;
   width: 100vw;
-  overflow: hidden; /* Prevent scrolling on the entire page */
+  /* Soft viewport constraint: allow overall page vertical scrolling on small viewports but hide by default if possible */
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Global App Header */
+.global-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 60px;
+  min-height: 60px;
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 24px;
+}
+
+.global-title-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.global-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.2px;
+}
+
+.global-subtitle {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.global-badge-container {
+  display: flex;
+  align-items: center;
+}
+
+.dataset-badge {
+  background-color: #f1f5f9; /* neutral gray */
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+}
+
+/* Dynamic Page Navigation (Tabs Layout) */
+.nav-container {
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 24px;
+  height: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.nav-tabs-wrapper {
+  display: flex;
+  height: 100%;
+  gap: 28px;
+}
+
+.nav-tab {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  padding: 0 4px;
+  transition: var(--transition-fast);
+  cursor: pointer;
+}
+
+.nav-tab:hover {
+  color: var(--primary);
+}
+
+.nav-tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+}
+
+/* Placeholder Page Styling */
+.placeholder-container {
+  padding: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 100px);
+  background-color: var(--bg-color);
+}
+
+.placeholder-card {
+  max-width: 500px;
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 32px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.placeholder-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.placeholder-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
 }
 
 /* Hide standard Dash debug / loading elements when not debugging */

@@ -1,9 +1,9 @@
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 
 # Coordinates of Vietnam provinces/cities present in the dataset
-# "Khác" and "Từ xa / Remote" are filtered out from coordinates as they are non-physical
 PROVINCE_COORDINATES = {
     'TP.HCM': {'lat': 10.8231, 'lon': 106.6297},
     'Hà Nội': {'lat': 21.0285, 'lon': 105.8542},
@@ -24,29 +24,19 @@ PROVINCE_COORDINATES = {
     'Bình Dương': {'lat': 10.9805, 'lon': 106.6518}
 }
 
-# Theme Colors
+# Professional Colors
 REGION_COLORS = {
-    'Bắc': '#3b82f6',       # Royal Blue
-    'Nam': '#10b981',       # Emerald Green
-    'Trung': '#f59e0b',     # Amber Orange
-    'Từ xa / Remote': '#06b6d4', # Teal
-    'Khác': '#8b5cf6'       # Lavender Purple
+    'Bắc': '#1d4ed8',       # Professional Blue
+    'Nam': '#16a34a',       # Professional Green
+    'Trung': '#ea580c',     # Warm Orange
+    'Từ xa / Remote': '#0d9488', # Teal
+    'Khác': '#9ca3af'       # Grey
 }
 
-WORK_TYPE_COLORS = {
-    'Full-time': '#2563eb',   # Deep Blue
-    'Internship': '#38bdf8',  # Sky Blue
-    'Part-time': '#f59e0b',   # Amber
-    'Contract': '#8b5cf6',    # Purple
-    'Khác': '#94a3b8',        # Slate
-    'Không rõ': '#cbd5e1'     # Light Slate
-}
-
-# Common layout styling helper
 def apply_layout_styles(fig):
     fig.update_layout(
-        font_family="Outfit, sans-serif",
-        font_color="#0f172a",
+        font_family="Inter, system-ui, -apple-system, sans-serif",
+        font_color="#111827",
         margin=dict(l=10, r=10, t=10, b=10),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
@@ -57,77 +47,124 @@ def apply_layout_styles(fig):
 
 def create_time_trend_chart(df):
     """
-    Line chart showing the recruitment trend over time (months/years)
+    Line chart showing the recruitment trend over time, with a 3-month moving average
     """
-    # Group by month and count jobs
-    # Drop rows without dates
     trend_df = df.dropna(subset=['thang_dang']).copy()
     
     if trend_df.empty:
-        # Return an empty figure with a placeholder message
         fig = go.Figure()
-        fig.add_annotation(text="Không có dữ liệu thời gian", showarrow=False, font=dict(size=14, color="#94a3b8"))
+        fig.add_annotation(text="Không có dữ liệu thời gian", showarrow=False, font=dict(size=12, color="#9ca3af"))
         apply_layout_styles(fig)
         return fig
         
     trend_data = trend_df.groupby('thang_dang').size().reset_index(name='job_count')
-    # Sort chronologically by thang_dang string 'YYYY-MM'
-    trend_data = trend_data.sort_values('thang_dang')
+    
+    # Convert thang_dang to datetime before sorting and calculations
+    trend_data['thang_dang_dt'] = pd.to_datetime(trend_data['thang_dang'] + '-01', format='%Y-%m-%d')
+    trend_data = trend_data.sort_values('thang_dang_dt')
+    
+    # Calculate 3-month moving average
+    trend_data['moving_avg'] = trend_data['job_count'].rolling(window=3, min_periods=1).mean()
     
     fig = go.Figure()
     
-    # Area gradient under the line
+    # 3-Month Moving Average (Dashed Grey Line)
+    fig.add_trace(go.Scatter(
+        x=trend_data['thang_dang'],
+        y=trend_data['moving_avg'],
+        mode='lines',
+        name='Trung bình trượt 3 tháng',
+        line=dict(color='#9ca3af', width=2, dash='dash'),
+        hoverinfo='skip'
+    ))
+    
+    # Main Job Count Line (Solid Blue Line, No markers)
     fig.add_trace(go.Scatter(
         x=trend_data['thang_dang'],
         y=trend_data['job_count'],
-        mode='lines+markers',
-        name='Số lượng việc làm',
-        line=dict(color='#2563eb', width=3.5, shape='spline'),
-        marker=dict(size=7, color='#2563eb', symbol='circle', line=dict(width=1.5, color='#ffffff')),
-        fill='tozeroy',
-        fillcolor='rgba(37, 99, 235, 0.08)',
+        mode='lines',
+        name='Tin tuyển dụng',
+        line=dict(color='#1d4ed8', width=2.5),
         hoverinfo='text',
-        hovertext=[f"<b>Tháng {row['thang_dang']}</b><br>Nhu cầu: {row['job_count']:,} tin tuyển dụng" for _, row in trend_data.iterrows()]
+        hovertext=[f"<b>Tháng {row['thang_dang']}</b><br>Nhu cầu: {row['job_count']:,} tin" for _, row in trend_data.iterrows()]
     ))
     
+    # Highlight Peak Month
+    if not trend_data.empty:
+        peak_idx = trend_data['job_count'].idxmax()
+        peak_row = trend_data.loc[peak_idx]
+        peak_month = peak_row['thang_dang']
+        peak_count = peak_row['job_count']
+        
+        # Single marker for peak month
+        fig.add_trace(go.Scatter(
+            x=[peak_month],
+            y=[peak_count],
+            mode='markers',
+            name='Tháng cao điểm',
+            marker=dict(size=8, color='#1d4ed8', symbol='circle', line=dict(width=1.5, color='#ffffff')),
+            hoverinfo='skip'
+        ))
+        
+        # Peak annotation
+        fig.add_annotation(
+            x=peak_month,
+            y=peak_count,
+            text=f"Đỉnh: {peak_count:,} tin",
+            showarrow=True,
+            arrowhead=0,
+            ax=0,
+            ay=-18,
+            font=dict(size=9, color='#1d4ed8', weight='bold'),
+            bgcolor="rgba(255, 255, 255, 0.9)",
+            bordercolor="#e5e7eb",
+            borderwidth=1,
+            borderpad=2
+        )
+        
     fig.update_xaxes(
         showgrid=False,
-        linecolor='#e2e8f0',
+        linecolor='#e5e7eb',
         tickangle=-30,
-        tickfont=dict(size=10, color='#64748b'),
-        title_font=dict(size=11, color='#64748b')
+        tickfont=dict(size=9, color='#4b5563'),
+        title_font=dict(size=10, color='#4b5563')
     )
     
     fig.update_yaxes(
         showgrid=True,
         gridcolor='#f1f5f9',
-        linecolor='#e2e8f0',
-        tickfont=dict(size=10, color='#64748b'),
-        title_font=dict(size=11, color='#64748b')
+        linecolor='#e5e7eb',
+        tickfont=dict(size=9, color='#4b5563'),
+        title_font=dict(size=10, color='#4b5563')
     )
     
     apply_layout_styles(fig)
-    # Adjust padding for line chart labels
-    fig.update_layout(margin=dict(l=40, r=10, t=10, b=40))
+    fig.update_layout(
+        margin=dict(l=40, r=10, t=10, b=35),
+        showlegend=True,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=0.9,
+            xanchor="right",
+            x=1,
+            font=dict(size=9, color='#4b5563')
+        )
+    )
     return fig
 
 def create_vietnam_map(df):
     """
-    Map of Vietnam using scatter_mapbox with open-street-map background
+    Map of Vietnam using scatter_mapbox with carto-positron style
     """
-    # Count jobs per province
     city_counts = df['tinh_thanh'].value_counts().reset_index(name='job_count')
     
-    # Map coordinates
     map_data = []
-    total_active_jobs = 0
-    
     for _, row in city_counts.iterrows():
         city = row['tinh_thanh']
         count = row['job_count']
         if city in PROVINCE_COORDINATES:
             lat_lon = PROVINCE_COORDINATES[city]
-            # Find the region corresponding to this province in the dataframe
             sample_row = df[df['tinh_thanh'] == city]
             region = sample_row['vung_mien'].iloc[0] if not sample_row.empty else 'Khác'
             
@@ -138,22 +175,18 @@ def create_vietnam_map(df):
                 'lon': lat_lon['lon'],
                 'Số lượng tuyển dụng': count
             })
-            total_active_jobs += count
             
     if not map_data:
-        # Return an empty map figure
         fig = go.Figure()
-        fig.add_annotation(text="Không có dữ liệu bản đồ phù hợp", showarrow=False, font=dict(size=14, color="#94a3b8"))
+        fig.add_annotation(text="Không có dữ liệu bản đồ phù hợp", showarrow=False, font=dict(size=12, color="#9ca3af"))
         apply_layout_styles(fig)
         return fig
         
     map_df = pd.DataFrame(map_data)
     
-    # Calculate scale factor for bubbles based on max count
-    max_count = map_df['Số lượng tuyển dụng'].max()
-    # Ensure bubble sizes are visible but not overriding the map
-    # We use a custom size scaling function: size = log(count) or sqrt(count)
-    map_df['marker_size'] = map_df['Số lượng tuyển dụng'].apply(lambda x: 8 + (x / max_count) * 28)
+    # Academic Square Root size scaling
+    # Prevents huge metropolitan centers from overshadowing regional data
+    map_df['marker_size'] = map_df['Số lượng tuyển dụng'].apply(lambda x: 4 + np.sqrt(x) * 0.42)
     
     fig = px.scatter_mapbox(
         map_df,
@@ -169,26 +202,25 @@ def create_vietnam_map(df):
             "Vùng miền": True,
             "Số lượng tuyển dụng": ":,f"
         },
-        size_max=32,
-        zoom=4.8,
-        center={"lat": 16.2, "lon": 107.5}, # Center of Vietnam
-        mapbox_style="open-street-map"
+        size_max=24,
+        zoom=4.7,
+        center={"lat": 16.2, "lon": 107.5},
+        mapbox_style="carto-positron"
     )
     
     apply_layout_styles(fig)
-    # Map styling overrides
     fig.update_layout(
-        margin=dict(l=0, r=0, t=0, b=0), # Map occupies the full card space
+        margin=dict(l=0, r=0, t=0, b=0),
         legend=dict(
             yanchor="bottom",
             y=0.02,
             xanchor="left",
             x=0.02,
-            bgcolor="rgba(255, 255, 255, 0.85)",
-            bordercolor="#e2e8f0",
+            bgcolor="rgba(255, 255, 255, 0.9)",
+            bordercolor="#e5e7eb",
             borderwidth=1,
-            title_font=dict(size=11, weight='bold'),
-            font=dict(size=10),
+            title_font=dict(size=10, weight='bold'),
+            font=dict(size=9),
             orientation="v"
         ),
         showlegend=True
@@ -198,42 +230,52 @@ def create_vietnam_map(df):
 
 def create_work_type_chart(df):
     """
-    Donut chart showing working form breakdown
+    Horizontal bar chart showing working format breakdown (Academic styled, replacing donut)
     """
     work_counts = df['hinh_thuc_lam_viec'].value_counts().reset_index(name='count')
     
     if work_counts.empty:
         fig = go.Figure()
-        fig.add_annotation(text="Không có dữ liệu hình thức", showarrow=False, font=dict(size=14, color="#94a3b8"))
+        fig.add_annotation(text="Không có dữ liệu hình thức", showarrow=False, font=dict(size=12, color="#9ca3af"))
         apply_layout_styles(fig)
         return fig
         
-    fig = go.Figure(data=[go.Pie(
-        labels=work_counts['hinh_thuc_lam_viec'],
-        values=work_counts['count'],
-        hole=0.55,
-        marker=dict(colors=[WORK_TYPE_COLORS.get(label, '#94a3b8') for label in work_counts['hinh_thuc_lam_viec']]),
-        textinfo='percent',
-        textfont=dict(size=10, color='#ffffff'),
-        insidetextorientation='radial',
-        hoverinfo='label+value+percent',
-        hovertemplate="<b>%{label}</b><br>Số lượng: %{value:,}<br>Tỷ lệ: %{percent}<extra></extra>"
+    total_work = work_counts['count'].sum()
+    work_counts['pct'] = (work_counts['count'] / total_work) * 100
+    
+    # Sort ascending for horizontal display (largest at top)
+    work_counts = work_counts.sort_values('count', ascending=True)
+    
+    # Form academic detailed labels on Y-axis
+    y_labels = [f" {row['hinh_thuc_lam_viec']}  ·  {row['count']:,}  ·  {row['pct']:.1f}% " for _, row in work_counts.iterrows()]
+    
+    fig = go.Figure(data=[go.Bar(
+        x=work_counts['count'],
+        y=y_labels,
+        orientation='h',
+        marker=dict(
+            color='#1d4ed8', # Uniform academic blue
+            line=dict(width=0)
+        ),
+        hoverinfo='text',
+        hovertext=[f"<b>{row['hinh_thuc_lam_viec']}</b><br>Số lượng: {row['count']:,}<br>Tỉ lệ: {row['pct']:.1f}%" for _, row in work_counts.iterrows()]
     )])
     
-    apply_layout_styles(fig)
-    fig.update_layout(
-        showlegend=True,
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=-0.25,
-            xanchor="center",
-            x=0.5,
-            font=dict(size=9),
-            traceorder="normal"
-        ),
-        margin=dict(l=10, r=10, t=10, b=30)
+    fig.update_xaxes(
+        showgrid=True,
+        gridcolor='#f1f5f9',
+        linecolor='#e5e7eb',
+        tickfont=dict(size=9, color='#4b5563')
     )
+    
+    fig.update_yaxes(
+        showgrid=False,
+        linecolor='#e5e7eb',
+        tickfont=dict(size=9, color='#111827', weight='bold')
+    )
+    
+    apply_layout_styles(fig)
+    fig.update_layout(margin=dict(l=10, r=10, t=10, b=20))
     
     return fig
 
@@ -245,44 +287,44 @@ def create_region_chart(df):
     
     if region_counts.empty:
         fig = go.Figure()
-        fig.add_annotation(text="Không có dữ liệu vùng miền", showarrow=False, font=dict(size=14, color="#94a3b8"))
+        fig.add_annotation(text="Không có dữ liệu vùng miền", showarrow=False, font=dict(size=12, color="#9ca3af"))
         apply_layout_styles(fig)
         return fig
         
-    # Sort from smallest to largest for horizontal bar order (plotly plots from bottom to top)
+    total_region = region_counts['count'].sum()
+    region_counts['pct'] = (region_counts['count'] / total_region) * 100
+    
+    # Sort ascending for horizontal display (largest at top)
     region_counts = region_counts.sort_values('count', ascending=True)
+    
+    y_labels = [f" {row['vung_mien']}  ·  {row['count']:,}  ·  {row['pct']:.1f}% " for _, row in region_counts.iterrows()]
     
     fig = go.Figure(data=[go.Bar(
         x=region_counts['count'],
-        y=region_counts['vung_mien'],
+        y=y_labels,
         orientation='h',
         marker=dict(
-            color=[REGION_COLORS.get(r, '#8b5cf6') for r in region_counts['vung_mien']],
+            color=[REGION_COLORS.get(r, '#9ca3af') for r in region_counts['vung_mien']],
             line=dict(width=0)
         ),
         hoverinfo='text',
-        hovertext=[f"<b>Miền {row['vung_mien']}</b><br>Nhu cầu: {row['count']:,} việc làm" for _, row in region_counts.iterrows()],
-        text=region_counts['count'].map(lambda x: f" {x:,} "),
-        textposition='outside',
-        textfont=dict(size=10, color='#475569', weight='bold')
+        hovertext=[f"<b>Miền {row['vung_mien']}</b><br>Nhu cầu: {row['count']:,}<br>Tỉ lệ: {row['pct']:.1f}%" for _, row in region_counts.iterrows()]
     )])
     
     fig.update_xaxes(
         showgrid=True,
         gridcolor='#f1f5f9',
-        linecolor='#e2e8f0',
-        tickfont=dict(size=10, color='#64748b'),
-        # Set generous max range to accommodate text labels outside bars
-        range=[0, region_counts['count'].max() * 1.15]
+        linecolor='#e5e7eb',
+        tickfont=dict(size=9, color='#4b5563')
     )
     
     fig.update_yaxes(
         showgrid=False,
-        linecolor='#e2e8f0',
-        tickfont=dict(size=10, color='#475569', weight='bold')
+        linecolor='#e5e7eb',
+        tickfont=dict(size=9, color='#111827', weight='bold')
     )
     
     apply_layout_styles(fig)
-    fig.update_layout(margin=dict(l=5, r=30, t=10, b=20))
+    fig.update_layout(margin=dict(l=10, r=10, t=10, b=20))
     
     return fig
