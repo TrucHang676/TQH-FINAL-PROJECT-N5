@@ -4,22 +4,22 @@
 */
 
 :root {
-  /* Color system - Clean Slate Academic Theme */
-  --bg-color: #f8fafc;        /* Slate 50 */
+  /* Color system - Warm Academic Theme */
+  --bg-color: #faf8f5;        /* Warm Cream Sand */
   --card-bg: #ffffff;
   --text-primary: #111827;    /* Slate 900 */
   --text-secondary: #4b5563;  /* Slate 600 */
   --text-muted: #9ca3af;      /* Slate 400 */
   
-  --border-color: #e5e7eb;    /* Slate 200 */
-  --primary: #1d4ed8;         /* Blue 700 */
-  --primary-hover: #1e40af;   /* Blue 800 */
-  --primary-light: #eff6ff;   /* Blue 50 */
+  --border-color: #eae5db;    /* Warm Beige Border */
+  --primary: #59B292;         /* Sage Green */
+  --primary-hover: #469d7e;   /* Darker Sage */
+  --primary-light: #f0faf6;   /* Light Sage Tint */
   
-  /* Region Colors - Professional Theme */
-  --color-bac: #1d4ed8;       /* Blue */
-  --color-nam: #16a34a;       /* Green */
-  --color-trung: #ea580c;     /* Orange */
+  /* Region Colors - Warm Theme */
+  --color-bac: #FA6781;       /* Coral Red */
+  --color-nam: #59B292;       /* Sage Green */
+  --color-trung: #FFC94D;     /* Amber Gold */
   --color-remote: #0d9488;    /* Teal */
   --color-khac: #9ca3af;      /* Neutral Grey */
 
@@ -192,3 +192,39 @@ body, html {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-secondary);
 }
+
+/* Smooth loading states for Dash callbacks (dimming and transitions) */
+[data-dash-is-loading="true"] {
+  opacity: 0.5;
+  filter: grayscale(20%) blur(0.5px);
+  transition: opacity 0.15s ease-in-out, filter 0.15s ease-in-out;
+}
+
+/* Card and Chart Hover transitions */
+.kpi-card, .chart-card {
+  transition: box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.kpi-card:hover, .chart-card:hover {
+  box-shadow: 0 10px 24px rgba(89, 178, 146, 0.08); /* Soft primary color accent shadow */
+  transform: translateY(-2px);
+}
+
+/* Fade-in animations for loading transitions */
+.fade-in {
+  animation: fadeInUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+

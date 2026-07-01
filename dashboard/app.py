@@ -37,10 +37,17 @@ app.layout = html.Div([
     html.Div([
         html.Div([
             html.H1("Thị trường tuyển dụng IT Việt Nam", className="global-title"),
-            html.Span("Mục tiêu 1 · Xu hướng nhu cầu theo thời gian, địa lý và hình thức làm việc", className="global-subtitle")
+            html.Div([
+                html.Span("Mục tiêu 1", className="global-subtitle-main"),
+                html.Span(" | ", className="global-subtitle-divider"),
+                html.Span("Xu hướng nhu cầu theo thời gian, địa lý và hình thức làm việc", className="global-subtitle-desc")
+            ], className="global-subtitle-container")
         ], className="global-title-container"),
         html.Div([
-            html.Div(f"Dataset: vietnam_it_jobs_processed.csv  ·  {total_records:,} tin tuyển dụng", className="dataset-badge")
+            html.Div([
+                html.Span("Dataset: vietnam_it_jobs_processed.csv", className="dataset-name"),
+                html.Span(f"{total_records:,} tin tuyển dụng", className="dataset-count")
+            ], className="dataset-badge")
         ], className="global-badge-container")
     ], className="global-header"),
     
@@ -59,8 +66,21 @@ app.layout = html.Div([
     dash.page_container
 ])
 
-# Callback to dynamically assign active classes to nav links based on URL path
-@app.callback(
+# Clientside Callback to dynamically assign active classes to nav links based on URL path
+app.clientside_callback(
+    """
+    function(pathname) {
+        var base_class = "nav-tab";
+        var is_home = (pathname === "/" || pathname === "" || pathname === null || pathname === undefined);
+        return [
+            base_class + (is_home ? " active" : ""),
+            base_class + (pathname === "/skills" ? " active" : ""),
+            base_class + (pathname === "/salary" ? " active" : ""),
+            base_class + (pathname === "/entry-level" ? " active" : ""),
+            base_class + (pathname === "/ai" ? " active" : "")
+        ];
+    }
+    """,
     [
         Output('link-home', 'className'),
         Output('link-skills', 'className'),
@@ -70,20 +90,6 @@ app.layout = html.Div([
     ],
     [Input('url', 'pathname')]
 )
-def update_active_nav(pathname):
-    base_class = "nav-tab"
-    
-    # Handle active class assignment
-    # pathname could be '/' or empty for home
-    is_home = (pathname == "/" or pathname == "" or pathname is None)
-    
-    return [
-        base_class + (" active" if is_home else ""),
-        base_class + (" active" if pathname == "/skills" else ""),
-        base_class + (" active" if pathname == "/salary" else ""),
-        base_class + (" active" if pathname == "/entry-level" else ""),
-        base_class + (" active" if pathname == "/ai" else "")
-    ]
 
 # Run server
 if __name__ == '__main__':

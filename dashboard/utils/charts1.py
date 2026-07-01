@@ -24,11 +24,11 @@ PROVINCE_COORDINATES = {
     'Bình Dương': {'lat': 10.9805, 'lon': 106.6518}
 }
 
-# Professional Colors
+# Professional Colors - Warm Editorial Theme
 REGION_COLORS = {
-    'Bắc': '#1d4ed8',       # Professional Blue
-    'Nam': '#16a34a',       # Professional Green
-    'Trung': '#ea580c',     # Warm Orange
+    'Bắc': '#FA6781',       # Coral Red
+    'Nam': '#59B292',       # Sage Green
+    'Trung': '#FFC94D',     # Amber Gold
     'Từ xa / Remote': '#0d9488', # Teal
     'Khác': '#9ca3af'       # Grey
 }
@@ -41,7 +41,21 @@ def apply_layout_styles(fig):
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
         hovermode="closest",
-        showlegend=False
+        showlegend=False,
+        # Smooth transition animation when figure updates
+        transition=dict(
+            duration=400,
+            easing="cubic-in-out"
+        ),
+        # Clean custom tooltip styled like modern HTML popovers (Shadcn Dark Style)
+        hoverlabel=dict(
+            bgcolor="#1e293b",
+            bordercolor="rgba(0,0,0,0)",
+            font_size=12,
+            font_family="Inter, system-ui, -apple-system, sans-serif",
+            font_color="#ffffff",
+            namelength=-1
+        )
     )
     return fig
 
@@ -73,20 +87,19 @@ def create_time_trend_chart(df):
         x=trend_data['thang_dang'],
         y=trend_data['moving_avg'],
         mode='lines',
-        name='Trung bình trượt 3 tháng',
+        name='Trung bình trượt',
         line=dict(color='#9ca3af', width=2, dash='dash'),
-        hoverinfo='skip'
+        hovertemplate="%{y:,.0f} tin<extra></extra>"
     ))
     
-    # Main Job Count Line (Solid Blue Line, No markers)
+    # Main Job Count Line (Solid Sage Green Line, No markers)
     fig.add_trace(go.Scatter(
         x=trend_data['thang_dang'],
         y=trend_data['job_count'],
         mode='lines',
         name='Tin tuyển dụng',
-        line=dict(color='#1d4ed8', width=2.5),
-        hoverinfo='text',
-        hovertext=[f"<b>Tháng {row['thang_dang']}</b><br>Nhu cầu: {row['job_count']:,} tin" for _, row in trend_data.iterrows()]
+        line=dict(color='#59B292', width=2.5),
+        hovertemplate="%{y:,.0f} tin<extra></extra>"
     ))
     
     # Highlight Peak Month
@@ -102,7 +115,7 @@ def create_time_trend_chart(df):
             y=[peak_count],
             mode='markers',
             name='Tháng cao điểm',
-            marker=dict(size=8, color='#1d4ed8', symbol='circle', line=dict(width=1.5, color='#ffffff')),
+            marker=dict(size=8, color='#FA6781', symbol='circle', line=dict(width=1.5, color='#ffffff')),
             hoverinfo='skip'
         ))
         
@@ -115,9 +128,9 @@ def create_time_trend_chart(df):
             arrowhead=0,
             ax=0,
             ay=-18,
-            font=dict(size=9, color='#1d4ed8', weight='bold'),
+            font=dict(size=9, color='#FA6781', weight='bold'),
             bgcolor="rgba(255, 255, 255, 0.9)",
-            bordercolor="#e5e7eb",
+            bordercolor="#FA6781",
             borderwidth=1,
             borderpad=2
         )
@@ -140,7 +153,8 @@ def create_time_trend_chart(df):
     
     apply_layout_styles(fig)
     fig.update_layout(
-        margin=dict(l=40, r=10, t=10, b=35),
+        hovermode="x unified",
+        margin=dict(l=40, r=10, t=50, b=35),
         showlegend=True,
         legend=dict(
             orientation="h",
@@ -195,17 +209,14 @@ def create_vietnam_map(df):
         size="Số lượng tuyển dụng",
         color="Vùng miền",
         color_discrete_map=REGION_COLORS,
-        hover_name="Tỉnh/Thành",
-        hover_data={
-            "lat": False,
-            "lon": False,
-            "Vùng miền": True,
-            "Số lượng tuyển dụng": ":,f"
-        },
+        custom_data=["Tỉnh/Thành", "Vùng miền", "Số lượng tuyển dụng"],
         size_max=24,
-        zoom=4.7,
+        zoom=4.5,
         center={"lat": 16.2, "lon": 107.5},
         mapbox_style="carto-positron"
+    )
+    fig.update_traces(
+        hovertemplate="<b>%{customdata[0]}</b><br>Vùng miền: %{customdata[1]}<br>Nhu cầu tuyển dụng: <b>%{customdata[2]:,} tin</b><extra></extra>"
     )
     
     apply_layout_styles(fig)
@@ -247,18 +258,20 @@ def create_work_type_chart(df):
     work_counts = work_counts.sort_values('count', ascending=True)
     
     # Form academic detailed labels on Y-axis
-    y_labels = [f" {row['hinh_thuc_lam_viec']}  ·  {row['count']:,}  ·  {row['pct']:.1f}% " for _, row in work_counts.iterrows()]
+    y_labels = [row['hinh_thuc_lam_viec'] for _, row in work_counts.iterrows()]
     
     fig = go.Figure(data=[go.Bar(
         x=work_counts['count'],
         y=y_labels,
         orientation='h',
+        text=[f"{row['count']:,} | {row['pct']:.1f}%" for _, row in work_counts.iterrows()],
+        textposition='outside',
         marker=dict(
-            color='#1d4ed8', # Uniform academic blue
+            color='#59B292', # Uniform academic sage green
             line=dict(width=0)
         ),
-        hoverinfo='text',
-        hovertext=[f"<b>{row['hinh_thuc_lam_viec']}</b><br>Số lượng: {row['count']:,}<br>Tỉ lệ: {row['pct']:.1f}%" for _, row in work_counts.iterrows()]
+        hovertext=[f"<b>{row['hinh_thuc_lam_viec']}</b><br>Số lượng: {row['count']:,}<br>Tỉ lệ: {row['pct']:.1f}%" for _, row in work_counts.iterrows()],
+        hovertemplate="%{hovertext}<extra></extra>"
     )])
     
     fig.update_xaxes(
@@ -297,18 +310,20 @@ def create_region_chart(df):
     # Sort ascending for horizontal display (largest at top)
     region_counts = region_counts.sort_values('count', ascending=True)
     
-    y_labels = [f" {row['vung_mien']}  ·  {row['count']:,}  ·  {row['pct']:.1f}% " for _, row in region_counts.iterrows()]
+    y_labels = [row['vung_mien'] for _, row in region_counts.iterrows()]
     
     fig = go.Figure(data=[go.Bar(
         x=region_counts['count'],
         y=y_labels,
         orientation='h',
+        text=[f"{row['count']:,} | {row['pct']:.1f}%" for _, row in region_counts.iterrows()],
+        textposition='outside',
         marker=dict(
             color=[REGION_COLORS.get(r, '#9ca3af') for r in region_counts['vung_mien']],
             line=dict(width=0)
         ),
-        hoverinfo='text',
-        hovertext=[f"<b>Miền {row['vung_mien']}</b><br>Nhu cầu: {row['count']:,}<br>Tỉ lệ: {row['pct']:.1f}%" for _, row in region_counts.iterrows()]
+        hovertext=[f"<b>{row['vung_mien']}</b><br>Số lượng: {row['count']:,}<br>Tỉ lệ: {row['pct']:.1f}%" for _, row in region_counts.iterrows()],
+        hovertemplate="%{hovertext}<extra></extra>"
     )])
     
     fig.update_xaxes(
