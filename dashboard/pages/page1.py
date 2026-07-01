@@ -150,12 +150,26 @@ layout = html.Div([
                 # Left Panel: Geography Map
                 html.Div([
                     html.Div([
-                        html.Span([
-                            html.Span("01", className="chart-title-num"),
-                            "Phân bố tuyển dụng theo tỉnh/thành"
-                        ], className="chart-title"),
-                        html.Span("Bản đồ phân bố địa lý Việt Nam", className="chart-subtitle")
-                    ], className="chart-header"),
+                        html.Div([
+                            html.Span([
+                                html.Span("01", className="chart-title-num"),
+                                "Bản đồ phân bố tuyển dụng"
+                            ], className="chart-title"),
+                            html.Span("Bản đồ phân bố địa lý Việt Nam", className="chart-subtitle")
+                        ]),
+                        html.Div([
+                            dcc.RadioItems(
+                                id="map-bar-toggle",
+                                options=[
+                                    {'label': html.Span('Tỉnh/Thành', className='radio-label-text'), 'value': 'province'},
+                                    {'label': html.Span('Vùng miền', className='radio-label-text'), 'value': 'region'}
+                                ],
+                                value='province',
+                                className="toggle-switch",
+                                labelClassName="toggle-label"
+                            )
+                        ], className="toggle-container")
+                    ], className="chart-header map-header"),
                     html.Div([
                         dcc.Loading(
                             type="default",
@@ -295,106 +309,135 @@ layout = html.Div([
         Input('filter-sources', 'value'),
         Input('filter-position', 'value'),
         Input('filter-experience', 'value'),
-        Input('filter-region', 'value')
+        Input('filter-region', 'value'),
+        Input('map-bar-toggle', 'value')
     ]
 )
-def update_dashboard(selected_sources, selected_position, selected_experience, selected_region):
-    if df.empty:
-        empty_fig = charts1.apply_layout_styles(dash.go.Figure())
-        return "0", "N/A", "N/A", "N/A", empty_fig, empty_fig, empty_fig, empty_fig
-
-    dff = df.copy()
+def update_dashboard(selected_sources, selected_position, selected_experience, selected_region, map_bar_toggle):
+    try:
+        if df.empty:
+            empty_fig = charts1.apply_layout_styles(dash.go.Figure())
+            return "0", "N/A", "N/A", "N/A", empty_fig, empty_fig, empty_fig, empty_fig
     
-    # 1. Filter by recruitment sources
-    if selected_sources:
-        dff = dff[dff['nguon'].isin(selected_sources)]
-    else:
-        dff = dff.iloc[0:0]
-
-    # 2. Filter by position
-    if selected_position and selected_position != 'All':
-        dff = dff[dff['nhom_vi_tri'] == selected_position]
-
-    # 3. Filter by experience
-    if selected_experience and selected_experience != 'All':
-        dff = dff[dff['cap_do_kinh_nghiem'] == selected_experience]
-
-    # 4. Filter by region
-    if selected_region and selected_region != 'All':
-        dff = dff[dff['vung_mien'] == selected_region]
-
-    total_jobs = len(dff)
-    kpi_total = [
-        html.Div(f"{total_jobs:,}", className="kpi-main-val"),
-        html.Div("Toàn bộ dữ liệu thu thập", className="kpi-desc")
-    ]
+        dff = df.copy()
+        
+        # 1. Filter by recruitment sources
+        if selected_sources:
+            dff = dff[dff['nguon'].isin(selected_sources)]
+        else:
+            dff = dff.iloc[0:0]
     
-    # Init default insights
-    insight_1 = "Không có thông tin địa bàn."
-    insight_2 = "Không có thông tin hình thức."
-    insight_3 = "Không đủ dữ liệu thời gian."
-
-    # --- KPI 2: Peak Month ---
-    if total_jobs > 0:
-        trend_dff = dff.dropna(subset=['thang_dang'])
-        if not trend_dff.empty:
-            month_counts = trend_dff['thang_dang'].value_counts()
-            if not month_counts.empty:
-                peak_month = month_counts.index[0]
-                peak_count = month_counts.iloc[0]
-                kpi_peak = [
-                    html.Div(f"{peak_month}", className="kpi-main-val"),
-                    html.Div(f"Đạt đỉnh với {peak_count:,} tin", className="kpi-desc")
-                ]
-                insight_3 = f"Nhu cầu tuyển dụng đạt đỉnh vào tháng {peak_month} với {peak_count:,} tin tuyển dụng."
+        # 2. Filter by position
+        if selected_position and selected_position != 'All':
+            dff = dff[dff['nhom_vi_tri'] == selected_position]
+    
+        # 3. Filter by experience
+        if selected_experience and selected_experience != 'All':
+            dff = dff[dff['cap_do_kinh_nghiem'] == selected_experience]
+    
+        # 4. Filter by region
+        if selected_region and selected_region != 'All':
+            dff = dff[dff['vung_mien'] == selected_region]
+    
+        total_jobs = len(dff)
+        
+        # --- Sparkline 1 Data ---
+        spark1_data = []
+        if total_jobs > 0 and 'thang_dang' in dff.columns:
+            monthly = dff.dropna(subset=['thang_dang']).groupby('thang_dang').size()
+            spark1_data = monthly.tolist()
+        
+        spark_color = "#FAE7CB"
+        spark1 = charts1.create_sparkline(spark1_data, spark_color)
+        spark2 = charts1.create_sparkline(spark1_data, spark_color)
+        
+        kpi_total = [
+            html.Div(f"{total_jobs:,}", className="kpi-main-val"),
+            html.Div("Toàn bộ dữ liệu thu thập", className="kpi-desc"),
+            dcc.Graph(figure=spark1, config={"displayModeBar": False}, style={"height": "40px", "marginTop": "4px"})
+        ]
+    
+        # --- KPI 2: Peak Month ---
+        if total_jobs > 0:
+            trend_dff = dff.dropna(subset=['thang_dang'])
+            if not trend_dff.empty:
+                month_counts = trend_dff.groupby('thang_dang').size()
+                if not month_counts.empty:
+                    peak_month = month_counts.idxmax()
+                    peak_count = month_counts.max()
+                    kpi_peak = [
+                        html.Div(f"{peak_month}", className="kpi-main-val"),
+                        html.Div(f"Đạt đỉnh với {peak_count:,} tin", className="kpi-desc"),
+                        dcc.Graph(figure=spark2, config={"displayModeBar": False}, style={"height": "40px", "marginTop": "4px"})
+                    ]
+                else:
+                    kpi_peak = "N/A"
             else:
                 kpi_peak = "N/A"
         else:
             kpi_peak = "N/A"
-    else:
-        kpi_peak = "N/A"
-
-    # --- KPI 3: Top Location ---
-    if total_jobs > 0:
-        top_city_series = dff['tinh_thanh'].value_counts()
-        if not top_city_series.empty:
-            top_city = top_city_series.index[0]
-            top_city_count = top_city_series.iloc[0]
-            top_city_pct = (top_city_count / total_jobs) * 100
-            kpi_location = [
-                html.Div(f"{top_city}", className="kpi-main-val"),
-                html.Div(f"Chiếm {top_city_pct:.1f}% toàn quốc", className="kpi-desc")
-            ]
-            insight_1 = f"{top_city} là trung tâm lớn nhất, chiếm {top_city_pct:.1f}% nhu cầu tuyển dụng."
+    
+        # --- KPI 3: Top Location ---
+        if total_jobs > 0:
+            top_city_series = dff['tinh_thanh'].value_counts()
+            if not top_city_series.empty:
+                top_city = top_city_series.index[0]
+                top_city_count = top_city_series.iloc[0]
+                top_city_pct = (top_city_count / total_jobs) * 100
+                
+                loc_dff = dff[dff['tinh_thanh'] == top_city].dropna(subset=['thang_dang'])
+                spark3_data = loc_dff.groupby('thang_dang').size().tolist()
+                spark3 = charts1.create_sparkline(spark3_data, spark_color)
+                
+                kpi_location = [
+                    html.Div(f"{top_city}", className="kpi-main-val"),
+                    html.Div(f"Chiếm {top_city_pct:.1f}% toàn quốc", className="kpi-desc"),
+                    dcc.Graph(figure=spark3, config={"displayModeBar": False}, style={"height": "40px", "marginTop": "4px"})
+                ]
+            else:
+                kpi_location = "N/A"
         else:
             kpi_location = "N/A"
-    else:
-        kpi_location = "N/A"
-
-    # --- KPI 4: Dominant Work Type ---
-    if total_jobs > 0:
-        work_series = dff['hinh_thuc_lam_viec'].value_counts()
-        if not work_series.empty:
-            top_work = work_series.index[0]
-            top_work_count = work_series.iloc[0]
-            top_work_pct = (top_work_count / total_jobs) * 100
-            kpi_work = [
-                html.Div(f"{top_work}", className="kpi-main-val"),
-                html.Div(f"Chiếm {top_work_pct:.1f}% tổng thể", className="kpi-desc")
-            ]
-            insight_2 = f"{top_work} là hình thức chiếm ưu thế vượt trội với tỷ lệ {top_work_pct:.1f}%."
+    
+        # --- KPI 4: Dominant Work Type ---
+        if total_jobs > 0:
+            work_series = dff['hinh_thuc_lam_viec'].value_counts()
+            if not work_series.empty:
+                top_work = work_series.index[0]
+                top_work_count = work_series.iloc[0]
+                top_work_pct = (top_work_count / total_jobs) * 100
+                
+                work_dff = dff[dff['hinh_thuc_lam_viec'] == top_work].dropna(subset=['thang_dang'])
+                spark4_data = work_dff.groupby('thang_dang').size().tolist()
+                spark4 = charts1.create_sparkline(spark4_data, spark_color)
+                
+                kpi_work = [
+                    html.Div(f"{top_work}", className="kpi-main-val"),
+                    html.Div(f"Chiếm {top_work_pct:.1f}% tổng thể", className="kpi-desc"),
+                    dcc.Graph(figure=spark4, config={"displayModeBar": False}, style={"height": "40px", "marginTop": "4px"})
+                ]
+            else:
+                kpi_work = "N/A"
         else:
             kpi_work = "N/A"
-    else:
-        kpi_work = "N/A"
-
-    # --- Generate Charts ---
-    trend_fig = charts1.create_time_trend_chart(dff)
-    map_fig = charts1.create_vietnam_map(dff)
-    work_fig = charts1.create_work_type_chart(dff)
-    region_fig = charts1.create_region_chart(dff)
-
-    return kpi_total, kpi_peak, kpi_location, kpi_work, trend_fig, map_fig, work_fig, region_fig
+    
+        # --- Generate Charts ---
+        trend_fig = charts1.create_time_trend_chart(dff)
+        
+        if map_bar_toggle == 'region':
+            map_fig = charts1.create_regional_vietnam_map(dff)
+        else:
+            map_fig = charts1.create_vietnam_map(dff)
+            
+        work_fig = charts1.create_work_type_chart(dff)
+        region_fig = charts1.create_region_chart(dff)
+    
+        return kpi_total, kpi_peak, kpi_location, kpi_work, trend_fig, map_fig, work_fig, region_fig
+    except Exception as e:
+        import traceback
+        with open('d:/BaiTapKi2Nam3/TQHDL/Final/scratch/error.log', 'w') as f:
+            f.write(traceback.format_exc())
+        raise e
 
 
 # Reset button callback

@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
+import os
+import json
 
 # Coordinates of Vietnam provinces/cities present in the dataset
 PROVINCE_COORDINATES = {
@@ -26,9 +28,9 @@ PROVINCE_COORDINATES = {
 
 # Professional Colors - Warm Editorial Theme
 REGION_COLORS = {
-    'Bắc': '#FA6781',       # Coral Red
-    'Nam': '#59B292',       # Sage Green
-    'Trung': '#FFC94D',     # Amber Gold
+    'Bắc': '#FA6781',       # Coral Red (hong)
+    'Nam': '#59B292',       # Sage Green (xanh la)
+    'Trung': '#FFC94D',     # Amber Gold (vang)
     'Từ xa / Remote': '#0d9488', # Teal
     'Khác': '#9ca3af'       # Grey
 }
@@ -36,6 +38,107 @@ REGION_COLORS = {
 def apply_layout_styles(fig):
     fig.update_layout(
         font_family="Inter, system-ui, -apple-system, sans-serif",
+        font_color="#111827",
+        margin=dict(l=10, r=10, t=10, b=10),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        hovermode="closest",
+        showlegend=False,
+        # Smooth transition animation when figure updates
+        transition=dict(
+            duration=400,
+            easing="cubic-in-out"
+        ),
+        # Clean custom tooltip styled like modern HTML popovers (Shadcn Dark Style)
+        hoverlabel=dict(
+            bgcolor="#1e293b",
+            bordercolor="rgba(0,0,0,0)",
+            font_size=12,
+            font_family="Inter, system-ui, -apple-system, sans-serif",
+            font_color="#ffffff",
+            namelength=-1
+        )
+    )
+    return fig
+
+def create_time_trend_chart(df):
+    """
+    Line chart showing the recruitment trend over time, with a 3-month moving average
+    """
+    trend_df = df.dropna(subset=['thang_dang']).copy()
+    
+    if trend_df.empty:
+        fig = go.Figure()
+        fig.add_annotation(text="Không có dữ liệu thời gian", showarrow=False, font=dict(size=12, color="#9ca3af"))
+        apply_layout_styles(fig)
+        return fig
+        
+    trend_data = trend_df.groupby('thang_dang').size().reset_index(name='job_count')
+    
+    # Convert thang_dang to datetime before sorting and calculations
+    trend_data['thang_dang_dt'] = pd.to_datetime(trend_data['thang_dang'] + '-01', format='%Y-%m-%d')
+    trend_data = trend_data.sort_values('thang_dang_dt')
+    
+    # Calculate 3-month moving average
+    trend_data['moving_avg'] = trend_data['job_count'].rolling(window=3, min_periods=1).mean()
+    
+    fig = go.Figure()
+    
+    # 3-Month Moving Average (Dashed Grey Line)
+    fig.add_trace(go.Scatter(
+        x=trend_data['thang_dang'],
+        y=trend_data['moving_avg'],
+        mode='lines',
+        name='Trung bình trượt',
+        line=dict(color='#9ca3af', width=2, dash='dash'),
+        hovertemplate="%{y:,.0f} tin<extra></extra>"
+    ))
+    
+    # Main Job Count Line (Solid Sage Green Line, No markers)
+    fig.add_trace(go.Scatter(
+        x=trend_data['thang_dang'],
+        y=trend_data['job_count'],
+        mode='lines',
+        name='Tin tuyển dụng',
+        line=dict(color='#59B292', width=2.5),
+        hovertemplate="%{y:,.0f} tin<extra></extra>"
+    ))
+    
+    # Highlight Peak Month
+    if not trend_data.empty:
+        peak_idx = trend_data['job_count'].idxmax()
+        peak_row = trend_data.loc[peak_idx]
+        peak_month = peak_row['thang_dang']
+        peak_count = peak_row['job_count']
+        
+        # Single marker for peak month
+        fig.add_trace(go.Scatter(
+            x=[peak_month],
+            y=[peak_count],
+            mode='markers',
+            name='Tháng cao điểm',
+            marker=dict(size=8, color='#FA6781', symbol='circle', line=dict(width=1.5, color='#ffffff')),
+            hoverinfo='skip'
+        ))
+        
+        # Peak annotation
+        fig.add_annotation(
+            x=peak_month,
+            y=peak_count,
+            text=f"Đỉnh: {peak_count:,} tin",
+            showarrow=True,
+            arrowhead=0,
+            ax=0,
+            ay=-18,
+            font=dict(size=9, color='#FA6781', weight='bold'),
+            bgcolor="rgba(255, 255, 255, 0.9)",
+            bordercolor="#FA6781",
+            borderwidth=1,
+            borderpad=2
+        )
+        
+    fig.update_xaxes(
+        showgrid=False,
         font_color="#111827",
         margin=dict(l=10, r=10, t=10, b=10),
         plot_bgcolor='rgba(0,0,0,0)',
@@ -167,58 +270,146 @@ def create_time_trend_chart(df):
     )
     return fig
 
+PROVINCE_NAME_MAPPING = {
+    'TP.HCM': 'Ho Chi Minh City',
+    'Hà Nội': 'Ha Noi City',
+    'Đà Nẵng': 'Da Nang City',
+    'Hải Phòng': 'Hai Phong City',
+    'Cần Thơ': 'Can Tho City',
+    'Đồng Nai': 'Dong Nai Province',
+    'Đắk Lắk': 'Dak Lak Province',
+    'Thừa Thiên Huế': 'Thua Thien Hue Province',
+    'Hưng Yên': 'Hung Yen Province',
+    'Bà Rịa - Vũng Tàu': 'Ba Ria - Vung Tau Province',
+    'Bình Dương': 'Binh Duong Province',
+    'Bắc Ninh': 'Bac Ninh Province',
+    'Thái Nguyên': 'Thai Nguyen Province',
+    'Khánh Hòa': 'Khanh Hoa Province',
+    'Quảng Ninh': 'Quang Ninh Province',
+    'Lâm Đồng': 'Lam Dong Province',
+    'Nghệ An': 'Nghe An Province'
+}
+
 def create_vietnam_map(df):
     """
-    Map of Vietnam using scatter_mapbox with carto-positron style
+    Choropleth Map of Vietnam Provinces using maplibre (Plotly 5.24+)
     """
     city_counts = df['tinh_thanh'].value_counts().reset_index(name='job_count')
+    # Filter out Khác and Từ xa
+    city_counts = city_counts[~city_counts['tinh_thanh'].isin(['Khác', 'Từ xa / Remote'])]
     
-    map_data = []
-    for _, row in city_counts.iterrows():
-        city = row['tinh_thanh']
-        count = row['job_count']
-        if city in PROVINCE_COORDINATES:
-            lat_lon = PROVINCE_COORDINATES[city]
-            sample_row = df[df['tinh_thanh'] == city]
-            region = sample_row['vung_mien'].iloc[0] if not sample_row.empty else 'Khác'
-            
-            map_data.append({
-                'Tỉnh/Thành': city,
-                'Vùng miền': region,
-                'lat': lat_lon['lat'],
-                'lon': lat_lon['lon'],
-                'Số lượng tuyển dụng': count
-            })
-            
-    if not map_data:
+    if city_counts.empty:
         fig = go.Figure()
-        fig.add_annotation(text="Không có dữ liệu bản đồ phù hợp", showarrow=False, font=dict(size=12, color="#9ca3af"))
+        fig.add_annotation(text="Không có dữ liệu tỉnh thành", showarrow=False, font=dict(size=12, color="#9ca3af"))
         apply_layout_styles(fig)
         return fig
+
+    # Map dataset province names to GeoJSON property 'Name'
+    city_counts['geojson_name'] = city_counts['tinh_thanh'].apply(
+        lambda x: PROVINCE_NAME_MAPPING.get(x, x)
+    )
+
+    geojson_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'geo', 'vietnam_provinces.geojson')
+    with open(geojson_path, 'r', encoding='utf-8') as f:
+        vn_geojson = json.load(f)
+
+    fig = px.choropleth_map(
+        city_counts,
+        geojson=vn_geojson,
+        featureidkey="properties.Name",
+        locations="geojson_name",
+        color="job_count",
+        color_continuous_scale="Viridis",
+        hover_name="tinh_thanh",
+        hover_data={"geojson_name": False, "job_count": True},
+        labels={'job_count': 'Số lượng tin'},
+        center={"lat": 16.2, "lon": 107.5},
+        zoom=4.5,
+        map_style="white-bg"
+    )
+    
+    fig.update_traces(
+        marker_line_width=0.5,
+        marker_line_color="white",
+        hovertemplate="<b>%{hovertext}</b><br>Nhu cầu tuyển dụng: <b>%{z:,} tin</b><extra></extra>"
+    )
+
+    apply_layout_styles(fig)
+    fig.update_layout(
+        margin=dict(l=0, r=0, t=0, b=0),
+        coloraxis_colorbar=dict(
+            title="",
+            thicknessmode="pixels", thickness=15,
+            lenmode="pixels", len=150,
+            yanchor="bottom", y=0.02,
+            xanchor="left", x=0.02,
+            tickfont=dict(size=9, color="#4b5563")
+        )
+    )
+    return fig
+
+def create_regional_vietnam_map(df):
+    """
+    Choropleth Map of Vietnam Regions using maplibre (Plotly 5.24+)
+    Colors provinces based on their region.
+    """
+    if df.empty:
+        fig = go.Figure()
+        fig.add_annotation(text="Không có dữ liệu vùng miền", showarrow=False, font=dict(size=12, color="#9ca3af"))
+        apply_layout_styles(fig)
+        return fig
+
+    # Get total jobs per region
+    region_totals = df['vung_mien'].value_counts().to_dict()
+
+    # Build map data for all unique provinces in dataset
+    map_data = []
+    unique_cities = df['tinh_thanh'].unique()
+    for city in unique_cities:
+        if city in ['Khác', 'Từ xa / Remote']:
+            continue
+        region = df[df['tinh_thanh'] == city]['vung_mien'].iloc[0]
+        count = region_totals.get(region, 0)
+        geojson_name = PROVINCE_NAME_MAPPING.get(city, city)
+        map_data.append({
+            'tinh_thanh': city,
+            'geojson_name': geojson_name,
+            'Vùng miền': region,
+            'Tổng tin vùng': count
+        })
         
     map_df = pd.DataFrame(map_data)
     
-    # Academic Square Root size scaling
-    # Prevents huge metropolitan centers from overshadowing regional data
-    map_df['marker_size'] = map_df['Số lượng tuyển dụng'].apply(lambda x: 4 + np.sqrt(x) * 0.42)
-    
-    fig = px.scatter_mapbox(
+    if map_df.empty:
+        fig = go.Figure()
+        fig.add_annotation(text="Không có dữ liệu vùng miền", showarrow=False, font=dict(size=12, color="#9ca3af"))
+        apply_layout_styles(fig)
+        return fig
+
+    geojson_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'geo', 'vietnam_provinces.geojson')
+    with open(geojson_path, 'r', encoding='utf-8') as f:
+        vn_geojson = json.load(f)
+
+    fig = px.choropleth_map(
         map_df,
-        lat="lat",
-        lon="lon",
-        size="Số lượng tuyển dụng",
+        geojson=vn_geojson,
+        featureidkey="properties.Name",
+        locations="geojson_name",
         color="Vùng miền",
         color_discrete_map=REGION_COLORS,
-        custom_data=["Tỉnh/Thành", "Vùng miền", "Số lượng tuyển dụng"],
-        size_max=24,
-        zoom=4.5,
+        hover_name="Vùng miền",
+        hover_data={"geojson_name": False, "Vùng miền": False, "tinh_thanh": True, "Tổng tin vùng": True},
         center={"lat": 16.2, "lon": 107.5},
-        mapbox_style="carto-positron"
-    )
-    fig.update_traces(
-        hovertemplate="<b>%{customdata[0]}</b><br>Vùng miền: %{customdata[1]}<br>Nhu cầu tuyển dụng: <b>%{customdata[2]:,} tin</b><extra></extra>"
+        zoom=4.5,
+        map_style="white-bg"
     )
     
+    fig.update_traces(
+        marker_line_width=0.5,
+        marker_line_color="white",
+        hovertemplate="<b>Vùng %{hovertext}</b><br>Tỉnh: %{customdata[0]}<br>Tổng nhu cầu vùng: <b>%{customdata[1]:,} tin</b><extra></extra>"
+    )
+
     apply_layout_styles(fig)
     fig.update_layout(
         margin=dict(l=0, r=0, t=0, b=0),
@@ -342,4 +533,96 @@ def create_region_chart(df):
     apply_layout_styles(fig)
     fig.update_layout(margin=dict(l=10, r=10, t=10, b=20))
     
+    return fig
+
+def create_provincial_bar_chart(df):
+    """
+    Horizontal bar chart for Top provinces (Alternative to map)
+    """
+    city_counts = df['tinh_thanh'].value_counts().reset_index(name='count')
+    # Exclude remote/other
+    city_counts = city_counts[~city_counts['tinh_thanh'].isin(['Khác', 'Từ xa / Remote'])]
+    
+    if city_counts.empty:
+        fig = go.Figure()
+        fig.add_annotation(text="Không có dữ liệu tỉnh thành", showarrow=False, font=dict(size=12, color="#9ca3af"))
+        apply_layout_styles(fig)
+        return fig
+        
+    # Get top 15 for better display
+    city_counts = city_counts.head(15).sort_values('count', ascending=True)
+    
+    # Map colors based on region
+    colors = []
+    for city in city_counts['tinh_thanh']:
+        sample_row = df[df['tinh_thanh'] == city]
+        region = sample_row['vung_mien'].iloc[0] if not sample_row.empty else 'Khác'
+        colors.append(REGION_COLORS.get(region, '#9ca3af'))
+        
+    fig = go.Figure(data=[go.Bar(
+        x=city_counts['count'],
+        y=city_counts['tinh_thanh'],
+        orientation='h',
+        text=[f"{count:,}" for count in city_counts['count']],
+        textposition='outside',
+        marker=dict(
+            color=colors,
+            line=dict(width=0)
+        ),
+        hovertemplate="<b>%{y}</b><br>Nhu cầu: %{x:,} tin<extra></extra>"
+    )])
+    
+    fig.update_xaxes(
+        showgrid=True,
+        gridcolor='#f1f5f9',
+        linecolor='#e5e7eb',
+        tickfont=dict(size=9, color='#4b5563')
+    )
+    fig.update_yaxes(
+        showgrid=False,
+        linecolor='#e5e7eb',
+        tickfont=dict(size=9, color='#111827', weight='bold')
+    )
+    
+    apply_layout_styles(fig)
+    fig.update_layout(
+        margin=dict(l=10, r=10, t=10, b=20)
+    )
+    
+    return fig
+
+def create_sparkline(data, color="#294669"):
+    """
+    Minimal line chart for KPI cards
+    """
+    if data is None or len(data) == 0:
+        fig = go.Figure()
+    else:
+        fig = go.Figure(go.Scatter(
+            x=list(range(len(data))), 
+            y=data, 
+            mode='lines',
+            line=dict(color=color, width=2, shape='spline', smoothing=1.3),
+            hoverinfo='skip'
+        ))
+        
+        # Add a subtle area fill
+        fig.add_trace(go.Scatter(
+            x=list(range(len(data))), 
+            y=data, 
+            mode='none',
+            fill='tozeroy',
+            fillcolor=f"rgba{tuple(int(color.lstrip('#')[i:i+2], 16) for i in (0, 2, 4)) + (0.1,)}",
+            hoverinfo='skip'
+        ))
+
+    fig.update_layout(
+        showlegend=False,
+        margin=dict(l=0, r=0, t=0, b=0),
+        height=40,
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, fixedrange=True),
+        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, fixedrange=True)
+    )
     return fig

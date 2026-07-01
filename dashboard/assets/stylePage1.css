@@ -50,6 +50,55 @@
   letter-spacing: 0.3px;
 }
 
+/* Toggle Switch for Map/Bar */
+.map-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.toggle-container {
+  background-color: #f1f5f9;
+  border-radius: 20px;
+  padding: 2px;
+}
+
+.toggle-switch {
+  display: flex;
+  gap: 2px;
+}
+
+.toggle-label {
+  display: inline-flex !important;
+  align-items: center;
+  padding: 0;
+  cursor: pointer;
+  margin: 0 !important;
+}
+
+.toggle-switch input[type='radio'] {
+  display: none !important;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.radio-label-text {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.toggle-switch input[type='radio']:checked + .radio-label-text {
+  background-color: white;
+  color: #59B292; /* Match the new theme */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
 .btn-reset {
   background-color: #ffffff;
   color: var(--text-secondary);
@@ -129,15 +178,16 @@
 
 .kpi-card {
   flex: 1;
-  background-color: var(--card-bg);
-  border: 1px solid var(--border-color);
+  background-color: #59B292; /* Sage Green */
+  border: none;
   border-radius: 8px;
   padding: 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-  transition: var(--transition-fast);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  color: #FAE7CB;
 }
 
 .kpi-card-info {
@@ -158,7 +208,7 @@
 .kpi-title {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: #FAE7CB;
 }
 
 .kpi-badge {
@@ -166,20 +216,20 @@
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 12px;
-  background-color: rgba(89, 178, 146, 0.1);
-  color: var(--primary);
+  background-color: rgba(250, 231, 203, 0.2);
+  color: #FAE7CB;
 }
 
 .kpi-main-val {
   font-size: 28px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #ffffff; /* Bright white for primary value */
   line-height: 1;
 }
 
 .kpi-desc {
   font-size: 12px;
-  color: var(--text-secondary);
+  color: rgba(250, 231, 203, 0.9);
   margin-top: 4px;
 }
 
@@ -232,7 +282,8 @@
   display: flex;
   flex: 1;
   gap: 12px;
-  min-height: 500px; /* Ensure charts have a reasonable height even if window sizes are adjusted */
+  height: 480px; /* Fixed height for consistent swap */
+  min-height: 480px;
 }
 
 /* Card base class for charts */
