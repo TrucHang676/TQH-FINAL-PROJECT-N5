@@ -2,13 +2,21 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import PlotlyChart from './PlotlyChart';
 
-const Dashboard = () => {
+const Dashboard1 = () => {
+  // =============================================================================
+  // Quản lý trạng thái (State) của các bộ lọc
+  // =============================================================================
   const [sources, setSources] = useState(['TopCV', 'VietnamWorks', 'ITviec', 'JobsGO', 'TopDev']);
   const [position, setPosition] = useState('All');
   const [experience, setExperience] = useState('All');
   const [region, setRegion] = useState('All');
+  
+  // Trạng thái chuyển đổi chế độ xem bản đồ / biểu đồ cột
   const [mapToggle, setMapToggle] = useState('map');
 
+  // =============================================================================
+  // Quản lý trạng thái dữ liệu trả về từ API và trạng thái tải (Loading)
+  // =============================================================================
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -280,4 +288,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Dashboard1;

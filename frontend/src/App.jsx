@@ -1,5 +1,5 @@
 import React from 'react';
-import Dashboard from './components/Dashboard';
+import Dashboard1 from './components/Dashboard1';
 
 // Import CSS y hệt như cấu trúc của Dash
 import './styles/style.css';
@@ -7,7 +7,8 @@ import './styles/stylePage1.css';
 
 function App() {
   return (
-    <div id="page1-container">
+    // Bọc toàn bộ ứng dụng trong một thẻ div chung, không dùng id page1-container ở đây
+    <div className="app-wrapper" style={{ height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column' }}>
       {/* Cấu trúc Header toàn cục chuẩn xác từ app.py */}
       <div className="global-header">
         <div className="global-title-container">
@@ -37,8 +38,8 @@ function App() {
         </div>
       </div>
 
-      {/* Main Content Workspace */}
-      <Dashboard />
+      {/* Nội dung chính của trang (Dashboard 1) */}
+      <Dashboard1 />
     </div>
   );
 }
