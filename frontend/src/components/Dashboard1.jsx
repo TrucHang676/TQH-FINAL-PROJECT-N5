@@ -148,6 +148,26 @@ const Dashboard1 = () => {
       borderRadius: '6px',
       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
     }),
+    menuList: (provided) => ({
+      ...provided,
+      padding: '4px',
+      scrollbarWidth: 'thin',
+      scrollbarColor: '#59B292 #f0faf6',
+      '&::-webkit-scrollbar': {
+        width: '6px',
+      },
+      '&::-webkit-scrollbar-track': {
+        background: '#f0faf6',
+        borderRadius: '4px',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        background: '#59B292',
+        borderRadius: '4px',
+      },
+      '&::-webkit-scrollbar-thumb:hover': {
+        background: '#469d7e',
+      },
+    }),
     singleValue: (provided) => ({
       ...provided,
       color: '#111827'
