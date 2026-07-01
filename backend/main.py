@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List, Optional
 
 # Nhập các hàm vẽ biểu đồ từ thư mục utils
-from utils import charts
+from backend.utils import charts
 
 app = FastAPI(title="IT Recruitment Dashboard API")
 
@@ -14,7 +14,7 @@ app = FastAPI(title="IT Recruitment Dashboard API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Có thể giới hạn domain trong thực tế
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

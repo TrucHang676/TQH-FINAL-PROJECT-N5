@@ -7,31 +7,38 @@ import './styles/stylePage1.css';
 
 function App() {
   return (
-    <div className="app-container" style={{ display: 'flex', flexDirection: 'column', height: '100vh', backgroundColor: '#FDFBF7' }}>
-      {/* Header */}
-      <div className="header" style={{ padding: '15px 24px', backgroundColor: '#1F6F5F', color: '#FDFBF7', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div className="logo-placeholder" style={{ width: '32px', height: '32px', backgroundColor: '#FDFBF7', borderRadius: '4px' }}></div>
-          <span style={{ fontSize: '18px', fontWeight: 'bold' }}>Dashboard Phân Tích Tin Tuyển Dụng IT Việt Nam</span>
+    <div id="page1-container">
+      {/* Cấu trúc Header toàn cục chuẩn xác từ app.py */}
+      <div className="global-header">
+        <div className="global-title-container">
+          <h1 className="global-title">Thị trường tuyển dụng IT Việt Nam</h1>
+          <div className="global-subtitle-container">
+            <span className="global-subtitle-main">Mục tiêu 1</span>
+            <span className="global-subtitle-divider"> | </span>
+            <span className="global-subtitle-desc">Xu hướng nhu cầu theo thời gian, địa lý và hình thức làm việc</span>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '20px' }}>
-          <a href="#" style={{ color: '#FDFBF7', textDecoration: 'none' }}>Về Dự Án</a>
-          <a href="#" style={{ color: '#FDFBF7', textDecoration: 'none' }}>Nguồn Dữ Liệu</a>
-          <a href="#" style={{ color: '#FDFBF7', textDecoration: 'none' }}>Tác Giả</a>
+        <div className="global-badge-container">
+          <div className="dataset-badge">
+            <span className="dataset-name">Dataset: vietnam_it_jobs_processed.csv</span>
+            <span className="dataset-count">8,452 tin tuyển dụng</span>
+          </div>
         </div>
       </div>
 
-      {/* Navigation tabs */}
-      <div className="nav-tabs" style={{ display: 'flex', padding: '0 24px', backgroundColor: '#1F6F5F', borderBottom: '1px solid #165246' }}>
-        <div className="nav-tab active" style={{ padding: '12px 24px', cursor: 'pointer', borderBottom: '3px solid #FA6781', fontWeight: 'bold' }}>Xu Hướng & Địa Lý</div>
-        <div className="nav-tab" style={{ padding: '12px 24px', cursor: 'pointer', opacity: 0.7 }}>Kỹ Năng & Lương</div>
-        <div className="nav-tab" style={{ padding: '12px 24px', cursor: 'pointer', opacity: 0.7 }}>Phân Tích Sâu</div>
+      {/* Thanh điều hướng Navigation Tabs */}
+      <div className="nav-container">
+        <div className="nav-tabs-wrapper">
+          <a href="#" className="nav-tab active">01 Xu hướng & Địa lý</a>
+          <a href="#" className="nav-tab">02 Kỹ năng & Công nghệ</a>
+          <a href="#" className="nav-tab">03 Lương thị trường</a>
+          <a href="#" className="nav-tab">04 Nhân sự trẻ</a>
+          <a href="#" className="nav-tab">05 AI phân tích</a>
+        </div>
       </div>
 
-      {/* Main Content */}
-      <div className="main-content-wrapper" style={{ flex: 1, overflow: 'hidden' }}>
-        <Dashboard />
-      </div>
+      {/* Main Content Workspace */}
+      <Dashboard />
     </div>
   );
 }
