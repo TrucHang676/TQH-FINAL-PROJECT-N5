@@ -112,10 +112,9 @@ def get_dashboard_data(req: FilterRequest):
     trend_fig = charts.create_time_trend_chart(dff)
     work_fig = charts.create_work_type_chart(dff)
 
-    # Tạo Bản đồ hoặc biểu đồ cột tùy theo switch toggle
+    caption = ""
     if req.map_toggle == 'region_chart':
         map_fig = charts.create_region_vertical_chart(dff)
-        caption = "Biểu đồ cột thể hiện nhu cầu tuyển dụng theo từng vùng miền."
     else:
         map_fig = charts.create_vietnam_map(dff)
         caption = "Không hiển thị nhóm Khác và Từ xa/Remote trên bản đồ do không có tọa độ địa lý cụ thể."

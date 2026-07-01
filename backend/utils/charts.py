@@ -142,20 +142,24 @@ def create_time_trend_chart(df):
         gridcolor='#f1f5f9',
         linecolor='#e5e7eb',
         tickfont=dict(size=9, color='#4b5563'),
-        title_font=dict(size=10, color='#4b5563')
+        title_font=dict(size=10, color='#4b5563'),
+        range=[0, max(800, peak_count * 1.6)] if not trend_data.empty else None
     )
 
     apply_layout_styles(fig)
     fig.update_layout(
         hovermode="x unified",
-        margin=dict(l=40, r=10, t=50, b=35),
+        margin=dict(l=40, r=10, t=25, b=35),
         showlegend=True,
         legend=dict(
             orientation="h",
             yanchor="bottom",
-            y=0.9,
+            y=1,
             xanchor="right",
             x=1,
+            bgcolor="rgba(255, 255, 255, 0)",
+            bordercolor="rgba(255, 255, 255, 0)",
+            borderwidth=0,
             font=dict(size=9, color='#4b5563')
         )
     )

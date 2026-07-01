@@ -11,7 +11,7 @@ const Dashboard1 = () => {
   const [position, setPosition] = useState(null);
   const [experience, setExperience] = useState(null);
   const [region, setRegion] = useState(null);
-  
+
   // Trạng thái chuyển đổi chế độ xem bản đồ / biểu đồ cột
   const [mapToggle, setMapToggle] = useState('region_chart');
 
@@ -129,10 +129,10 @@ const Dashboard1 = () => {
     }),
     option: (provided, state) => ({
       ...provided,
-      backgroundColor: state.isSelected 
-        ? '#59B292' 
-        : state.isFocused 
-          ? '#f0faf6' 
+      backgroundColor: state.isSelected
+        ? '#59B292'
+        : state.isFocused
+          ? '#f0faf6'
           : 'white',
       color: state.isSelected ? 'white' : '#111827',
       cursor: 'pointer',
@@ -298,7 +298,6 @@ const Dashboard1 = () => {
                   </div>
                 </div>
               </div>
-              <div className="chart-subtitle" style={{ marginBottom: '8px' }}>Bản đồ phân bố địa lý Việt Nam</div>
               <div className="chart-content">
                 {data?.charts?.map && <PlotlyChart key={mapToggle} figure={data.charts.map} />}
               </div>
@@ -312,12 +311,10 @@ const Dashboard1 = () => {
                   <span className="chart-title">
                     Xu hướng tuyển dụng theo tháng
                   </span>
-                  <span className="chart-subtitle">Số lượng tin tuyển dụng IT theo thời gian</span>
                 </div>
                 <div className="chart-content">
                   {data?.charts?.trend && <PlotlyChart figure={data.charts.trend} />}
                 </div>
-                <div className="chart-caption">Biểu đồ thời gian chỉ tính các tin có thang_dang.</div>
               </div>
 
               <div className="split-row">
@@ -326,7 +323,6 @@ const Dashboard1 = () => {
                     <span className="chart-title">
                       Hình thức làm việc chủ đạo
                     </span>
-                    <span className="chart-subtitle">Tỷ lệ hình thức làm việc tuyển dụng</span>
                   </div>
                   <div className="chart-content">
                     {data?.charts?.work && <PlotlyChart figure={data.charts.work} />}
