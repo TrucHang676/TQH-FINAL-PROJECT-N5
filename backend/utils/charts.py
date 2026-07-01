@@ -204,6 +204,27 @@ def create_vietnam_map(df):
     with open(geojson_path, 'r', encoding='utf-8') as f:
         vn_geojson = json.load(f)
 
+    # Thêm các tỉnh không có dữ liệu vào dataframe với số lượng = 0 để bản đồ hiển thị đủ hình dáng chữ S
+    all_provinces = [feature['properties']['Name'] for feature in vn_geojson['features']]
+    existing_provinces = city_counts['geojson_name'].tolist()
+    missing_provinces = set(all_provinces) - set(existing_provinces)
+    
+    if missing_provinces:
+        missing_df = pd.DataFrame({
+            'tinh_thanh': list(missing_provinces),
+            'job_count': [0] * len(missing_provinces),
+            'geojson_name': list(missing_provinces)
+        })
+        city_counts = pd.concat([city_counts, missing_df], ignore_index=True)
+
+    # Bảng màu custom: 0 = Xám/Be, sau đó chuyển từ xanh nhạt sang xanh lục đậm
+    custom_colorscale = [
+        [0.0, "#eae5db"],   # 0 jobs (Beige/Gray)
+        [0.01, "#a7f3d0"],  # Rất ít jobs
+        [0.5, "#59B292"],   # Trung bình
+        [1.0, "#064e3b"]    # Rất nhiều jobs
+    ]
+
     # Vẽ bản đồ phân bố bằng Plotly choropleth_map
     fig = px.choropleth_map(
         city_counts,
@@ -211,7 +232,7 @@ def create_vietnam_map(df):
         featureidkey="properties.Name",
         locations="geojson_name",
         color="job_count",
-        color_continuous_scale="Viridis",
+        color_continuous_scale=custom_colorscale,
         hover_name="tinh_thanh",
         hover_data={"geojson_name": False, "job_count": True},
         labels={'job_count': 'Số lượng tin'},
