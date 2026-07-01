@@ -227,12 +227,9 @@ const Dashboard1 = () => {
             {/* Left map */}
             <div className="chart-card map-card">
               <div className="chart-header map-header">
-                <div>
-                  <span className="chart-title">
-                    <span className="chart-title-num">01</span> Bản đồ phân bố tuyển dụng
-                  </span><br/>
-                  <span className="chart-subtitle">Bản đồ phân bố địa lý Việt Nam</span>
-                </div>
+                <span className="chart-title">
+                  <span className="chart-title-num">01</span> Bản đồ phân bố tuyển dụng
+                </span>
                 <div className="toggle-container">
                   <div className="toggle-switch" style={{ display: 'flex', gap: '10px' }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -246,6 +243,7 @@ const Dashboard1 = () => {
                   </div>
                 </div>
               </div>
+              <div className="chart-subtitle" style={{ marginBottom: '8px' }}>Bản đồ phân bố địa lý Việt Nam</div>
               <div className="chart-content">
                 {data?.charts?.map && <PlotlyChart figure={data.charts.map} />}
               </div>
@@ -258,7 +256,7 @@ const Dashboard1 = () => {
                 <div className="chart-header">
                   <span className="chart-title">
                     <span className="chart-title-num">02</span> Xu hướng tuyển dụng theo tháng
-                  </span><br/>
+                  </span>
                   <span className="chart-subtitle">Số lượng tin tuyển dụng IT theo thời gian</span>
                 </div>
                 <div className="chart-content">
@@ -272,7 +270,7 @@ const Dashboard1 = () => {
                   <div className="chart-header">
                     <span className="chart-title">
                       <span className="chart-title-num">03</span> Hình thức làm việc chủ đạo
-                    </span><br/>
+                    </span>
                     <span className="chart-subtitle">Tỷ lệ hình thức làm việc tuyển dụng</span>
                   </div>
                   <div className="chart-content">
