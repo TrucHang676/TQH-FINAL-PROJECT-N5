@@ -3,6 +3,9 @@
    Clean, Academic, Professional Theme. System fonts, minimal spacing, flat panels.
 */
 
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap');
+
+
 :root {
   /* Color system - Warm Academic Theme */
   --bg-color: #faf8f5;        /* Warm Cream Sand */
@@ -29,6 +32,7 @@
 
   /* Fonts - Neutral Offline-friendly System Font Stack */
   --font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-heading: 'Outfit', var(--font-family);
   
   --transition-fast: all 0.15s ease-in-out;
 }
@@ -56,9 +60,9 @@ body, html {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 60px;
-  min-height: 60px;
-  background-color: #ffffff;
+  height: 80px;
+  min-height: 80px;
+  background-color: #1F6F5F;
   border-bottom: 1px solid var(--border-color);
   padding: 0 24px;
 }
@@ -69,16 +73,26 @@ body, html {
 }
 
 .global-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
   letter-spacing: -0.2px;
 }
 
-.global-subtitle {
-  font-size: 12px;
+.global-subtitle-container {
+  font-size: 13px;
   font-weight: 400;
-  color: var(--text-secondary);
+  color: #e0f2ec;
+  margin-top: 4px;
+}
+
+.global-subtitle-main {
+  font-weight: 600;
+}
+
+.global-subtitle-desc {
+  opacity: 0.9;
 }
 
 .global-badge-container {
@@ -87,23 +101,30 @@ body, html {
 }
 
 .dataset-badge {
-  background-color: #f1f5f9; /* neutral gray */
-  color: var(--text-secondary);
-  border: 1px solid var(--border-color);
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 11px;
+  background-color: rgba(255, 255, 255, 0.15); /* translucent white */
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.1px;
+}
+.dataset-name {
+  margin-right: 8px;
+  opacity: 0.9;
+}
+.dataset-count {
+  font-weight: 700;
 }
 
 /* Dynamic Page Navigation (Tabs Layout) */
 .nav-container {
   background-color: #ffffff;
   border-bottom: 1px solid var(--border-color);
-  padding: 0 24px;
-  height: 40px;
-  min-height: 40px;
+  padding: 0 20px;
+  height: 44px;
+  min-height: 44px;
   display: flex;
   align-items: center;
 }
@@ -111,31 +132,34 @@ body, html {
 .nav-tabs-wrapper {
   display: flex;
   height: 100%;
-  gap: 28px;
+  gap: 6px;
+  align-items: center;
 }
 
 .nav-tab {
   display: flex;
   align-items: center;
-  height: 100%;
   color: var(--text-secondary);
   text-decoration: none;
   font-size: 13px;
   font-weight: 500;
-  border-bottom: 2px solid transparent;
-  padding: 0 4px;
-  transition: var(--transition-fast);
+  padding: 6px 14px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
   cursor: pointer;
+  border: none;
 }
 
 .nav-tab:hover {
-  color: var(--primary);
+  color: #FA6781;
+  background-color: rgba(250, 103, 129, 0.08);
 }
 
 .nav-tab.active {
-  color: var(--primary);
-  border-bottom-color: var(--primary);
+  color: #ffffff;
+  background-color: #FA6781;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(250, 103, 129, 0.25);
 }
 
 /* Placeholder Page Styling */

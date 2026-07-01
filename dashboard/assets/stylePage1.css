@@ -6,7 +6,7 @@
 #page1-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 100px); /* 100vh minus header (60px) and nav bar (40px) */
+  height: calc(100vh - 124px); /* 100vh minus header (80px) and nav bar (44px) */
   width: 100vw;
   background-color: var(--bg-color);
   overflow: hidden;
@@ -24,8 +24,9 @@
 .sidebar {
   width: 280px;
   min-width: 280px;
-  background-color: var(--card-bg);
+  background-color: #ffffff;
   border-right: 1px solid var(--border-color);
+  border-left: 4px solid #1F6F5F;
   display: flex;
   flex-direction: column;
   padding: 16px;
@@ -44,8 +45,8 @@
 
 .sidebar-title {
   font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-weight: 700;
+  color: #1F6F5F;
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
@@ -93,10 +94,15 @@
   user-select: none;
 }
 
+.radio-label-text:hover {
+  color: #FA6781;
+  background-color: rgba(250, 103, 129, 0.08);
+}
+
 .toggle-switch input[type='radio']:checked + .radio-label-text {
-  background-color: white;
-  color: #59B292; /* Match the new theme */
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  background-color: #FA6781;
+  color: #ffffff;
+  box-shadow: 0 1px 4px rgba(250, 103, 129, 0.3);
 }
 
 .btn-reset {
@@ -112,9 +118,9 @@
 }
 
 .btn-reset:hover {
-  background-color: var(--primary-light);
-  color: var(--primary);
-  border-color: rgba(89, 178, 146, 0.3);
+  background-color: rgba(250, 103, 129, 0.08);
+  color: #FA6781;
+  border-color: rgba(250, 103, 129, 0.3);
 }
 
 .filter-group {
@@ -126,7 +132,7 @@
 .filter-label {
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
 
 /* Customize Dash Checklist style inside sidebar */
