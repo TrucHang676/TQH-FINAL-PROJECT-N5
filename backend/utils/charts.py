@@ -362,6 +362,7 @@ def create_work_type_chart(df):
         orientation='h',
         text=[f"{row['count']:,} | {row['pct']:.1f}%" for _, row in work_counts.iterrows()],
         textposition='outside',
+        cliponaxis=False,
         marker=dict(
             color='#59B292',
             line=dict(width=0)
@@ -411,6 +412,7 @@ def create_region_chart(df):
         orientation='h',
         text=[f"{row['count']:,} | {row['pct']:.1f}%" for _, row in region_counts.iterrows()],
         textposition='outside',
+        cliponaxis=False,
         marker=dict(
             color=[REGION_COLORS.get(r, '#9ca3af') for r in region_counts['vung_mien']],
             line=dict(width=0)
@@ -459,6 +461,7 @@ def create_region_vertical_chart(df):
         orientation='v',
         text=[f"{row['count']:,}<br>{row['pct']:.1f}%" for _, row in region_counts.iterrows()],
         textposition='outside',
+        cliponaxis=False,
         textfont=dict(size=10),
         marker=dict(
             color=[REGION_COLORS.get(r, '#9ca3af') for r in region_counts['vung_mien']],
@@ -473,13 +476,17 @@ def create_region_vertical_chart(df):
         linecolor='#e5e7eb',
         tickfont=dict(size=11, color='#111827')
     )
+    import pandas as pd
+    max_count = region_counts['count'].max()
+
     fig.update_yaxes(
         showgrid=True,
         gridcolor='#f1f5f9',
         linecolor='#e5e7eb',
         tickfont=dict(size=9, color='#4b5563'),
         title_text="Số lượng tin",
-        title_font=dict(size=10, color='#6b7280')
+        title_font=dict(size=10, color='#6b7280'),
+        range=[0, max_count * 1.15] if not pd.isna(max_count) else None
     )
 
     apply_layout_styles(fig)
@@ -513,6 +520,7 @@ def create_provincial_bar_chart(df):
         orientation='h',
         text=[f"{count:,}" for count in city_counts['count']],
         textposition='outside',
+        cliponaxis=False,
         marker=dict(color=colors, line=dict(width=0)),
         hovertemplate="<b>%{y}</b><br>Nhu cầu: %{x:,} tin<extra></extra>"
     )])

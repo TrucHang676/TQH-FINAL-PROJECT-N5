@@ -10,23 +10,37 @@
 /* Định nghĩa các biến CSS toàn cục bao gồm mã màu, đổ bóng, font chữ và hiệu ứng chuyển động */
 :root {
   /* Color system - Warm Academic Theme */
-  --bg-color: #faf8f5;        /* Warm Cream Sand */
+  --bg-color: #FFF6DC;
+  --bg2-color: #F6F5F2;
+  /* Warm Cream Sand */
   --card-bg: #ffffff;
-  --text-primary: #111827;    /* Slate 900 */
-  --text-secondary: #4b5563;  /* Slate 600 */
-  --text-muted: #9ca3af;      /* Slate 400 */
-  
-  --border-color: #eae5db;    /* Warm Beige Border */
-  --primary: #59B292;         /* Sage Green */
-  --primary-hover: #469d7e;   /* Darker Sage */
-  --primary-light: #f0faf6;   /* Light Sage Tint */
-  
+  --text-primary: #111827;
+  /* Slate 900 */
+  --text-secondary: #4b5563;
+  /* Slate 600 */
+  --text-muted: #9ca3af;
+  /* Slate 400 */
+
+  --border-color: #eae5db;
+  /* Warm Beige Border */
+  --primary: #59B292;
+  /* Sage Green */
+  --primary-hover: #469d7e;
+  /* Darker Sage */
+  --primary-light: #f0faf6;
+  /* Light Sage Tint */
+
   /* Region Colors - Warm Theme */
-  --color-bac: #FA6781;       /* Coral Red */
-  --color-nam: #59B292;       /* Sage Green */
-  --color-trung: #FFC94D;     /* Amber Gold */
-  --color-remote: #0d9488;    /* Teal */
-  --color-khac: #9ca3af;      /* Neutral Grey */
+  --color-bac: #FA6781;
+  /* Coral Red */
+  --color-nam: #59B292;
+  /* Sage Green */
+  --color-trung: #FFC94D;
+  /* Amber Gold */
+  --color-remote: #0d9488;
+  /* Teal */
+  --color-khac: #9ca3af;
+  /* Neutral Grey */
 
   /* Shadows (Extremely light borders preferred, minimal shadow) */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -35,12 +49,18 @@
   /* Fonts - Neutral Offline-friendly System Font Stack */
   --font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-heading: 'Outfit', var(--font-family);
-  
+
   --transition-fast: all 0.15s ease-in-out;
 }
 
 /* Hiệu ứng con trỏ chuột cho tất cả các thành phần có thể tương tác */
-button, select, input[type="radio"], input[type="checkbox"], label, a, .clickable {
+button,
+select,
+input[type="radio"],
+input[type="checkbox"],
+label,
+a,
+.clickable {
   cursor: pointer;
 }
 
@@ -52,7 +72,8 @@ button, select, input[type="radio"], input[type="checkbox"], label, a, .clickabl
 }
 
 /* Thiết lập font chữ, màu nền, màu chữ mặc định và giới hạn kích thước cho toàn bộ trang web */
-body, html {
+body,
+html {
   font-family: var(--font-family);
   background-color: var(--bg-color);
   color: var(--text-primary);
@@ -117,7 +138,8 @@ body, html {
 
 /* Định dạng huy hiệu hiển thị thông tin dataset: nền bán trong suốt, bo góc và viền nhẹ */
 .dataset-badge {
-  background-color: rgba(255, 255, 255, 0.15); /* translucent white */
+  background-color: rgba(255, 255, 255, 0.15);
+  /* translucent white */
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 6px 12px;
@@ -258,14 +280,17 @@ body, html {
 }
 
 /* Thêm hiệu ứng chuyển động mượt mà cho các thẻ KPI và thẻ biểu đồ */
-.kpi-card, .chart-card {
+.kpi-card,
+.chart-card {
   transition: box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform;
 }
 
 /* Hiệu ứng khi di chuột qua thẻ KPI hoặc biểu đồ: đẩy nhẹ lên trên và đổ bóng màu xanh nhạt */
-.kpi-card:hover, .chart-card:hover {
-  box-shadow: 0 10px 24px rgba(89, 178, 146, 0.08); /* Soft primary color accent shadow */
+.kpi-card:hover,
+.chart-card:hover {
+  box-shadow: 0 10px 24px rgba(89, 178, 146, 0.08);
+  /* Soft primary color accent shadow */
   transform: translateY(-2px);
 }
 
@@ -280,6 +305,7 @@ body, html {
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

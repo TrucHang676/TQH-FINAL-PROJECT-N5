@@ -156,20 +156,23 @@
   border: 1px solid var(--border-color);
   padding: 8px;
   border-radius: 6px;
-  background-color: var(--bg-color);
+  background-color: var(--bg2-color);
 }
 
 .source-checklist::-webkit-scrollbar {
   width: 6px;
 }
+
 .source-checklist::-webkit-scrollbar-track {
   background: var(--bg-color);
   border-radius: 4px;
 }
+
 .source-checklist::-webkit-scrollbar-thumb {
   background: var(--primary);
   border-radius: 4px;
 }
+
 .source-checklist::-webkit-scrollbar-thumb:hover {
   background: var(--primary-hover);
 }

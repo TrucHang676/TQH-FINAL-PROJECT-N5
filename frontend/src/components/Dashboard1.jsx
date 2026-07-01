@@ -13,7 +13,7 @@ const Dashboard1 = () => {
   const [region, setRegion] = useState(null);
   
   // Trạng thái chuyển đổi chế độ xem bản đồ / biểu đồ cột
-  const [mapToggle, setMapToggle] = useState('map');
+  const [mapToggle, setMapToggle] = useState('region_chart');
 
   // =============================================================================
   // Quản lý trạng thái dữ liệu trả về từ API và trạng thái tải (Loading)
@@ -159,8 +159,8 @@ const Dashboard1 = () => {
       <div className="workspace">
         {/* Sidebar */}
         <div className="sidebar">
-          <div className="sidebar-header">
-            <h3>Bộ lọc</h3>
+          <div className="sidebar-title-section">
+            <span className="sidebar-title">Bộ lọc</span>
             <button className="btn-reset" onClick={resetFilters}>⟲ Đặt lại</button>
           </div>
 
@@ -288,12 +288,12 @@ const Dashboard1 = () => {
                 <div className="toggle-container">
                   <div className="toggle-switch" style={{ display: 'flex', gap: '10px' }}>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <input type="radio" value="map" checked={mapToggle === 'map'} onChange={(e) => setMapToggle(e.target.value)} />
-                      <span className="radio-label-text">Bản đồ</span>
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <input type="radio" value="region_chart" checked={mapToggle === 'region_chart'} onChange={(e) => setMapToggle(e.target.value)} />
                       <span className="radio-label-text">Theo vùng</span>
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <input type="radio" value="map" checked={mapToggle === 'map'} onChange={(e) => setMapToggle(e.target.value)} />
+                      <span className="radio-label-text">Bản đồ</span>
                     </label>
                   </div>
                 </div>
