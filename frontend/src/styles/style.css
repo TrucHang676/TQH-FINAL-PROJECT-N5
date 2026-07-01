@@ -39,6 +39,11 @@
   --transition-fast: all 0.15s ease-in-out;
 }
 
+/* Hiệu ứng con trỏ chuột cho tất cả các thành phần có thể tương tác */
+button, select, input[type="radio"], input[type="checkbox"], label, a, .clickable {
+  cursor: pointer;
+}
+
 /* Reset CSS cơ bản để loại bỏ margin, padding mặc định và đồng nhất cách tính kích thước phần tử */
 * {
   box-sizing: border-box;

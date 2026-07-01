@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import PlotlyChart from './PlotlyChart';
+import Select from 'react-select';
 
 const Dashboard1 = () => {
   // =============================================================================
   // Quản lý trạng thái (State) của các bộ lọc
   // =============================================================================
   const [sources, setSources] = useState(['TopCV', 'VietnamWorks', 'ITviec', 'JobsGO', 'TopDev']);
-  const [position, setPosition] = useState('All');
-  const [experience, setExperience] = useState('All');
-  const [region, setRegion] = useState('All');
+  const [position, setPosition] = useState(null);
+  const [experience, setExperience] = useState(null);
+  const [region, setRegion] = useState(null);
   
   // Trạng thái chuyển đổi chế độ xem bản đồ / biểu đồ cột
   const [mapToggle, setMapToggle] = useState('map');
@@ -54,27 +55,45 @@ const Dashboard1 = () => {
     { value: 'Từ xa / Remote', label: 'Từ xa / Remote' }
   ];
 
+  // Set default values explicitly
+  useEffect(() => {
+    setPosition(positionOptions[0]);
+    setExperience(experienceOptions[0]);
+    setRegion(regionOptions[0]);
+  }, []);
+
   const sourceOptions = ['ITviec', 'JobsGO', 'TopCV', 'TopDev', 'VietnamWorks'];
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.post('http://localhost:8000/api/dashboard/page1', {
-        sources,
-        position,
-        experience,
-        region,
-        map_toggle: mapToggle
-      });
-      setData(response.data);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-    setLoading(false);
-  };
-
   useEffect(() => {
+    if (!position || !experience || !region) return;
+    let isActive = true;
+
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.post('http://localhost:8000/api/dashboard/page1', {
+          sources,
+          position: position.value,
+          experience: experience.value,
+          region: region.value,
+          map_toggle: mapToggle
+        });
+        if (isActive) {
+          setData(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+      if (isActive) {
+        setLoading(false);
+      }
+    };
+
     fetchData();
+
+    return () => {
+      isActive = false;
+    };
   }, [sources, position, experience, region, mapToggle]);
 
   const handleSourceChange = (val) => {
@@ -87,10 +106,52 @@ const Dashboard1 = () => {
 
   const resetFilters = () => {
     setSources(['TopCV', 'VietnamWorks', 'ITviec', 'JobsGO', 'TopDev']);
-    setPosition('All');
-    setExperience('All');
-    setRegion('All');
+    setPosition(positionOptions[0]);
+    setExperience(experienceOptions[0]);
+    setRegion(regionOptions[0]);
     setMapToggle('map');
+  };
+
+  // Custom styles for react-select to match the palette
+  const customSelectStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      borderColor: state.isFocused ? '#59B292' : '#d1d5db',
+      boxShadow: state.isFocused ? '0 0 0 2px rgba(89, 178, 146, 0.2)' : 'none',
+      '&:hover': {
+        borderColor: '#59B292',
+        backgroundColor: '#f0faf6'
+      },
+      cursor: 'pointer',
+      padding: '2px',
+      borderRadius: '4px',
+      fontSize: '14px',
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected 
+        ? '#59B292' 
+        : state.isFocused 
+          ? '#f0faf6' 
+          : 'white',
+      color: state.isSelected ? 'white' : '#111827',
+      cursor: 'pointer',
+      '&:active': {
+        backgroundColor: '#469d7e',
+        color: 'white'
+      },
+      fontSize: '14px',
+    }),
+    menu: (provided) => ({
+      ...provided,
+      zIndex: 9999,
+      borderRadius: '6px',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: '#111827'
+    })
   };
 
   return (
@@ -98,9 +159,9 @@ const Dashboard1 = () => {
       <div className="workspace">
         {/* Sidebar */}
         <div className="sidebar">
-          <div className="sidebar-title-section">
-            <span className="sidebar-title">Bộ lọc</span>
-            <button className="btn-reset" onClick={resetFilters}>Đặt lại</button>
+          <div className="sidebar-header">
+            <h3>Bộ lọc</h3>
+            <button className="btn-reset" onClick={resetFilters}>⟲ Đặt lại</button>
           </div>
 
           <div className="filter-group">
@@ -121,41 +182,35 @@ const Dashboard1 = () => {
 
           <div className="filter-group">
             <label className="filter-label">Nhóm vị trí công việc</label>
-            <select
+            <Select
               value={position}
-              onChange={(e) => setPosition(e.target.value)}
-              style={{ width: '100%', padding: '8px', border: '1px solid #d1d5db', borderRadius: '4px', backgroundColor: 'white' }}
-            >
-              {positionOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
+              onChange={setPosition}
+              options={positionOptions}
+              styles={customSelectStyles}
+              isSearchable={false}
+            />
           </div>
 
           <div className="filter-group">
             <label className="filter-label">Cấp độ kinh nghiệm</label>
-            <select
+            <Select
               value={experience}
-              onChange={(e) => setExperience(e.target.value)}
-              style={{ width: '100%', padding: '8px', border: '1px solid #d1d5db', borderRadius: '4px', backgroundColor: 'white' }}
-            >
-              {experienceOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
+              onChange={setExperience}
+              options={experienceOptions}
+              styles={customSelectStyles}
+              isSearchable={false}
+            />
           </div>
 
           <div className="filter-group">
             <label className="filter-label">Vùng miền địa lý</label>
-            <select
+            <Select
               value={region}
-              onChange={(e) => setRegion(e.target.value)}
-              style={{ width: '100%', padding: '8px', border: '1px solid #d1d5db', borderRadius: '4px', backgroundColor: 'white' }}
-            >
-              {regionOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
+              onChange={setRegion}
+              options={regionOptions}
+              styles={customSelectStyles}
+              isSearchable={false}
+            />
           </div>
         </div>
 
@@ -228,7 +283,7 @@ const Dashboard1 = () => {
             <div className="chart-card map-card">
               <div className="chart-header map-header">
                 <span className="chart-title">
-                  <span className="chart-title-num">01</span> Bản đồ phân bố tuyển dụng
+                  Bản đồ phân bố tuyển dụng
                 </span>
                 <div className="toggle-container">
                   <div className="toggle-switch" style={{ display: 'flex', gap: '10px' }}>
@@ -245,7 +300,7 @@ const Dashboard1 = () => {
               </div>
               <div className="chart-subtitle" style={{ marginBottom: '8px' }}>Bản đồ phân bố địa lý Việt Nam</div>
               <div className="chart-content">
-                {data?.charts?.map && <PlotlyChart figure={data.charts.map} />}
+                {data?.charts?.map && <PlotlyChart key={mapToggle} figure={data.charts.map} />}
               </div>
               <div className="chart-caption">{data?.caption || ''}</div>
             </div>
@@ -255,7 +310,7 @@ const Dashboard1 = () => {
               <div className="chart-card trend-card">
                 <div className="chart-header">
                   <span className="chart-title">
-                    <span className="chart-title-num">02</span> Xu hướng tuyển dụng theo tháng
+                    Xu hướng tuyển dụng theo tháng
                   </span>
                   <span className="chart-subtitle">Số lượng tin tuyển dụng IT theo thời gian</span>
                 </div>
@@ -269,7 +324,7 @@ const Dashboard1 = () => {
                 <div className="chart-card donut-card">
                   <div className="chart-header">
                     <span className="chart-title">
-                      <span className="chart-title-num">03</span> Hình thức làm việc chủ đạo
+                      Hình thức làm việc chủ đạo
                     </span>
                     <span className="chart-subtitle">Tỷ lệ hình thức làm việc tuyển dụng</span>
                   </div>
