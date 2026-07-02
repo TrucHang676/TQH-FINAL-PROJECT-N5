@@ -40,7 +40,18 @@ TQHDL/Final/
 - Python 3.9 trở lên
 - Node.js (phiên bản LTS 18.x hoặc 20.x)
 
-### Bước 2.1. Khởi chạy Backend (FastAPI)
+### CÁCH 1: KHỞI CHẠY NHANH (Khuyên dùng)
+Dự án đã được tích hợp sẵn script chạy tự động cho hệ điều hành Windows.
+1. Mở thư mục dự án `TQHDL/Final/` trong File Explorer.
+2. Click đúp chuột vào file `run.bat`.
+3. Script sẽ tự động bật 2 cửa sổ Terminal (1 cho Backend, 1 cho Frontend). Đợi vài giây, mở trình duyệt truy cập `http://localhost:5173`.
+
+---
+
+### CÁCH 2: KHỞI CHẠY THỦ CÔNG (Dành cho Dev / Fix bug)
+Nếu chạy bằng file `.bat` gặp lỗi, hoặc bạn đang dùng macOS/Linux, hãy chạy thủ công theo 2 bước sau:
+
+#### Bước 1: Khởi chạy Backend (FastAPI)
 
 1. Mở Terminal và di chuyển vào thư mục backend:
    ```bash
@@ -55,7 +66,7 @@ TQHDL/Final/
    uvicorn main:app --reload --port 8000
    ```
 
-### Bước 2.2. Khởi chạy Frontend (React)
+#### Bước 2: Khởi chạy Frontend (React)
 
 1. Mở một Terminal mới và di chuyển vào thư mục frontend:
    ```bash
@@ -70,15 +81,27 @@ TQHDL/Final/
    npm run dev
    ```
 
-## 3. Kiến trúc luồng dữ liệu
+## 3. Kiến trúc luồng dữ liệu (Data Flow)
 
-1. **Frontend (React):** 
-   - Quản lý trạng thái (State) tập trung (Vị trí, Cấp bậc, Vùng miền...).
-   - Gửi yêu cầu phân tích (HTTP POST request) mang theo tham số bộ lọc xuống Backend.
-2. **Backend (FastAPI):**
-   - Nhận Filter Request (tại `routers/router_page1.py`).
-   - Đọc dữ liệu từ file `data/processed/vietnam_it_jobs_processed.csv` qua thư viện Pandas.
-   - Trích xuất dữ liệu, tổng hợp và gọi các hàm tạo biểu đồ Plotly trong `utils/charts_page1.py`. (Lưu ý: Mọi config màu sắc/style chuẩn được viết trong `charts_common.py`).
-   - Trả về cấu trúc biểu đồ (Figure) dưới định dạng JSON.
-3. **Frontend Render:**
-   - Sử dụng thư viện `react-plotly.js` (Component `<PlotlyChart />`) để parse JSON và hiển thị biểu đồ tương tác lên giao diện.
+Để làm tiếp các trang Dashboard tiếp theo, các thành viên cần hiểu rõ chu trình luồng dữ liệu 3 bước (Mô hình Client - Server):
+
+### 3.1. Frontend (React)
+- **Quản lý trạng thái (State):** Người dùng tương tác với các nút bấm, bộ lọc (Vị trí, Cấp bậc, Vùng miền...) trên giao diện. Trạng thái này được lưu tập trung bằng `useState` bên trong Component (ví dụ `Dashboard_page1.jsx`).
+- **Gửi API Request:** Mỗi khi bộ lọc thay đổi, React sử dụng hàm `useEffect` để kích hoạt việc gọi API bằng thư viện `axios`.
+- **Payload:** Thông tin bộ lọc được đóng gói thành một HTTP POST Request (định dạng JSON) và gửi xuống đường dẫn API tương ứng (VD: `http://localhost:8000/api/page1/data`).
+
+### 3.2. Backend (FastAPI)
+- **Tiếp nhận Request:** Endpoint tại `routers/router_page1.py` sẽ hứng request, giải mã JSON payload để lấy ra các tham số lọc (`position`, `experience`, `region`).
+- **Xử lý Dữ liệu (Data Processing):**
+  - Đọc file tổng `data/processed/vietnam_it_jobs_processed.csv` thành một `Pandas DataFrame`.
+  - Dùng Pandas query/mask để lọc bỏ các dòng không thỏa mãn điều kiện filter.
+- **Tạo biểu đồ (Visualization Logic):**
+  - Truyền DataFrame đã lọc xuống các hàm tạo biểu đồ cụ thể nằm trong `utils/charts_page1.py`.
+  - Các hàm này tính toán tần suất, nhóm dữ liệu (groupby) và sử dụng Plotly Express/Graph Objects để vẽ hình (`fig`).
+  - Hàm `apply_layout_styles` từ `utils/charts_common.py` được gọi để đồng bộ giao diện cho `fig`.
+- **Trả về (Response):** Hàm `json.loads(fig.to_json())` chuyển đổi cấu trúc `fig` của Plotly Python thành một JSON Object thuần túy và trả về cho Frontend kèm theo các số liệu KPI tính toán được.
+
+### 3.3. Frontend Render
+- **Tiếp nhận Response:** Frontend nhận cục dữ liệu JSON từ Backend (chứa KPI và danh sách các charts).
+- **Cập nhật Giao diện:** Gắn dữ liệu số vào các Component thẻ như `<KpiCard />`.
+- **Render Biểu đồ Tương tác:** Chuyển phần tử chart JSON vào thư viện `react-plotly.js` thông qua wrapper Component `<PlotlyChart figure={data.charts.xxx} />`. Lúc này thư viện Plotly.js phía Frontend sẽ tiếp quản và hiển thị biểu đồ, đồng thời lắng nghe các sự kiện (Click, Hover) để tạo trải nghiệm tương tác trực quan.
