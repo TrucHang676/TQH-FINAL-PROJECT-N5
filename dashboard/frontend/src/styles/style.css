@@ -94,7 +94,7 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Style cho thanh đầu trang (header) toàn cục: căn chỉnh các phần tử bên trong và đặt màu nền */
+/* Style cho thanh đầu trang (header) toàn cục: Nền cũ */
 .global-header {
   display: flex;
   justify-content: space-between;
@@ -106,78 +106,106 @@ html {
   padding: 0 24px;
 }
 
-/* Container chứa tiêu đề chính và tiêu đề phụ của trang web */
+/* Container chứa tiêu đề chính và tiêu đề phụ */
 .global-title-container {
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 1;
 }
 
-/* Style cho tiêu đề chính: kích thước lớn, chữ đậm và màu trắng */
+/* Tiêu đề chính */
 .global-title {
   font-family: var(--font-heading);
   font-size: 22px;
   font-weight: 700;
   color: #ffffff;
   letter-spacing: -0.2px;
+  margin: 0;
 }
 
-/* Style cho khu vực tiêu đề phụ: cỡ chữ nhỏ và màu chữ nhạt */
+/* Khu vực tiêu đề phụ */
 .global-subtitle-container {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 400;
-  color: #e0f2ec;
-  margin-top: 4px;
+  color: #cbd5e1;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
 }
 
+/* Goal Badge: Solid pastel green */
 .goal-badge {
-  background: rgba(251, 191, 36, 0.2);
-  color: #fbbf24;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 11px;
+  background: #a7f3d0;
+  color: #064e3b;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   display: inline-flex;
   align-items: center;
-  margin-right: 12px;
-  border: 1px solid rgba(251, 191, 36, 0.4);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-right: 10px;
+  box-shadow: 0 2px 4px rgba(167, 243, 208, 0.2);
+  border: 1px solid rgba(110, 231, 183, 0.5);
+  text-shadow: none;
 }
 
-/* Làm mờ nhẹ phần mô tả chi tiết trong tiêu đề phụ */
+/* Mô tả chi tiết */
 .global-subtitle-desc {
-  opacity: 0.9;
+  opacity: 0.85;
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: 0.3px;
 }
 
 /* Container căn giữa các huy hiệu (badge) thông tin bộ dữ liệu */
 .global-badge-container {
   display: flex;
   align-items: center;
+  z-index: 1;
 }
 
-/* Định dạng huy hiệu hiển thị thông tin dataset: nền bán trong suốt, bo góc và viền nhẹ */
+/* Dataset Badge: Glassmorphism cực xịn */
 .dataset-badge {
-  background-color: rgba(255, 255, 255, 0.15);
-  /* translucent white */
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 12px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.1px;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: 'Outfit', sans-serif;
 }
 
-/* Định dạng tên dataset trong huy hiệu: tạo khoảng cách và làm mờ nhẹ */
+.dataset-badge:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Định dạng tên dataset */
 .dataset-name {
-  margin-right: 8px;
-  opacity: 0.9;
+  margin-right: 12px;
+  padding-right: 12px;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
 }
 
-/* Làm đậm chữ cho phần hiển thị số lượng dữ liệu */
+/* Số lượng dữ liệu nổi bật */
 .dataset-count {
   font-weight: 700;
+  color: #5eead4;
 }
 
 /* Style cho thanh điều hướng chứa các tab: nền trắng, có viền dưới và căn giữa phần tử */

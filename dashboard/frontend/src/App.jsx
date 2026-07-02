@@ -43,9 +43,11 @@ function App() {
         <div className="global-title-container">
           <h1 className="global-title">Thị trường tuyển dụng IT Việt Nam</h1>
           <div className="global-subtitle-container">
-            <span className="goal-badge">
-              {tabConfig[activeTab].goal}
-            </span>
+            {activeTab !== 5 && (
+              <span className="goal-badge">
+                {tabConfig[activeTab].goal}
+              </span>
+            )}
             <span className="global-subtitle-desc">{tabConfig[activeTab].desc}</span>
           </div>
         </div>

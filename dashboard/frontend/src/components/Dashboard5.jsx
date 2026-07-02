@@ -188,31 +188,18 @@ export default function Dashboard5() {
       />
 
       <div className="ai-chat-main">
-        {messages.length === 0 ? (
-          <div className="ai-welcome">
-            <div className="ai-welcome-icon">
-              <Sparkles size={30} color="#59B292" />
-            </div>
-            <h3>AI Phân tích Dữ liệu</h3>
-            <p>
-              Hãy nhập câu hỏi hoặc yêu cầu phân tích bên dưới.
-              AI sẽ tự động viết mã Python, bạn duyệt và chạy để xem kết quả trực quan.
-            </p>
-          </div>
-        ) : (
-          <div className="ai-chat-messages">
-            {messages.map(msg => (
-              <AiChatMessage
-                key={msg.id}
-                message={msg}
-                onApprove={handleApprove}
-                onReject={handleReject}
-                isExecuting={executingId === msg.requestId}
-              />
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-        )}
+        <div className="ai-chat-messages">
+          {messages.map(msg => (
+            <AiChatMessage
+              key={msg.id}
+              message={msg}
+              onApprove={handleApprove}
+              onReject={handleReject}
+              isExecuting={executingId === msg.requestId}
+            />
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
 
         <AiRequestForm
           onSubmit={handleSendRequest}
