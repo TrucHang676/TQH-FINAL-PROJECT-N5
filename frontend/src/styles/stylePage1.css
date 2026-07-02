@@ -588,3 +588,23 @@
 .js-plotly-plot .maplibregl-canvas {
   cursor: default !important;
 }
+
+/* CSS HACKS CHO PLOTLY TOOLTIP ĐẸP HƠN */
+.js-plotly-plot .hoverlayer .hovertext path {
+  stroke-width: 1px !important;
+  stroke-linejoin: round !important;
+  stroke-linecap: round !important;
+  /* Đổ bóng mịn màng trung tính */
+  filter: drop-shadow(0 6px 15px rgba(0, 0, 0, 0.12)) drop-shadow(0 2px 5px rgba(0, 0, 0, 0.08)) !important;
+}
+
+/* Format text bên trong tooltip */
+.js-plotly-plot .hoverlayer .hovertext text {
+  font-family: var(--font-family) !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+}
+
+.js-plotly-plot .hoverlayer .hovertext text b {
+  font-weight: 700 !important;
+}

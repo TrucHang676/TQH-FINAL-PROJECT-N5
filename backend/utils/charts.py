@@ -318,10 +318,37 @@ def create_regional_vietnam_map(df):
         map_style="white-bg"
     )
 
+    region_text_colors = {
+        'Bắc': '#881337',
+        'Nam': '#064e3b',
+        'Trung': '#78350f',
+        'Từ xa / Remote': '#115e59',
+        'Khác': '#374151'
+    }
+    
+    # Tạo danh sách text hover với định dạng màu sắc tiêu đề theo vùng miền
+    hover_texts = []
+    for idx, row in map_df.iterrows():
+        r = row['Vùng miền']
+        t_color = region_text_colors.get(r, '#374151')
+        hover_texts.append(
+            f"<span style='font-size:4px'> </span><br>"
+            f" &nbsp;<b><span style='color:{t_color}'>▍</span> Vùng {r}</b>&nbsp; <br>"
+            f"<span style='font-size:4px'> </span><br>"
+            f" &nbsp;Tỉnh: <b>{row['tinh_thanh']}</b>&nbsp; <br>"
+            f" &nbsp;Tổng tin vùng: <b>{row['Tổng tin vùng']:,} tin</b>&nbsp; <br>"
+            f"<span style='font-size:4px'> </span>"
+        )
+    map_df['hover_text'] = hover_texts
+
     fig.update_traces(
         marker_line_width=0.5,
         marker_line_color="white",
-        hovertemplate="<b>Vùng %{hovertext}</b><br>Tỉnh: %{customdata[0]}<br>Tổng nhu cầu vùng: <b>%{customdata[1]:,} tin</b><extra></extra>"
+        hovertemplate="%{customdata[2]}<extra></extra>",
+        customdata=np.stack((map_df['tinh_thanh'], map_df['Tổng tin vùng'], map_df['hover_text']), axis=-1),
+        hoverlabel=dict(
+            font=dict(color='#1a1a1a')
+        )
     )
 
     apply_layout_styles(fig)
@@ -372,7 +399,7 @@ def create_work_type_chart(df):
             color='#59B292',
             line=dict(width=0)
         ),
-        hovertext=[f"<b>{row['hinh_thuc_lam_viec']}</b><br><span style='color:#5a4000'>Số lượng: <b>{row['count']:,} tin</b><br>Tỉ lệ: <b>{row['pct']:.1f}%</b></span>" for _, row in work_counts.iterrows()],
+        hovertext=[f"<span style='font-size:4px'> </span><br> &nbsp;<b>{row['hinh_thuc_lam_viec']}</b>&nbsp; <br><span style='font-size:4px'> </span><br><span style='color:#5a4000'> &nbsp;Số lượng: <b>{row['count']:,} tin</b>&nbsp; <br> &nbsp;Tỉ lệ: <b>{row['pct']:.1f}%</b>&nbsp; </span><br><span style='font-size:4px'> </span>" for _, row in work_counts.iterrows()],
         hovertemplate="%{hovertext}<extra></extra>"
     )])
 
@@ -411,6 +438,15 @@ def create_region_chart(df):
 
     y_labels = [row['vung_mien'] for _, row in region_counts.iterrows()]
 
+    region_text_colors = {
+        'Bắc': '#881337',
+        'Nam': '#064e3b',
+        'Trung': '#78350f',
+        'Từ xa / Remote': '#115e59',
+        'Khác': '#374151'
+    }
+    colors = [REGION_COLORS.get(r, '#9ca3af') for r in region_counts['vung_mien']]
+
     fig = go.Figure(data=[go.Bar(
         x=region_counts['count'],
         y=y_labels,
@@ -419,11 +455,23 @@ def create_region_chart(df):
         textposition='outside',
         cliponaxis=False,
         marker=dict(
-            color=[REGION_COLORS.get(r, '#9ca3af') for r in region_counts['vung_mien']],
+            color=colors,
             line=dict(width=0)
         ),
-        hovertext=[f"<b>Vùng {row['vung_mien']}</b><br><span style='color:#5a4000'>Số lượng: <b>{row['count']:,} tin</b><br>Tỉ lệ: <b>{row['pct']:.1f}%</b></span>" for _, row in region_counts.iterrows()],
-        hovertemplate="%{hovertext}<extra></extra>"
+        hovertext=[
+            f"<span style='font-size:4px'> </span><br>"
+            f" &nbsp;<b><span style='color:{region_text_colors.get(row['vung_mien'], '#374151')}'>▍</span> Vùng {row['vung_mien']}</b>&nbsp; <br>"
+            f"<span style='font-size:4px'> </span><br>"
+            f"<span style='color:#5a4000'>"
+            f" &nbsp;Số lượng: <b>{row['count']:,} tin</b>&nbsp; <br>"
+            f" &nbsp;Tỉ lệ: <b>{row['pct']:.1f}%</b>&nbsp; "
+            f"</span><br><span style='font-size:4px'> </span>"
+            for _, row in region_counts.reset_index(drop=True).iterrows()
+        ],
+        hovertemplate="%{hovertext}<extra></extra>",
+        hoverlabel=dict(
+            font=dict(color='#1a1a1a')
+        )
     )])
 
     fig.update_xaxes(
@@ -460,6 +508,15 @@ def create_region_vertical_chart(df):
     region_counts['pct'] = (region_counts['count'] / total_region) * 100
     region_counts = region_counts.sort_values('count', ascending=False)
 
+    region_text_colors = {
+        'Bắc': '#881337',
+        'Nam': '#064e3b',
+        'Trung': '#78350f',
+        'Từ xa / Remote': '#115e59',
+        'Khác': '#374151'
+    }
+    colors = [REGION_COLORS.get(r, '#9ca3af') for r in region_counts['vung_mien']]
+
     fig = go.Figure(data=[go.Bar(
         x=region_counts['vung_mien'],
         y=region_counts['count'],
@@ -469,11 +526,23 @@ def create_region_vertical_chart(df):
         cliponaxis=False,
         textfont=dict(size=10),
         marker=dict(
-            color=[REGION_COLORS.get(r, '#9ca3af') for r in region_counts['vung_mien']],
+            color=colors,
             line=dict(width=0)
         ),
-        hovertext=[f"<b>Vùng {row['vung_mien']}</b><br><span style='color:#5a4000'>Số lượng: <b>{row['count']:,} tin</b><br>Tỉ lệ: <b>{row['pct']:.1f}%</b></span>" for _, row in region_counts.iterrows()],
-        hovertemplate="%{hovertext}<extra></extra>"
+        hovertext=[
+            f"<span style='font-size:4px'> </span><br>"
+            f" &nbsp;<b><span style='color:{region_text_colors.get(row['vung_mien'], '#374151')}'>▍</span> Vùng {row['vung_mien']}</b>&nbsp; <br>"
+            f"<span style='font-size:4px'> </span><br>"
+            f"<span style='color:#5a4000'>"
+            f" &nbsp;Số lượng: <b>{row['count']:,} tin</b>&nbsp; <br>"
+            f" &nbsp;Tỉ lệ: <b>{row['pct']:.1f}%</b>&nbsp; "
+            f"</span><br><span style='font-size:4px'> </span>"
+            for _, row in region_counts.reset_index(drop=True).iterrows()
+        ],
+        hovertemplate="%{hovertext}<extra></extra>",
+        hoverlabel=dict(
+            font=dict(color='#1a1a1a')
+        )
     )])
 
     fig.update_xaxes(
@@ -527,7 +596,7 @@ def create_provincial_bar_chart(df):
         textposition='outside',
         cliponaxis=False,
         marker=dict(color=colors, line=dict(width=0)),
-        hovertemplate="<b>%{y}</b><br><span style='color:#5a4000'>%{x:,} tin tuyển dụng</span><extra></extra>"
+        hovertemplate="<span style='font-size:4px'> </span><br> &nbsp;<b>%{y}</b>&nbsp; <br><span style='font-size:4px'> </span><br><span style='color:#5a4000'> &nbsp;Số lượng: <b>%{x:,} tin</b>&nbsp; </span><br><span style='font-size:4px'> </span><extra></extra>"
     )])
 
     fig.update_xaxes(
