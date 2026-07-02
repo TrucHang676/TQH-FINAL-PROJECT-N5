@@ -246,7 +246,7 @@ def create_vietnam_map(df):
         labels={'job_count': 'Số lượng tin'},
         center={"lat": 16.2, "lon": 107.5},
         zoom=4.5,
-        map_style="white-bg"
+        map_style="carto-positron"
     )
 
     fig.update_traces(
@@ -318,7 +318,7 @@ def create_regional_vietnam_map(df):
         hover_data={"geojson_name": False, "Vùng miền": False, "tinh_thanh": True, "Tổng tin vùng": True},
         center={"lat": 16.2, "lon": 107.5},
         zoom=4.5,
-        map_style="white-bg"
+        map_style="carto-positron"
     )
 
     region_text_colors = {
