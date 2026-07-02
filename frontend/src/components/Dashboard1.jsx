@@ -279,7 +279,7 @@ const Dashboard1 = () => {
             <div className="chart-card map-card">
               <div className="chart-header map-header">
                 <span className="chart-title">
-                  Bản đồ phân bố tuyển dụng
+                  {mapToggle === 'map' ? 'Bản đồ phân bố tuyển dụng' : 'Biểu đồ phân bố tuyển dụng'}
                 </span>
                 <div className="toggle-container">
                   <div className="toggle-switch" style={{ display: 'flex', gap: '10px' }}>

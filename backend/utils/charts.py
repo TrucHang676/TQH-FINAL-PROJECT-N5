@@ -521,7 +521,7 @@ def create_region_vertical_chart(df):
         x=region_counts['vung_mien'],
         y=region_counts['count'],
         orientation='v',
-        text=[f"{row['count']:,}<br>{row['pct']:.1f}%" for _, row in region_counts.iterrows()],
+        text=[f"{row['count']:,}" for _, row in region_counts.iterrows()],
         textposition='outside',
         cliponaxis=False,
         textfont=dict(size=10),
