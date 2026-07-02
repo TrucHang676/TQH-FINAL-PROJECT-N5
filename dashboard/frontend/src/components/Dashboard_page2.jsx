@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Dashboard2() {
+export default function Dashboard_page2() {
   return (
     <div style={{ 
       padding: '40px', 

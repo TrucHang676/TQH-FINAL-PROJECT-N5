@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Dashboard4() {
+export default function Dashboard_page3() {
   return (
     <div style={{ 
       padding: '40px', 
@@ -15,10 +15,10 @@ export default function Dashboard4() {
       alignItems: 'center'
     }}>
       <h2 style={{ fontSize: '28px', fontWeight: '800', color: '#1a5944', textTransform: 'uppercase', letterSpacing: '1px' }}>
-        04 Nhân sự trẻ
+        03 Lương thị trường
       </h2>
       <p style={{ marginTop: '12px', color: '#6b7280', fontSize: '14px' }}>
-        Trang thống kê cơ hội tuyển dụng cho sinh viên, Intern, Fresher và cơ hội nghề nghiệp trẻ.
+        Trang phân tích cơ cấu mức lương theo vị trí tuyển dụng, kinh nghiệm và địa lý.
       </p>
     </div>
   );

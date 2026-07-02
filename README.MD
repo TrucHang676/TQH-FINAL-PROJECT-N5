@@ -19,7 +19,7 @@ TQHDL/Final/
 ├── notebooks/              # Jupyter Notebooks phục vụ EDA và Data Cleaning
 └── dashboard/              # Hệ thống Web Dashboard
     ├── backend/            # REST API (Python FastAPI)
-    │   ├── routers/        # Các endpoints xử lý API (page1.py, ai_analysis.py,...)
+    │   ├── routers/        # Các endpoints xử lý API (router_page1.py, router_page5.py,...)
     │   ├── utils/          # Logic vẽ biểu đồ Plotly và xử lý data (charts_common.py, charts_page1.py)
     │   ├── main.py         # File khởi chạy server FastAPI
     │   └── requirements.txt
@@ -76,7 +76,7 @@ TQHDL/Final/
    - Quản lý trạng thái (State) tập trung (Vị trí, Cấp bậc, Vùng miền...).
    - Gửi yêu cầu phân tích (HTTP POST request) mang theo tham số bộ lọc xuống Backend.
 2. **Backend (FastAPI):**
-   - Nhận Filter Request (tại `routers/page1.py`).
+   - Nhận Filter Request (tại `routers/router_page1.py`).
    - Đọc dữ liệu từ file `data/processed/vietnam_it_jobs_processed.csv` qua thư viện Pandas.
    - Trích xuất dữ liệu, tổng hợp và gọi các hàm tạo biểu đồ Plotly trong `utils/charts_page1.py`. (Lưu ý: Mọi config màu sắc/style chuẩn được viết trong `charts_common.py`).
    - Trả về cấu trúc biểu đồ (Figure) dưới định dạng JSON.

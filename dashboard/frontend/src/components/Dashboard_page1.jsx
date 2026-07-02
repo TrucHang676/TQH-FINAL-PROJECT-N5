@@ -4,7 +4,7 @@ import PlotlyChart from './PlotlyChart';
 import Select from 'react-select';
 import KpiCard from './KpiCard';
 
-const Dashboard1 = () => {
+const Dashboard_page1 = () => {
   // =============================================================================
   // Quản lý trạng thái (State) của các bộ lọc
   // =============================================================================
@@ -410,4 +410,4 @@ const Dashboard1 = () => {
   );
 };
 
-export default Dashboard1;
+export default Dashboard_page1;

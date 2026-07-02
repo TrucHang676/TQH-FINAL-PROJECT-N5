@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import Dashboard1 from './components/Dashboard1';
-import Dashboard2 from './components/Dashboard2';
-import Dashboard3 from './components/Dashboard3';
-import Dashboard4 from './components/Dashboard4';
-import Dashboard5 from './components/Dashboard5';
+import Dashboard1 from './components/Dashboard_page1';
+import Dashboard2 from './components/Dashboard_page2';
+import Dashboard3 from './components/Dashboard_page3';
+import Dashboard4 from './components/Dashboard_page4';
+import Dashboard5 from './components/Dashboard_page5';
 
 // Import CSS y hệt như cấu trúc của Dash
 import './styles/style.css';
-import './styles/stylePage1.css';
+import './styles/style_page1.css';
 
 const tabConfig = {
   1: {

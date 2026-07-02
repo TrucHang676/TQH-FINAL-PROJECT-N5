@@ -5,7 +5,7 @@ import AiRequestForm from './ai/AiRequestForm';
 import AiChatMessage from './ai/AiChatMessage';
 import { Sparkles } from 'lucide-react';
 
-export default function Dashboard5() {
+export default function Dashboard_page5() {
   const [historyList, setHistoryList] = useState([]);
   const [currentRequestId, setCurrentRequestId] = useState(null);
   const [messages, setMessages] = useState([]);
