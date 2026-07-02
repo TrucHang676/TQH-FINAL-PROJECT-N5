@@ -8,8 +8,8 @@ from backend.utils import charts
 
 router = APIRouter()
 
-# Lấy thư mục gốc chứa dữ liệu
-root_dir = Path(__file__).parent.parent.parent.resolve()
+# Lấy thư mục gốc chứa dữ liệu (Final/)
+root_dir = Path(__file__).parent.parent.parent.parent.resolve()
 csv_path = root_dir / "data" / "processed" / "vietnam_it_jobs_processed.csv"
 
 # Model dữ liệu nhận vào (Request Body)
