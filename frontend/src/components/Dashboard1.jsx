@@ -238,7 +238,7 @@ const Dashboard1 = () => {
         <div className="main-panel">
           <div className="kpi-row">
             {/* KPI 1 */}
-            <div className="kpi-card">
+            <div className="kpi-card kpi-tooltip-wrap" data-tooltip="Tổng số tin tuyển dụng IT được thu thập từ tất cả nguồn dữ liệu, sau khi áp dụng các bộ lọc hiện tại.">
               <div className="kpi-card-info">
                 <div className="kpi-header">
                   <span className="kpi-title">Tổng tin tuyển dụng</span>
@@ -253,7 +253,7 @@ const Dashboard1 = () => {
             </div>
 
             {/* KPI 2 */}
-            <div className="kpi-card">
+            <div className="kpi-card kpi-tooltip-wrap" data-tooltip="Tháng ghi nhận số lượng tin tuyển dụng cao nhất trong toàn bộ giai đoạn dữ liệu.">
               <div className="kpi-card-info">
                 <div className="kpi-header">
                   <span className="kpi-title">Tháng cao điểm</span>
@@ -268,7 +268,7 @@ const Dashboard1 = () => {
             </div>
 
             {/* KPI 3 */}
-            <div className="kpi-card">
+            <div className="kpi-card kpi-tooltip-wrap" data-tooltip="Tỉnh/thành phố có nhu cầu tuyển dụng IT cao nhất, được tính theo tỉ lệ phần trăm so với tổng cả nước.">
               <div className="kpi-card-info">
                 <div className="kpi-header">
                   <span className="kpi-title">Địa bàn lớn nhất</span>
@@ -283,7 +283,7 @@ const Dashboard1 = () => {
             </div>
 
             {/* KPI 4 */}
-            <div className="kpi-card">
+            <div className="kpi-card kpi-tooltip-wrap" data-tooltip="Hình thức làm việc được đăng tuyển nhiều nhất, phản ánh xu hướng tuyển dụng chủ đạo của thị trường IT hiện tại.">
               <div className="kpi-card-info">
                 <div className="kpi-header">
                   <span className="kpi-title">Hình thức chủ đạo</span>

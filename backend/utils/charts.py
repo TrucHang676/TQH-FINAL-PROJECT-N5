@@ -46,14 +46,15 @@ def apply_layout_styles(fig):
         paper_bgcolor='rgba(0,0,0,0)',
         hovermode="closest",
         showlegend=False,
-        transition=dict(duration=400, easing="cubic-in-out"), # Hiệu ứng chuyển động mượt mà
+        transition=dict(duration=400, easing="cubic-in-out"),
         hoverlabel=dict(
-            bgcolor="#1e293b",
-            bordercolor="rgba(0,0,0,0)",
+            bgcolor="#FFC94D",
+            bordercolor="#e6a800",
             font_size=12,
             font_family="Inter, system-ui, -apple-system, sans-serif",
-            font_color="#ffffff",
-            namelength=-1
+            font_color="#1a1a1a",
+            namelength=-1,
+            align="left"
         )
     )
     return fig
@@ -85,7 +86,7 @@ def create_time_trend_chart(df):
         mode='lines',
         name='Trung bình trượt',
         line=dict(color='#9ca3af', width=2, dash='dash'),
-        hovertemplate="%{y:,.0f} tin<extra></extra>"
+        hovertemplate="<b>%{y:,.0f}</b> tin<extra></extra>"
     ))
 
     # Đường xu hướng tuyển dụng chính nét liền xanh
@@ -95,7 +96,7 @@ def create_time_trend_chart(df):
         mode='lines',
         name='Tin tuyển dụng',
         line=dict(color='#59B292', width=2.5),
-        hovertemplate="%{y:,.0f} tin<extra></extra>"
+        hovertemplate="<b>%{y:,.0f}</b> tin<extra></extra>"
     ))
 
     # Đánh dấu chấm tròn và chú thích tại tháng có số lượng tuyển dụng cao nhất
@@ -371,7 +372,7 @@ def create_work_type_chart(df):
             color='#59B292',
             line=dict(width=0)
         ),
-        hovertext=[f"<b>{row['hinh_thuc_lam_viec']}</b><br>Số lượng: {row['count']:,}<br>Tỉ lệ: {row['pct']:.1f}%" for _, row in work_counts.iterrows()],
+        hovertext=[f"<b>{row['hinh_thuc_lam_viec']}</b><br><span style='color:#5a4000'>Số lượng: <b>{row['count']:,} tin</b><br>Tỉ lệ: <b>{row['pct']:.1f}%</b></span>" for _, row in work_counts.iterrows()],
         hovertemplate="%{hovertext}<extra></extra>"
     )])
 
@@ -421,7 +422,7 @@ def create_region_chart(df):
             color=[REGION_COLORS.get(r, '#9ca3af') for r in region_counts['vung_mien']],
             line=dict(width=0)
         ),
-        hovertext=[f"<b>{row['vung_mien']}</b><br>Số lượng: {row['count']:,}<br>Tỉ lệ: {row['pct']:.1f}%" for _, row in region_counts.iterrows()],
+        hovertext=[f"<b>Vùng {row['vung_mien']}</b><br><span style='color:#5a4000'>Số lượng: <b>{row['count']:,} tin</b><br>Tỉ lệ: <b>{row['pct']:.1f}%</b></span>" for _, row in region_counts.iterrows()],
         hovertemplate="%{hovertext}<extra></extra>"
     )])
 
@@ -471,7 +472,7 @@ def create_region_vertical_chart(df):
             color=[REGION_COLORS.get(r, '#9ca3af') for r in region_counts['vung_mien']],
             line=dict(width=0)
         ),
-        hovertext=[f"<b>{row['vung_mien']}</b><br>Số lượng: {row['count']:,}<br>Tỉ lệ: {row['pct']:.1f}%" for _, row in region_counts.iterrows()],
+        hovertext=[f"<b>Vùng {row['vung_mien']}</b><br><span style='color:#5a4000'>Số lượng: <b>{row['count']:,} tin</b><br>Tỉ lệ: <b>{row['pct']:.1f}%</b></span>" for _, row in region_counts.iterrows()],
         hovertemplate="%{hovertext}<extra></extra>"
     )])
 
@@ -526,7 +527,7 @@ def create_provincial_bar_chart(df):
         textposition='outside',
         cliponaxis=False,
         marker=dict(color=colors, line=dict(width=0)),
-        hovertemplate="<b>%{y}</b><br>Nhu cầu: %{x:,} tin<extra></extra>"
+        hovertemplate="<b>%{y}</b><br><span style='color:#5a4000'>%{x:,} tin tuyển dụng</span><extra></extra>"
     )])
 
     fig.update_xaxes(

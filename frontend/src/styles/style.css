@@ -297,25 +297,7 @@ html {
   transition: opacity 0.15s ease-in-out, filter 0.15s ease-in-out;
 }
 
-/* Thêm hiệu ứng chuyển động mượt mà cho các thẻ KPI và thẻ biểu đồ */
-.kpi-card,
-.chart-card {
-  transition: box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-              transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
-}
-
-/* KPI card hover - nổi lên nhẹ + glow xanh sage */
-.kpi-card:hover {
-  box-shadow: 0 12px 28px rgba(89, 178, 146, 0.2), 0 4px 8px rgba(89, 178, 146, 0.1);
-  transform: translateY(-3px) scale(1.005);
-}
-
-/* Chart card hover - nổi nhẹ + bóng trung tính */
-.chart-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
-  transform: translateY(-2px);
-}
+/* Remove elevation/glow hover effects on KPI and Chart cards as requested */
 
 /* Áp dụng hiệu ứng animation xuất hiện dần và trượt từ dưới lên */
 .fade-in {
