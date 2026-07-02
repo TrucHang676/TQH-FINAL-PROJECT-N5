@@ -43,15 +43,16 @@ function App() {
         <div className="global-title-container">
           <h1 className="global-title">Thị trường tuyển dụng IT Việt Nam</h1>
           <div className="global-subtitle-container">
-            <span className="global-subtitle-main">{tabConfig[activeTab].goal}</span>
-            <span className="global-subtitle-divider"> | </span>
+            <span className="goal-badge">
+              {tabConfig[activeTab].goal}
+            </span>
             <span className="global-subtitle-desc">{tabConfig[activeTab].desc}</span>
           </div>
         </div>
         <div className="global-badge-container">
           <div className="dataset-badge">
-            <span className="dataset-name">Dataset: vietnam_it_jobs_processed.csv</span>
-            <span className="dataset-count">8,452 tin tuyển dụng</span>
+            <span className="dataset-name">vietnam_it_jobs_processed.csv</span>
+            <span className="dataset-count">8,452 bản ghi</span>
           </div>
         </div>
       </div>

@@ -129,9 +129,20 @@ html {
   margin-top: 4px;
 }
 
-/* Làm đậm phần thông tin chính trong tiêu đề phụ */
-.global-subtitle-main {
-  font-weight: 600;
+.goal-badge {
+  background: rgba(251, 191, 36, 0.2);
+  color: #fbbf24;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  margin-right: 12px;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Làm mờ nhẹ phần mô tả chi tiết trong tiêu đề phụ */
