@@ -388,3 +388,72 @@ html {
   opacity: 1;
   transform: translateX(-50%) translateY(0) rotate(45deg);
 }
+
+/* ==========================================
+   GLOBAL REUSABLE KPI CARD STYLES
+   ========================================== */
+/* Thẻ KPI đơn lẻ - nền xanh sage, bo góc, đổ bóng nhẹ */
+.kpi-card {
+  flex: 1;
+  background-color: #59B292;
+  /* Sage Green */
+  border: none;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  color: #FAE7CB;
+}
+
+/* Vùng thông tin bên trong thẻ KPI - flex dọc toàn chiều cao */
+.kpi-card-info {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  gap: 12px;
+}
+
+/* Header thẻ KPI - tiêu đề và badge nằm hai đầu */
+.kpi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* Tiêu đề thẻ KPI - chữ nhỏ, đậm, màu kem */
+.kpi-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #FAE7CB;
+}
+
+/* Badge phụ trên thẻ KPI - nền trong mờ, bo tròn pill */
+.kpi-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background-color: rgba(250, 250, 250, 0.811);
+  color: #FA6781;
+}
+
+/* Giá trị chính thẻ KPI - chữ lớn 28px, trắng sáng */
+.kpi-main-val {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  /* Bright white for primary value */
+  line-height: 1;
+}
+
+/* Mô tả phụ thẻ KPI - chữ nhỏ, màu kem mờ */
+.kpi-desc {
+  font-size: 12px;
+  color: rgba(250, 231, 203, 0.9);
+  margin-top: 4px;
+}

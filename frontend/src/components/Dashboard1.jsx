@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import PlotlyChart from './PlotlyChart';
 import Select from 'react-select';
+import KpiCard from './KpiCard';
 
 const Dashboard1 = () => {
   // =============================================================================
@@ -229,7 +230,6 @@ const Dashboard1 = () => {
               onChange={setRegion}
               options={regionOptions}
               styles={customSelectStyles}
-              isSearchable={false}
             />
           </div>
         </div>
@@ -237,65 +237,41 @@ const Dashboard1 = () => {
         {/* Main Panel */}
         <div className="main-panel">
           <div className="kpi-row">
-            {/* KPI 1 */}
-            <div className="kpi-card kpi-tooltip-wrap" data-tooltip="Tổng số tin tuyển dụng IT được thu thập từ tất cả nguồn dữ liệu, sau khi áp dụng các bộ lọc hiện tại.">
-              <div className="kpi-card-info">
-                <div className="kpi-header">
-                  <span className="kpi-title">Tổng tin tuyển dụng</span>
-                  <span className="kpi-badge">Năm 2024</span>
-                </div>
-                <div className="kpi-body">
-                  <div className="kpi-main-val">{data?.kpi?.total_jobs?.toLocaleString() || 0}</div>
-                  <div className="kpi-desc">Toàn bộ dữ liệu thu thập</div>
-                  {data?.charts?.spark1 && <div style={{ height: '40px', marginTop: '4px' }}><PlotlyChart figure={data.charts.spark1} /></div>}
-                </div>
-              </div>
-            </div>
+            <KpiCard
+              title="Tổng tin tuyển dụng"
+              badge="Năm 2024"
+              value={data?.kpi?.total_jobs?.toLocaleString() || 0}
+              description="Toàn bộ dữ liệu thu thập"
+              sparkline={data?.charts?.spark1}
+              tooltip="Tổng số tin tuyển dụng IT được thu thập từ tất cả nguồn dữ liệu, sau khi áp dụng các bộ lọc hiện tại."
+            />
 
-            {/* KPI 2 */}
-            <div className="kpi-card kpi-tooltip-wrap" data-tooltip="Tháng ghi nhận số lượng tin tuyển dụng cao nhất trong toàn bộ giai đoạn dữ liệu.">
-              <div className="kpi-card-info">
-                <div className="kpi-header">
-                  <span className="kpi-title">Tháng cao điểm</span>
-                  <span className="kpi-badge">Đỉnh</span>
-                </div>
-                <div className="kpi-body">
-                  <div className="kpi-main-val">{data?.kpi?.peak_month?.month || 'N/A'}</div>
-                  <div className="kpi-desc">Đạt đỉnh với {data?.kpi?.peak_month?.count?.toLocaleString() || 0} tin</div>
-                  {data?.charts?.spark2 && <div style={{ height: '40px', marginTop: '4px' }}><PlotlyChart figure={data.charts.spark2} /></div>}
-                </div>
-              </div>
-            </div>
+            <KpiCard
+              title="Tháng cao điểm"
+              badge="Đỉnh"
+              value={data?.kpi?.peak_month?.month || 'N/A'}
+              description={`Đạt đỉnh với ${data?.kpi?.peak_month?.count?.toLocaleString() || 0} tin`}
+              sparkline={data?.charts?.spark2}
+              tooltip="Tháng ghi nhận số lượng tin tuyển dụng cao nhất trong toàn bộ giai đoạn dữ liệu."
+            />
 
-            {/* KPI 3 */}
-            <div className="kpi-card kpi-tooltip-wrap" data-tooltip="Tỉnh/thành phố có nhu cầu tuyển dụng IT cao nhất, được tính theo tỉ lệ phần trăm so với tổng cả nước.">
-              <div className="kpi-card-info">
-                <div className="kpi-header">
-                  <span className="kpi-title">Địa bàn lớn nhất</span>
-                  <span className="kpi-badge">Hot</span>
-                </div>
-                <div className="kpi-body">
-                  <div className="kpi-main-val">{data?.kpi?.top_city?.city || 'N/A'}</div>
-                  <div className="kpi-desc">Chiếm {data?.kpi?.top_city?.pct?.toFixed(1) || 0}% toàn quốc</div>
-                  {data?.charts?.spark3 && <div style={{ height: '40px', marginTop: '4px' }}><PlotlyChart figure={data.charts.spark3} /></div>}
-                </div>
-              </div>
-            </div>
+            <KpiCard
+              title="Địa bàn lớn nhất"
+              badge="Hot"
+              value={data?.kpi?.top_city?.city || 'N/A'}
+              description={`Chiếm ${data?.kpi?.top_city?.pct?.toFixed(1) || 0}% toàn quốc`}
+              sparkline={data?.charts?.spark3}
+              tooltip="Tỉnh/thành phố có nhu cầu tuyển dụng IT cao nhất, được tính theo tỉ lệ phần trăm so với tổng cả nước."
+            />
 
-            {/* KPI 4 */}
-            <div className="kpi-card kpi-tooltip-wrap" data-tooltip="Hình thức làm việc được đăng tuyển nhiều nhất, phản ánh xu hướng tuyển dụng chủ đạo của thị trường IT hiện tại.">
-              <div className="kpi-card-info">
-                <div className="kpi-header">
-                  <span className="kpi-title">Hình thức chủ đạo</span>
-                  <span className="kpi-badge">Phổ biến</span>
-                </div>
-                <div className="kpi-body">
-                  <div className="kpi-main-val">{data?.kpi?.top_work?.work || 'N/A'}</div>
-                  <div className="kpi-desc">Chiếm {data?.kpi?.top_work?.pct?.toFixed(1) || 0}% tổng thể</div>
-                  {data?.charts?.spark4 && <div style={{ height: '40px', marginTop: '4px' }}><PlotlyChart figure={data.charts.spark4} /></div>}
-                </div>
-              </div>
-            </div>
+            <KpiCard
+              title="Hình thức chủ đạo"
+              badge="Phổ biến"
+              value={data?.kpi?.top_work?.work || 'N/A'}
+              description={`Chiếm ${data?.kpi?.top_work?.pct?.toFixed(1) || 0}% tổng thể`}
+              sparkline={data?.charts?.spark4}
+              tooltip="Hình thức làm việc được đăng tuyển nhiều nhất, phản ánh xu hướng tuyển dụng chủ đạo của thị trường IT hiện tại."
+            />
           </div>
 
           <div className="charts-container">
