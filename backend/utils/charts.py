@@ -48,8 +48,8 @@ def apply_layout_styles(fig):
         showlegend=False,
         transition=dict(duration=400, easing="cubic-in-out"),
         hoverlabel=dict(
-            bgcolor="#FFC94D",
-            bordercolor="#e6a800",
+            bgcolor="#FFE066",
+            bordercolor="#F5B000",
             font_size=12,
             font_family="Inter, system-ui, -apple-system, sans-serif",
             font_color="#1a1a1a",
@@ -137,7 +137,8 @@ def create_time_trend_chart(df):
         tickfont=dict(size=9, color='#4b5563'),
         title_text="Thời gian đăng tuyển",
         title_font=dict(size=10, color='#4b5563', weight='bold'),
-        tickformat="T%-m/%Y"
+        tickformat="T%-m/%Y",
+        hoverformat="<span style='color:#59B292'>▍</span> T%-m/%Y"
     )
 
     fig.update_yaxes(
@@ -252,7 +253,7 @@ def create_vietnam_map(df):
     fig.update_traces(
         marker_line_width=0.5,
         marker_line_color="white",
-        hovertemplate="<b>%{hovertext}</b><br>Nhu cầu tuyển dụng: <b>%{z:,} tin</b><extra></extra>"
+        hovertemplate=" &nbsp;<b><span style='color:#59B292'>▍</span> %{hovertext}</b>&nbsp; <br><span style='font-size:4px'> </span><br><span style='color:#5a4000'> &nbsp;Nhu cầu tuyển dụng: <b>%{z:,} tin</b>&nbsp; </span><extra></extra>"
     )
 
     apply_layout_styles(fig)
@@ -402,7 +403,7 @@ def create_work_type_chart(df):
             color='#59B292',
             line=dict(width=0)
         ),
-        hovertext=[f"<span style='font-size:4px'> </span><br> &nbsp;<b>{row['hinh_thuc_lam_viec']}</b>&nbsp; <br><span style='font-size:4px'> </span><br><span style='color:#5a4000'> &nbsp;Số lượng: <b>{row['count']:,} tin</b>&nbsp; <br> &nbsp;Tỉ lệ: <b>{row['pct']:.1f}%</b>&nbsp; </span><br><span style='font-size:4px'> </span>" for _, row in work_counts.iterrows()],
+        hovertext=[f"<span style='font-size:4px'> </span><br> &nbsp;<b><span style='color:#59B292'>▍</span> {row['hinh_thuc_lam_viec']}</b>&nbsp; <br><span style='font-size:4px'> </span><br><span style='color:#5a4000'> &nbsp;Số lượng: <b>{row['count']:,} tin</b>&nbsp; <br> &nbsp;Tỉ lệ: <b>{row['pct']:.1f}%</b>&nbsp; </span><br><span style='font-size:4px'> </span>" for _, row in work_counts.iterrows()],
         hovertemplate="%{hovertext}<extra></extra>"
     )])
 
@@ -467,7 +468,7 @@ def create_region_chart(df):
         ),
         hovertext=[
             f"<span style='font-size:4px'> </span><br>"
-            f" &nbsp;<b><span style='color:{region_text_colors.get(row['vung_mien'], '#374151')}'>▍</span> Vùng {row['vung_mien']}</b>&nbsp; <br>"
+            f" &nbsp;<b><span style='color:#59B292'>▍</span> Vùng {row['vung_mien']}</b>&nbsp; <br>"
             f"<span style='font-size:4px'> </span><br>"
             f"<span style='color:#5a4000'>"
             f" &nbsp;Số lượng: <b>{row['count']:,} tin</b>&nbsp; <br>"
@@ -538,7 +539,7 @@ def create_region_vertical_chart(df):
         ),
         hovertext=[
             f"<span style='font-size:4px'> </span><br>"
-            f" &nbsp;<b><span style='color:{region_text_colors.get(row['vung_mien'], '#374151')}'>▍</span> Vùng {row['vung_mien']}</b>&nbsp; <br>"
+            f" &nbsp;<b><span style='color:#59B292'>▍</span> Vùng {row['vung_mien']}</b>&nbsp; <br>"
             f"<span style='font-size:4px'> </span><br>"
             f"<span style='color:#5a4000'>"
             f" &nbsp;Số lượng: <b>{row['count']:,} tin</b>&nbsp; <br>"
