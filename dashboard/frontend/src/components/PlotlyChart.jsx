@@ -1,7 +1,7 @@
 import React from 'react';
 import Plot from 'react-plotly.js';
 
-const PlotlyChart = ({ figure, style }) => {
+const PlotlyChart = ({ figure, style, onChartClick }) => {
   if (!figure) return null;
 
   const modifiedLayout = {
@@ -30,6 +30,11 @@ const PlotlyChart = ({ figure, style }) => {
     }
   }
 
+  // Nếu biểu đồ có thể click, thêm chế độ chọn để tự highlight
+  if (onChartClick) {
+    modifiedLayout.clickmode = 'event+select';
+  }
+
   return (
     <Plot
       data={figure.data}
@@ -40,7 +45,8 @@ const PlotlyChart = ({ figure, style }) => {
         scrollZoom: false,
         doubleClick: 'reset'
       }}
-      style={{ width: '100%', height: '100%', ...style }}
+      onClick={onChartClick ? (e) => onChartClick(e) : undefined}
+      style={{ width: '100%', height: '100%', cursor: onChartClick ? 'pointer' : 'default', ...style }}
       useResizeHandler={true}
     />
   );

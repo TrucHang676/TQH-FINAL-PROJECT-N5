@@ -174,6 +174,28 @@ const Dashboard1 = () => {
     })
   };
 
+  const handleRegionClick = (e) => {
+    if (e.points && e.points.length > 0) {
+      // For vertical bar chart, x is the label (Region)
+      let clickedLabel = e.points[0].x;
+      // Also try y if the chart is horizontal
+      if (!clickedLabel && e.points[0].y) {
+         clickedLabel = e.points[0].y;
+      }
+      if (!clickedLabel && e.points[0].label) {
+         clickedLabel = e.points[0].label;
+      }
+
+      if (clickedLabel) {
+        // Match with regionOptions
+        const matchedRegion = regionOptions.find(r => r.value === clickedLabel || r.label === clickedLabel);
+        if (matchedRegion) {
+          setRegion(matchedRegion);
+        }
+      }
+    }
+  };
+
   return (
     <div id="page1-container">
       <div className="workspace">
@@ -301,7 +323,7 @@ const Dashboard1 = () => {
 
                 {/* Vertical Region Bar Chart */}
                 {mapToggle === 'region_chart' && data?.charts?.region_chart && (
-                  <PlotlyChart key="region-view" figure={data.charts.region_chart} />
+                  <PlotlyChart key="region-view" figure={data.charts.region_chart} onChartClick={handleRegionClick} />
                 )}
 
                 {/* Floating Widgets on Left and Right of Vietnam Map */}
