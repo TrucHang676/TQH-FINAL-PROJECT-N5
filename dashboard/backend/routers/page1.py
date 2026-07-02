@@ -4,7 +4,7 @@ from typing import List, Optional
 import pandas as pd
 from pathlib import Path
 import json
-from backend.utils import charts
+import backend.utils.charts_page1 as charts
 
 router = APIRouter()
 
