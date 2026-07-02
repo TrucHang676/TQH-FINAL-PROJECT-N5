@@ -1,23 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import AiService from './ai/AiService';
 import AiHistoryPanel from './ai/AiHistoryPanel';
 import AiRequestForm from './ai/AiRequestForm';
-import AiCodeCard from './ai/AiCodeCard';
-import AiResultPanel from './ai/AiResultPanel';
+import AiChatMessage from './ai/AiChatMessage';
+import { Sparkles } from 'lucide-react';
 
 export default function Dashboard5() {
   const [historyList, setHistoryList] = useState([]);
   const [currentRequestId, setCurrentRequestId] = useState(null);
-  
-  // Trạng thái hiện tại của phiên làm việc
-  const [status, setStatus] = useState('empty'); // empty, loading_ai, pending_approval, executing, success, error, rejected
-  const [code, setCode] = useState('');
-  const [resultData, setResultData] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [executingId, setExecutingId] = useState(null);
+  const messagesEndRef = useRef(null);
 
-  // Load lịch sử lần đầu
   useEffect(() => {
     fetchHistory();
   }, []);
+
+  useEffect(() => {
+    // Auto scroll to bottom when new messages arrive
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const fetchHistory = async () => {
     try {
@@ -28,131 +31,194 @@ export default function Dashboard5() {
     }
   };
 
-  const handleSendRequest = async (prompt) => {
-    setStatus('loading_ai');
-    setCode('');
-    setResultData(null);
+  const handleNewChat = () => {
+    setMessages([]);
     setCurrentRequestId(null);
+    setIsSubmitting(false);
+    setExecutingId(null);
+  };
+
+  const handleSendRequest = async (prompt) => {
+    // Add user message
+    const userMsg = {
+      id: Date.now() + '_user',
+      role: 'user',
+      content: prompt,
+      timestamp: new Date().toISOString()
+    };
+
+    // Add loading indicator
+    const loadingMsg = {
+      id: Date.now() + '_loading',
+      role: 'loading',
+      timestamp: new Date().toISOString()
+    };
+
+    setMessages(prev => [...prev, userMsg, loadingMsg]);
+    setIsSubmitting(true);
 
     try {
       const response = await AiService.sendRequest(prompt);
-      setCode(response.code);
       setCurrentRequestId(response.requestId);
-      setStatus('pending_approval');
-      fetchHistory(); // Refresh lịch sử
+
+      // Replace loading with AI code message
+      const aiCodeMsg = {
+        id: response.requestId + '_code',
+        role: 'ai_code',
+        code: response.code,
+        status: 'pending_approval',
+        requestId: response.requestId,
+        timestamp: new Date().toISOString()
+      };
+
+      setMessages(prev => prev.filter(m => m.role !== 'loading').concat(aiCodeMsg));
+      fetchHistory();
     } catch (error) {
       console.error(error);
-      setStatus('error');
-      setResultData({ type: 'error', data: 'Lỗi khi gọi API AI: ' + error.message });
+      // Replace loading with error
+      const errorMsg = {
+        id: Date.now() + '_result',
+        role: 'ai_result',
+        resultData: { type: 'error', data: 'Lỗi khi gọi API AI: ' + error.message },
+        timestamp: new Date().toISOString()
+      };
+      setMessages(prev => prev.filter(m => m.role !== 'loading').concat(errorMsg));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleApprove = async (editedCode) => {
-    setStatus('executing');
-    setCode(editedCode);
-    setResultData(null);
+  const handleApprove = async (requestId, editedCode) => {
+    setExecutingId(requestId);
+
+    // Update code message status to executing
+    setMessages(prev => prev.map(m =>
+      m.requestId === requestId && m.role === 'ai_code'
+        ? { ...m, status: 'executing', code: editedCode }
+        : m
+    ));
 
     try {
-      const response = await AiService.executeCode(currentRequestId, editedCode);
-      if (response.status === 'success') {
-        setStatus('success');
-      } else {
-        setStatus('error');
-      }
-      setResultData(response.result || { type: 'error', data: response.logs });
-      fetchHistory(); // Cập nhật lại trạng thái trong lịch sử
+      const response = await AiService.executeCode(requestId, editedCode);
+      const newStatus = response.status === 'success' ? 'success' : 'error';
+
+      // Update code message status
+      setMessages(prev => prev.map(m =>
+        m.requestId === requestId && m.role === 'ai_code'
+          ? { ...m, status: newStatus }
+          : m
+      ));
+
+      // Add result message
+      const resultMsg = {
+        id: requestId + '_result',
+        role: 'ai_result',
+        resultData: response.result || { type: 'error', data: response.logs },
+        timestamp: new Date().toISOString()
+      };
+      setMessages(prev => [...prev, resultMsg]);
+      fetchHistory();
     } catch (error) {
       console.error(error);
-      setStatus('error');
-      setResultData({ type: 'error', data: 'Lỗi khi gọi API thực thi: ' + error.message });
+      setMessages(prev => prev.map(m =>
+        m.requestId === requestId && m.role === 'ai_code'
+          ? { ...m, status: 'error' }
+          : m
+      ));
+
+      const errorMsg = {
+        id: requestId + '_result',
+        role: 'ai_result',
+        resultData: { type: 'error', data: 'Lỗi khi thực thi: ' + error.message },
+        timestamp: new Date().toISOString()
+      };
+      setMessages(prev => [...prev, errorMsg]);
       fetchHistory();
+    } finally {
+      setExecutingId(null);
     }
   };
 
-  const handleReject = () => {
-    setStatus('rejected');
-    setResultData(null);
-    // Có thể gọi backend để update status nếu cần, hiện tại update local UI
+  const handleReject = (requestId) => {
+    setMessages(prev => prev.map(m =>
+      m.requestId === requestId && m.role === 'ai_code'
+        ? { ...m, status: 'rejected' }
+        : m
+    ));
   };
 
   const handleSelectHistoryItem = (item) => {
     setCurrentRequestId(item.id);
-    setCode(item.code || '');
-    setStatus(item.status || 'empty');
-    setResultData(item.result || null);
+    // Rebuild messages from history item
+    const rebuilt = [];
+    rebuilt.push({
+      id: item.id + '_user',
+      role: 'user',
+      content: item.prompt,
+      timestamp: item.timestamp
+    });
+    if (item.code) {
+      rebuilt.push({
+        id: item.id + '_code',
+        role: 'ai_code',
+        code: item.code,
+        status: item.status || 'success',
+        requestId: item.id,
+        timestamp: item.timestamp
+      });
+    }
+    if (item.result) {
+      rebuilt.push({
+        id: item.id + '_result',
+        role: 'ai_result',
+        resultData: item.result,
+        timestamp: item.timestamp
+      });
+    }
+    setMessages(rebuilt);
   };
 
   return (
-    <div style={{ display: 'flex', height: 'calc(100vh - 120px)', backgroundColor: 'var(--bg-color)' }}>
-      
-      {/* 1. Cột trái: Panel Lịch sử */}
-      <AiHistoryPanel 
-        historyList={historyList} 
+    <div className="ai-chat-container">
+      <AiHistoryPanel
+        historyList={historyList}
         onSelectItem={handleSelectHistoryItem}
         currentRequestId={currentRequestId}
+        onNewChat={handleNewChat}
       />
 
-      {/* Khu vực trung tâm & bên phải */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', padding: '20px' }}>
-        
-        <div style={{ display: 'flex', gap: '20px', flex: 1 }}>
-          
-          {/* 2. Cột giữa: Tương tác & Code */}
-          <div style={{ flex: 1, minWidth: '0', display: 'flex', flexDirection: 'column' }}>
-            <AiRequestForm 
-              onSubmit={handleSendRequest} 
-              isSubmitting={status === 'loading_ai'} 
-            />
-            
-            <AiCodeCard 
-              code={code}
-              status={status}
-              isExecuting={status === 'executing'}
-              onApprove={handleApprove}
-              onReject={handleReject}
-            />
+      <div className="ai-chat-main">
+        {messages.length === 0 ? (
+          <div className="ai-welcome">
+            <div className="ai-welcome-icon">
+              <Sparkles size={30} color="#59B292" />
+            </div>
+            <h3>AI Phân tích Dữ liệu</h3>
+            <p>
+              Hãy nhập câu hỏi hoặc yêu cầu phân tích bên dưới.
+              AI sẽ tự động viết mã Python, bạn duyệt và chạy để xem kết quả trực quan.
+            </p>
           </div>
+        ) : (
+          <div className="ai-chat-messages">
+            {messages.map(msg => (
+              <AiChatMessage
+                key={msg.id}
+                message={msg}
+                onApprove={handleApprove}
+                onReject={handleReject}
+                isExecuting={executingId === msg.requestId}
+              />
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+        )}
 
-          {/* 3. Cột phải: Kết quả */}
-          <div style={{ width: '450px', minWidth: '450px', display: 'flex', flexDirection: 'column' }}>
-            {status === 'empty' ? (
-              <div style={{ 
-                height: '100%', 
-                border: '1px dashed var(--border-color)', 
-                borderRadius: '12px', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                color: 'var(--text-secondary)',
-                fontSize: '14px',
-                textAlign: 'center',
-                padding: '20px'
-              }}>
-                Chưa có kết quả phân tích. Vui lòng gửi yêu cầu từ form bên trái.
-              </div>
-            ) : status === 'loading_ai' || status === 'pending_approval' || status === 'executing' ? (
-               <div style={{ 
-                height: '100%', 
-                border: '1px dashed var(--border-color)', 
-                borderRadius: '12px', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                color: 'var(--text-secondary)',
-                fontSize: '14px',
-                textAlign: 'center',
-                padding: '20px'
-              }}>
-                Đang chờ thực thi mã nguồn...
-              </div>
-            ) : (
-              <AiResultPanel resultData={resultData} />
-            )}
-          </div>
-          
-        </div>
+        <AiRequestForm
+          onSubmit={handleSendRequest}
+          isSubmitting={isSubmitting}
+        />
       </div>
     </div>
   );
 }
-

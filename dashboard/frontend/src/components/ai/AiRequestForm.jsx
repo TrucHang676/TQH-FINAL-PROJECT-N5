@@ -1,108 +1,77 @@
-import React, { useState } from 'react';
-import { Send, Loader2, Sparkles } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Send, Loader2 } from 'lucide-react';
+
+const suggestPrompts = [
+  "Biểu đồ cột: lương TB theo cấp độ kinh nghiệm",
+  "Thống kê số lượng tin tuyển dụng theo nhóm vị trí",
+  "Biểu đồ tròn: tỷ lệ hình thức làm việc"
+];
 
 const AiRequestForm = ({ onSubmit, isSubmitting }) => {
   const [prompt, setPrompt] = useState('');
+  const textareaRef = useRef(null);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (el) {
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+    }
+  }, [prompt]);
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     if (prompt.trim() && !isSubmitting) {
       onSubmit(prompt.trim());
+      setPrompt('');
     }
   };
 
-  const suggestPrompts = [
-    "Vẽ biểu đồ cột thể hiện mức lương trung bình theo từng cấp độ kinh nghiệm.",
-    "Thống kê số lượng tin tuyển dụng theo từng nhóm vị trí (Backend, Frontend,...)",
-    "Vẽ biểu đồ tròn thể hiện tỷ lệ phần trăm các hình thức làm việc (Full-time, Part-time)."
-  ];
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
 
   return (
-    <div className="chart-card" style={{ marginBottom: '20px' }}>
-      <div className="chart-header">
-        <span className="chart-title">
-          <Sparkles size={16} color="#B45309" />
-          Yêu cầu AI Phân Tích
-        </span>
-      </div>
-      <div className="chart-content" style={{ padding: '20px' }}>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+    <div className="ai-chat-input-bar">
+      <div className="ai-chat-input-inner">
+        <div className="ai-suggestion-chips">
+          {suggestPrompts.map((s, idx) => (
+            <button
+              key={idx}
+              className="ai-suggestion-chip"
+              onClick={() => { setPrompt(s); textareaRef.current?.focus(); }}
+              disabled={isSubmitting}
+              type="button"
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+        <form onSubmit={handleSubmit} className="ai-chat-input-wrapper">
           <textarea
+            ref={textareaRef}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Ví dụ: Vẽ biểu đồ cột thể hiện mức lương trung bình theo từng cấp độ kinh nghiệm..."
+            onKeyDown={handleKeyDown}
+            placeholder="Nhập yêu cầu phân tích dữ liệu..."
             disabled={isSubmitting}
-            style={{
-              width: '100%',
-              minHeight: '100px',
-              padding: '12px',
-              borderRadius: '8px',
-              border: '1px solid var(--border-color)',
-              fontSize: '14px',
-              fontFamily: 'inherit',
-              resize: 'vertical',
-              outline: 'none',
-              boxSizing: 'border-box'
-            }}
+            rows={1}
           />
-          
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', flex: 1 }}>
-              {suggestPrompts.map((s, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => setPrompt(s)}
-                  disabled={isSubmitting}
-                  style={{
-                    backgroundColor: 'rgba(89, 178, 146, 0.1)',
-                    color: 'var(--primary-color)',
-                    border: 'none',
-                    borderRadius: '4px',
-                    padding: '6px 10px',
-                    fontSize: '12px',
-                    cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                    textAlign: 'left'
-                  }}
-                >
-                  {s.length > 50 ? s.substring(0, 50) + '...' : s}
-                </button>
-              ))}
-            </div>
-
-            <button
-              type="submit"
-              disabled={!prompt.trim() || isSubmitting}
-              style={{
-                backgroundColor: !prompt.trim() || isSubmitting ? '#9CA3AF' : 'var(--primary-color)',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '10px 20px',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: !prompt.trim() || isSubmitting ? 'not-allowed' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                transition: 'background-color 0.2s',
-                marginLeft: '15px',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 size={16} className="lucide-spin" style={{ animation: 'spin 2s linear infinite' }} />
-                  Đang xử lý...
-                </>
-              ) : (
-                <>
-                  <Send size={16} />
-                  Gửi yêu cầu
-                </>
-              )}
-            </button>
-          </div>
+          <button
+            type="submit"
+            className="ai-chat-send-btn"
+            disabled={!prompt.trim() || isSubmitting}
+          >
+            {isSubmitting ? (
+              <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
+            ) : (
+              <Send size={18} />
+            )}
+          </button>
         </form>
       </div>
     </div>
