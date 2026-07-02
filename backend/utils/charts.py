@@ -135,7 +135,9 @@ def create_time_trend_chart(df):
         linecolor='#e5e7eb',
         tickangle=-30,
         tickfont=dict(size=9, color='#4b5563'),
-        title_font=dict(size=10, color='#4b5563')
+        title_text="Thời gian đăng tuyển",
+        title_font=dict(size=10, color='#4b5563', weight='bold'),
+        tickformat="T%-m/%Y"
     )
 
     fig.update_yaxes(
@@ -143,7 +145,8 @@ def create_time_trend_chart(df):
         gridcolor='#f1f5f9',
         linecolor='#e5e7eb',
         tickfont=dict(size=9, color='#4b5563'),
-        title_font=dict(size=10, color='#4b5563'),
+        title_text="Số lượng tin tuyển dụng",
+        title_font=dict(size=10, color='#4b5563', weight='bold'),
         range=[0, max(800, peak_count * 1.6)] if not trend_data.empty else None
     )
 
@@ -392,7 +395,7 @@ def create_work_type_chart(df):
         x=work_counts['count'],
         y=y_labels,
         orientation='h',
-        text=[f"{row['count']:,} | {row['pct']:.1f}%" for _, row in work_counts.iterrows()],
+        text=[f"{row['count']:,}" for _, row in work_counts.iterrows()],
         textposition='outside',
         cliponaxis=False,
         marker=dict(
@@ -403,11 +406,15 @@ def create_work_type_chart(df):
         hovertemplate="%{hovertext}<extra></extra>"
     )])
 
+    max_count = work_counts['count'].max()
     fig.update_xaxes(
         showgrid=True,
         gridcolor='#f1f5f9',
         linecolor='#e5e7eb',
-        tickfont=dict(size=9, color='#4b5563')
+        tickfont=dict(size=9, color='#4b5563'),
+        range=[0, max_count * 1.12] if not pd.isna(max_count) else None,
+        title_text="Số lượng tin tuyển dụng",
+        title_font=dict(size=10, color='#4b5563', weight='bold')
     )
 
     fig.update_yaxes(
