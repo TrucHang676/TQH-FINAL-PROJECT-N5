@@ -426,3 +426,68 @@
 .js-plotly-plot .hoverlayer .hovertext text b {
   font-weight: 700 !important;
 }
+
+/* CSS CHO CÁC HỘP THÔNG TIN FLOATING TRÊN BẢN ĐỒ */
+.map-overlay-box {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  z-index: 5;
+  pointer-events: none; /* Tránh cản trở rê chuột vào bản đồ phía sau */
+  width: 195px;
+}
+
+.overlay-left {
+  top: 15px;
+  left: 15px;
+}
+
+.overlay-right {
+  top: 15px;
+  right: 15px;
+}
+
+.overlay-box-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding-bottom: 3px;
+}
+
+.overlay-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 10.5px;
+  color: var(--text-secondary);
+}
+
+.overlay-item:last-child {
+  margin-bottom: 0;
+}
+
+.overlay-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 6px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.overlay-label {
+  flex: 1;
+  margin-right: 4px;
+}
+
+.overlay-val-bold {
+  font-weight: 700;
+  color: var(--text-primary);
+}

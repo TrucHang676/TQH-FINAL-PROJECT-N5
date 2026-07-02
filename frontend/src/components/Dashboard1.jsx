@@ -76,8 +76,7 @@ const Dashboard1 = () => {
           sources,
           position: position.value,
           experience: experience.value,
-          region: region.value,
-          map_toggle: mapToggle
+          region: region.value
         });
         if (isActive) {
           setData(response.data);
@@ -95,7 +94,7 @@ const Dashboard1 = () => {
     return () => {
       isActive = false;
     };
-  }, [sources, position, experience, region, mapToggle]);
+  }, [sources, position, experience, region]);
 
   const handleSourceChange = (val) => {
     if (sources.includes(val)) {
@@ -294,10 +293,66 @@ const Dashboard1 = () => {
                   </div>
                 </div>
               </div>
-              <div className="chart-content">
-                {data?.charts?.map && <PlotlyChart key={mapToggle} figure={data.charts.map} />}
+              <div className="chart-content" style={{ position: 'relative' }}>
+                {/* Geographic Map */}
+                {mapToggle === 'map' && data?.charts?.map && (
+                  <PlotlyChart key="map-view" figure={data.charts.map} />
+                )}
+
+                {/* Vertical Region Bar Chart */}
+                {mapToggle === 'region_chart' && data?.charts?.region_chart && (
+                  <PlotlyChart key="region-view" figure={data.charts.region_chart} />
+                )}
+
+                {/* Floating Widgets on Left and Right of Vietnam Map */}
+                {mapToggle === 'map' && data?.regions && (
+                  <>
+                    {/* Left overlay for Remote / Other jobs */}
+                    <div className="map-overlay-box overlay-left">
+                      <div className="overlay-box-title">Ngoài địa lý cụ thể</div>
+                      <div className="overlay-item">
+                        <span className="overlay-dot" style={{ backgroundColor: '#0d9488' }}></span>
+                        <span className="overlay-label">Từ xa / Remote:</span>
+                        <span className="overlay-val-bold">{data.regions['Từ xa / Remote']?.toLocaleString() || 0} tin</span>
+                      </div>
+                      <div className="overlay-item">
+                        <span className="overlay-dot" style={{ backgroundColor: '#9ca3af' }}></span>
+                        <span className="overlay-label">Khác / Không rõ:</span>
+                        <span className="overlay-val-bold">{data.regions['Khác']?.toLocaleString() || 0} tin</span>
+                      </div>
+                    </div>
+
+                    {/* Right overlay for region breakdown */}
+                    <div className="map-overlay-box overlay-right">
+                      <div className="overlay-box-title">Thống kê theo 3 Miền</div>
+                      <div className="overlay-item">
+                        <span className="overlay-dot" style={{ backgroundColor: '#FA6781' }}></span>
+                        <span className="overlay-label">Miền Bắc:</span>
+                        <span className="overlay-val-bold">
+                          {data.regions['Bắc']?.toLocaleString() || 0} tin ({((data.regions['Bắc'] / (data.kpi?.total_jobs || 1)) * 100).toFixed(1)}%)
+                        </span>
+                      </div>
+                      <div className="overlay-item">
+                        <span className="overlay-dot" style={{ backgroundColor: '#FFC94D' }}></span>
+                        <span className="overlay-label">Miền Trung:</span>
+                        <span className="overlay-val-bold">
+                          {data.regions['Trung']?.toLocaleString() || 0} tin ({((data.regions['Trung'] / (data.kpi?.total_jobs || 1)) * 100).toFixed(1)}%)
+                        </span>
+                      </div>
+                      <div className="overlay-item">
+                        <span className="overlay-dot" style={{ backgroundColor: '#59B292' }}></span>
+                        <span className="overlay-label">Miền Nam:</span>
+                        <span className="overlay-val-bold">
+                          {data.regions['Nam']?.toLocaleString() || 0} tin ({((data.regions['Nam'] / (data.kpi?.total_jobs || 1)) * 100).toFixed(1)}%)
+                        </span>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
-              <div className="chart-caption">{data?.caption || ''}</div>
+              {mapToggle === 'map' && (
+                <div className="chart-caption">{data?.caption || ''}</div>
+              )}
             </div>
 
             {/* Right Panel */}

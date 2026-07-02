@@ -111,13 +111,17 @@ def get_dashboard_data(req: FilterRequest):
     # Tạo biểu đồ xu hướng và hình thức
     trend_fig = charts.create_time_trend_chart(dff)
     work_fig = charts.create_work_type_chart(dff)
+    map_fig = charts.create_vietnam_map(dff)
+    region_chart_fig = charts.create_region_vertical_chart(dff)
 
-    caption = ""
-    if req.map_toggle == 'region_chart':
-        map_fig = charts.create_region_vertical_chart(dff)
-    else:
-        map_fig = charts.create_vietnam_map(dff)
-        caption = "Không hiển thị nhóm Khác và Từ xa/Remote trên bản đồ do không có tọa độ địa lý cụ thể."
+    region_counts = dff['vung_mien'].value_counts().to_dict()
+    regions_data = {
+        "Bắc": int(region_counts.get('Bắc', 0)),
+        "Trung": int(region_counts.get('Trung', 0)),
+        "Nam": int(region_counts.get('Nam', 0)),
+        "Từ xa / Remote": int(region_counts.get('Từ xa / Remote', 0)),
+        "Khác": int(region_counts.get('Khác', 0))
+    }
 
     # Xây dựng kết quả trả về, lưu ý phải ép kiểu dữ liệu Numpy về Python chuẩn (int, float, str)
     return {
@@ -127,7 +131,8 @@ def get_dashboard_data(req: FilterRequest):
             "top_city": {"city": top_city, "pct": top_city_pct},
             "top_work": {"work": top_work, "pct": top_work_pct},
         },
-        "caption": caption,
+        "regions": regions_data,
+        "caption": "Không hiển thị nhóm Khác và Từ xa/Remote trên bản đồ do không có tọa độ địa lý cụ thể.",
         "charts": {
             "spark1": json.loads(spark1_fig.to_json()),
             "spark2": json.loads(spark2_fig.to_json()),
@@ -135,6 +140,7 @@ def get_dashboard_data(req: FilterRequest):
             "spark4": json.loads(spark4_fig.to_json()),
             "trend": json.loads(trend_fig.to_json()),
             "work": json.loads(work_fig.to_json()),
-            "map": json.loads(map_fig.to_json())
+            "map": json.loads(map_fig.to_json()),
+            "region_chart": json.loads(region_chart_fig.to_json())
         }
     }
