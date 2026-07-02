@@ -342,68 +342,7 @@
   min-height: 480px;
 }
 
-/* Card base class for charts */
-/* Thẻ biểu đồ cơ sở - nền card, viền, bo góc, flex dọc */
-.chart-card {
-  background-color: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 12px;
-  box-shadow: var(--shadow-sm);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* Header biểu đồ - tiêu đề và phụ đề hai đầu, có đường kẻ dưới */
-.chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 6px;
-  margin-bottom: 8px;
-  height: 26px;
-}
-
-/* Tiêu đề biểu đồ - chữ nhỏ đậm, flex ngang với icon */
-.chart-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-primary);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-/* Số thứ tự trước tiêu đề biểu đồ - màu primary, đậm */
-.chart-title-num {
-  color: var(--primary);
-  font-weight: 700;
-  margin-right: 4px;
-}
-
-/* Phụ đề biểu đồ - chữ rất nhỏ, màu muted */
-.chart-subtitle {
-  font-size: 10px;
-  color: var(--text-muted);
-}
-
-/* Vùng nội dung biểu đồ - flex co giãn, không tràn */
-.chart-content {
-  flex: 1;
-  position: relative;
-  min-height: 0;
-  /* Important for flex child sizing */
-}
-
-/* Chú thích dưới biểu đồ - chữ rất nhỏ, màu muted */
-.chart-caption {
-  font-size: 10px;
-  color: var(--text-muted);
-  margin-top: 6px;
-  line-height: 1.3;
-}
+/* Chart card styles moved to global style.css for project-wide reusability */
 
 /* Left Panel: Map */
 /* Card bản đồ bên trái - chiếm 42% chiều rộng */

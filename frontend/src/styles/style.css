@@ -457,3 +457,70 @@ html {
   color: rgba(250, 231, 203, 0.9);
   margin-top: 4px;
 }
+
+/* ==========================================
+   GLOBAL REUSABLE CHART CARD STYLES
+   ========================================== */
+/* Thẻ biểu đồ cơ sở - nền card, viền, bo góc, flex dọc */
+.chart-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header biểu đồ - không dùng chiều cao cứng để tránh co ép badge */
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+/* Tiêu đề biểu đồ - định dạng thành badge màu vàng nhạt mềm mại */
+.chart-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #78350f; /* Chữ màu nâu vàng đậm */
+  background-color: rgba(255, 201, 77, 0.14); /* Nền vàng nhạt trong mờ */
+  border: 1.5px solid rgba(255, 201, 77, 0.45);
+  padding: 3px 10px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Số thứ tự trước tiêu đề biểu đồ (nếu dùng) */
+.chart-title-num {
+  color: #b45309;
+  font-weight: 700;
+  margin-right: 4px;
+}
+
+/* Phụ đề biểu đồ */
+.chart-subtitle {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* Vùng nội dung biểu đồ - flex co giãn, không tràn */
+.chart-content {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+
+/* Chú thích dưới biểu đồ - chữ rất nhỏ, màu muted */
+.chart-caption {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  line-height: 1.3;
+}
