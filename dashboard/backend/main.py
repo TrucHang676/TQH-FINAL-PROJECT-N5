@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # Nhập các router đã tách biệt theo từng trang
 from backend.routers import router_page1
+from backend.routers import router_page2
 
 # Khởi tạo ứng dụng FastAPI
 app = FastAPI(title="IT Recruitment Dashboard API")
@@ -19,6 +20,9 @@ app.add_middleware(
 
 # Gắn (include) router của trang 1 vào ứng dụng chính
 app.include_router(router_page1.router, tags=["Page 1"])
+
+# Gắn router của trang 2 - Kỹ năng & Công nghệ
+app.include_router(router_page2.router, tags=["Page 2"])
 
 # Gắn router của AI Analysis (Trang 5)
 from backend.routers import router_page5
