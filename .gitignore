@@ -29,6 +29,7 @@ env/
 !crawler/output/*.json
 !crawler/html_input/*.html
 !data/vietnam_it_jobs_raw.csv
+!dashboard/frontend/package.json
 
 # Logs
 logs/
