@@ -8,6 +8,7 @@ import Dashboard5 from './components/Dashboard_page5';
 // Import CSS y hệt như cấu trúc của Dash
 import './styles/style.css';
 import './styles/style_page1.css';
+import './styles/style_page2.css';
 
 const tabConfig = {
   1: {
