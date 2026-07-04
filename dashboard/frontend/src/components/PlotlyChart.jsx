@@ -1,7 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Plot from 'react-plotly.js';
 
 const PlotlyChart = ({ figure, style, onChartClick }) => {
+  const [revision, setRevision] = useState(0);
+
+  // Trigger a full Plotly recalculation/redraw when the figure data changes
+  useEffect(() => {
+    if (figure && figure.data) {
+      setRevision(prev => prev + 1);
+    }
+  }, [figure]);
+
   if (!figure) return null;
 
   const modifiedLayout = {
@@ -39,6 +48,7 @@ const PlotlyChart = ({ figure, style, onChartClick }) => {
     <Plot
       data={figure.data}
       layout={modifiedLayout}
+      revision={revision}
       config={{
         displayModeBar: false,
         responsive: true,

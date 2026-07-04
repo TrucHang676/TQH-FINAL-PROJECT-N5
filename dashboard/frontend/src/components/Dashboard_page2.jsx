@@ -17,6 +17,7 @@ const Dashboard_page2 = () => {
   const [region, setRegion] = useState(null);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [trendMode, setTrendMode] = useState('smoothed'); // 'actual' hoặc 'smoothed'
 
   // ---- Dropdown options (giống Page 1 nhưng với nhóm vị trí cập nhật) ----
   const positionOptions = [
@@ -130,6 +131,32 @@ const Dashboard_page2 = () => {
       scrollbarColor: '#59B292 #f0faf6',
     }),
     singleValue: (provided) => ({ ...provided, color: '#111827' }),
+  };
+
+  const getFilteredTrendFigure = (figure, mode) => {
+    if (!figure || !figure.data) return figure;
+
+    const filteredData = figure.data.map((trace, index) => {
+      const isSmoothed = index % 2 === 1;
+      const isActive = mode === 'smoothed' ? isSmoothed : !isSmoothed;
+
+      return {
+        ...trace,
+        visible: isActive,
+        showlegend: isActive,
+        name: trace.name.replace(' (TB trượt)', '').replace(' (Thực tế)', ''),
+        line: {
+          ...trace.line,
+          width: isActive ? (mode === 'smoothed' ? 3 : 2.5) : trace.line.width
+        },
+        opacity: isActive ? 1.0 : trace.opacity
+      };
+    });
+
+    return {
+      ...figure,
+      data: filteredData
+    };
   };
 
   return (
@@ -283,15 +310,43 @@ const Dashboard_page2 = () => {
 
               {/* RIGHT BOTTOM: Xu hướng công nghệ theo thời gian */}
               <div className="chart-card trend-tech-card">
-                <div className="chart-header">
-                  <span className="chart-title">
-                    Xu hướng công nghệ mới theo thời gian
-                  </span>
-                  <span className="chart-subtitle">AI/ML · Cloud · DevOps · Data Engineering (Đường nhạt: Thực tế | Đường đậm: Trung bình 3 tháng)</span>
+                <div className="chart-header map-header" style={{ flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', flex: '1', minWidth: '280px' }}>
+                    <span className="chart-title">
+                      Xu hướng công nghệ mới theo thời gian
+                    </span>
+                    <span className="chart-subtitle" style={{ marginTop: '4px' }}>
+                      {trendMode === 'smoothed' 
+                        ? 'Xu hướng: Trung bình trượt 3 tháng giúp lọc biến động ngắn hạn để nhìn rõ xu thế.' 
+                        : 'Thực tế: Số liệu gốc ghi nhận hàng tháng, phản ánh chính xác lượng tuyển dụng.'}
+                    </span>
+                  </div>
+                  <div className="toggle-container" style={{ display: 'flex', alignItems: 'center' }}>
+                    <div className="toggle-switch" style={{ display: 'flex', gap: '10px' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }} className="toggle-label">
+                        <input 
+                          type="radio" 
+                          value="actual" 
+                          checked={trendMode === 'actual'} 
+                          onChange={(e) => setTrendMode(e.target.value)} 
+                        />
+                        <span className="radio-label-text">Thực tế</span>
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }} className="toggle-label">
+                        <input 
+                          type="radio" 
+                          value="smoothed" 
+                          checked={trendMode === 'smoothed'} 
+                          onChange={(e) => setTrendMode(e.target.value)} 
+                        />
+                        <span className="radio-label-text">Xu hướng</span>
+                      </label>
+                    </div>
+                  </div>
                 </div>
                 <div className="chart-content">
                   {data?.charts?.tech_trend && (
-                    <PlotlyChart figure={data.charts.tech_trend} />
+                    <PlotlyChart figure={getFilteredTrendFigure(data.charts.tech_trend, trendMode)} />
                   )}
                 </div>
               </div>
