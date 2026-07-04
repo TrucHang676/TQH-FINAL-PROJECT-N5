@@ -374,7 +374,7 @@ def create_work_type_chart(df):
     )
 
     apply_layout_styles(fig)
-    fig.update_layout(margin=dict(l=10, r=10, t=10, b=20))
+    fig.update_layout(margin=dict(l=100, r=10, t=10, b=20))
 
     return fig
 
@@ -445,7 +445,7 @@ def create_region_chart(df):
     )
 
     apply_layout_styles(fig)
-    fig.update_layout(margin=dict(l=10, r=10, t=10, b=20))
+    fig.update_layout(margin=dict(l=100, r=10, t=10, b=20))
 
     return fig
 
@@ -569,7 +569,7 @@ def create_provincial_bar_chart(df):
     )
 
     apply_layout_styles(fig)
-    fig.update_layout(margin=dict(l=10, r=10, t=10, b=20))
+    fig.update_layout(margin=dict(l=100, r=10, t=10, b=20))
 
     return fig
 

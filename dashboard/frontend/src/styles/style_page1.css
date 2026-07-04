@@ -274,7 +274,7 @@
 .kpi-row {
   display: flex;
   gap: 16px;
-  min-height: 110px;
+  min-height: 80px;
   position: relative;
   z-index: 10;
 }
@@ -337,9 +337,9 @@
   display: flex;
   flex: 1;
   gap: 12px;
-  height: 480px;
+  height: 520px;
   /* Fixed height for consistent swap */
-  min-height: 480px;
+  min-height: 520px;
 }
 
 /* Chart card styles moved to global style.css for project-wide reusability */

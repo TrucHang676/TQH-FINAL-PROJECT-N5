@@ -438,7 +438,7 @@ html {
   /* Sage Green */
   border: none;
   border-radius: 8px;
-  padding: 16px;
+  padding: 10px 14px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -453,7 +453,7 @@ html {
   flex-direction: column;
   width: 100%;
   height: 100%;
-  gap: 12px;
+  gap: 6px;
 }
 
 /* Header thẻ KPI - tiêu đề và badge nằm hai đầu */
@@ -494,7 +494,7 @@ html {
 .kpi-desc {
   font-size: 12px;
   color: rgba(250, 231, 203, 0.9);
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 /* ==========================================
@@ -509,7 +509,7 @@ html {
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible; /* Changed from hidden so tooltips don't get cut off */
 }
 
 /* Header biểu đồ - không dùng chiều cao cứng để tránh co ép badge */
@@ -554,6 +554,14 @@ html {
   flex: 1;
   position: relative;
   min-height: 0;
+}
+
+/* Đảm bảo tooltip của Plotly có thể hiển thị vượt ra ngoài khung biểu đồ */
+.chart-content .js-plotly-plot,
+.chart-content .plot-container,
+.chart-content .svg-container,
+.chart-content svg {
+  overflow: visible !important;
 }
 
 /* Chú thích dưới biểu đồ - chữ rất nhỏ, màu muted */

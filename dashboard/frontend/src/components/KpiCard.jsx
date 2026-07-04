@@ -12,7 +12,7 @@ import PlotlyChart from './PlotlyChart';
  * @param {object} sparkline - A Plotly figure object for the trend line (optional)
  * @param {string} tooltip - Tooltip description shown on hover (optional)
  */
-export default function KpiCard({ title, badge, value, description, sparkline, tooltip }) {
+export default function KpiCard({ title, badge, value, description, tooltip }) {
   const cardContent = (
     <div className="kpi-card-info">
       <div className="kpi-header">
@@ -22,11 +22,6 @@ export default function KpiCard({ title, badge, value, description, sparkline, t
       <div className="kpi-body">
         <div className="kpi-main-val">{value}</div>
         <div className="kpi-desc">{description}</div>
-        {sparkline && (
-          <div style={{ height: '40px', marginTop: '4px' }}>
-            <PlotlyChart figure={sparkline} />
-          </div>
-        )}
       </div>
     </div>
   );
