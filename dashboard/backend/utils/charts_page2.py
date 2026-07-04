@@ -263,7 +263,7 @@ def create_skills_heatmap(df):
         y=top_skills,
         text=text_matrix,
         texttemplate="%{text}",
-        textfont=dict(size=11, color='#111827'),
+        textfont=dict(size=9, color='#111827'),
         colorscale=custom_colorscale,
         showscale=True,
         hovertext=hover_matrix,
@@ -286,9 +286,10 @@ def create_skills_heatmap(df):
     )
 
     fig.update_yaxes(
-        tickfont=dict(size=10, color='#111827', weight='bold'),
+        tickfont=dict(size=9, color='#111827', weight='bold'),
         showgrid=False,
-        linecolor='#e5e7eb'
+        linecolor='#e5e7eb',
+        dtick=1
     )
 
     apply_layout_styles(fig)
