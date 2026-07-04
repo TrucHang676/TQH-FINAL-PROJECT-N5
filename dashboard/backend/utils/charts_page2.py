@@ -26,6 +26,9 @@ NON_TECH_SKILLS = {
     'requirements', 'documentation', 'report', 'reporting',
     'fresher', 'intern', 'junior', 'middle', 'senior', 'lead',
     'mentor', 'coach', 'training', 'teaching',
+    'nhiệt tình', 'có sức khỏe tốt', 'sức khỏe tốt', 'trung thực',
+    'chăm chỉ', 'nhanh nhẹn', 'cẩn thận', 'giao tiếp', 'làm việc nhóm',
+    'điện lực', 'công nghệ thông tin', 'nam', 'nữ', 'sức khỏe'
 }
 
 # ===================================================
@@ -107,9 +110,20 @@ def create_top_skills_chart(df):
     # Sắp xếp tăng dần để biểu đồ hiển thị cao nhất ở trên
     skill_counts = skill_counts.sort_values('count', ascending=True)
 
+    # Rút gọn nhãn chữ nếu quá dài để tránh vỡ khung biểu đồ
+    seen = {}
+    display_names = []
+    for name in skill_counts['ky_nang']:
+        trunc = name[:15] + '...' if len(name) > 18 else name
+        while trunc in seen:
+            trunc += ' '  # Thêm khoảng trắng để tạo sự khác biệt cho Plotly tránh gộp nhóm
+        seen[trunc] = True
+        display_names.append(trunc)
+    skill_counts['ky_nang_display'] = display_names
+
     fig = go.Figure(data=[go.Bar(
         x=skill_counts['count'],
-        y=skill_counts['ky_nang'],
+        y=skill_counts['ky_nang_display'],
         orientation='h',
         text=[f"{row['count']:,}" for _, row in skill_counts.iterrows()],
         textposition='outside',
@@ -149,7 +163,7 @@ def create_top_skills_chart(df):
     )
 
     apply_layout_styles(fig)
-    fig.update_layout(margin=dict(l=10, r=60, t=10, b=20))
+    fig.update_layout(margin=dict(l=120, r=60, t=10, b=20))
 
     return fig
 
@@ -294,7 +308,7 @@ def create_skills_heatmap(df):
 
     apply_layout_styles(fig)
     fig.update_layout(
-        margin=dict(l=10, r=50, t=10, b=10),
+        margin=dict(l=120, r=50, t=10, b=10),
         showlegend=False
     )
 
