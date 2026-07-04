@@ -263,7 +263,6 @@ const Dashboard_page1 = () => {
               badge="Năm 2024"
               value={data?.kpi?.total_jobs?.toLocaleString() || 0}
               description="Toàn bộ dữ liệu thu thập"
-              sparkline={data?.charts?.spark1}
               tooltip="Tổng số tin tuyển dụng IT được thu thập từ tất cả nguồn dữ liệu, sau khi áp dụng các bộ lọc hiện tại."
             />
 
@@ -272,7 +271,6 @@ const Dashboard_page1 = () => {
               badge="Đỉnh"
               value={data?.kpi?.peak_month?.month || 'N/A'}
               description={`Đạt đỉnh với ${data?.kpi?.peak_month?.count?.toLocaleString() || 0} tin`}
-              sparkline={data?.charts?.spark2}
               tooltip="Tháng ghi nhận số lượng tin tuyển dụng cao nhất trong toàn bộ giai đoạn dữ liệu."
             />
 
@@ -281,7 +279,6 @@ const Dashboard_page1 = () => {
               badge="Hot"
               value={data?.kpi?.top_city?.city || 'N/A'}
               description={`Chiếm ${data?.kpi?.top_city?.pct?.toFixed(1) || 0}% toàn quốc`}
-              sparkline={data?.charts?.spark3}
               tooltip="Tỉnh/thành phố có nhu cầu tuyển dụng IT cao nhất, được tính theo tỉ lệ phần trăm so với tổng cả nước."
             />
 
@@ -290,7 +287,6 @@ const Dashboard_page1 = () => {
               badge="Phổ biến"
               value={data?.kpi?.top_work?.work || 'N/A'}
               description={`Chiếm ${data?.kpi?.top_work?.pct?.toFixed(1) || 0}% tổng thể`}
-              sparkline={data?.charts?.spark4}
               tooltip="Hình thức làm việc được đăng tuyển nhiều nhất, phản ánh xu hướng tuyển dụng chủ đạo của thị trường IT hiện tại."
             />
           </div>

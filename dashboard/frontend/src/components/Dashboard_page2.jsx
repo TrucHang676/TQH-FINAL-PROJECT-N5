@@ -205,8 +205,7 @@ const Dashboard_page2 = () => {
               badge="Unique"
               value={data?.kpi?.total_unique_skills?.toLocaleString() || 0}
               description={`Trên tổng ${data?.kpi?.total_jobs?.toLocaleString() || 0} tin tuyển dụng`}
-              sparkline={data?.charts?.spark1}
-              tooltip="Tổng số kỹ năng kỹ thuật unique được yêu cầu trong các tin tuyển dụng sau khi áp dụng bộ lọc."
+              tooltip="Tổng số kỹ năng kỹ thuật khác nhau được yêu cầu trong các tin tuyển dụng sau khi áp dụng bộ lọc."
             />
 
             <KpiCard
@@ -214,7 +213,6 @@ const Dashboard_page2 = () => {
               badge="#1"
               value={data?.kpi?.top_skill?.name || 'N/A'}
               description={`Xuất hiện trong ${data?.kpi?.top_skill?.count?.toLocaleString() || 0} tin tuyển dụng`}
-              sparkline={data?.charts?.spark2}
               tooltip="Kỹ năng công nghệ được yêu cầu nhiều nhất trong toàn bộ tin tuyển dụng được lọc."
             />
 
@@ -236,7 +234,6 @@ const Dashboard_page2 = () => {
                 return shortMap[name] || name;
               })()}
               description={`TB ${data?.kpi?.most_diverse_position?.avg_skills?.toFixed(1) || 0} kỹ năng / tin`}
-              sparkline={data?.charts?.spark3}
               tooltip="Nhóm vị trí công việc có số lượng kỹ năng yêu cầu trung bình trên mỗi tin tuyển dụng cao nhất."
             />
 
@@ -245,7 +242,6 @@ const Dashboard_page2 = () => {
               badge="Trending"
               value={data?.kpi?.trending_tech?.name || 'N/A'}
               description={`Tăng ${data?.kpi?.trending_tech?.growth_pct > 0 ? '+' : ''}${data?.kpi?.trending_tech?.growth_pct?.toFixed(1) || 0}% gần đây`}
-              sparkline={data?.charts?.spark4}
               tooltip="Nhóm công nghệ có tốc độ tăng trưởng nhu cầu tuyển dụng cao nhất so với giai đoạn trước."
             />
           </div>
@@ -291,7 +287,7 @@ const Dashboard_page2 = () => {
                   <span className="chart-title">
                     Xu hướng công nghệ mới theo thời gian
                   </span>
-                  <span className="chart-subtitle">AI/ML · Cloud · DevOps · Data Engineering</span>
+                  <span className="chart-subtitle">AI/ML · Cloud · DevOps · Data Engineering (Đường nhạt: Thực tế | Đường đậm: Trung bình 3 tháng)</span>
                 </div>
                 <div className="chart-content">
                   {data?.charts?.tech_trend && (
