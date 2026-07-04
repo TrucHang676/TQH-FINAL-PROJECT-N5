@@ -363,9 +363,9 @@ def create_tech_trend_chart(df):
             mode='lines',
             name=group_name,
             line=dict(color=color, width=2),
-            opacity=0.6,
+            opacity=0.4, # Make it slightly lighter (opacity 0.4 instead of 0.6) to differentiate more clearly
             showlegend=True,
-            hovertemplate=f"<b>{group_name}</b><br>%{{x}}: <b>%{{y:,}} tin</b><extra></extra>"
+            hovertemplate=f"<b>{group_name} (Thực tế)</b><br>%{{x}}: <b>%{{y:,}} tin</b><extra></extra>"
         ))
 
         # Vẽ đường trung bình trượt (nét liền đậm hơn)
@@ -374,9 +374,9 @@ def create_tech_trend_chart(df):
             y=moving_avg.round(1).tolist(),
             mode='lines',
             name=f'{group_name} (TB trượt)',
-            line=dict(color=color, width=2.5),
+            line=dict(color=color, width=3), # Make it slightly thicker (width 3 instead of 2.5) to stand out
             showlegend=False,
-            hovertemplate=f"<b>{group_name} (TB3T)</b><br>%{{x}}: <b>%{{y:,.1f}} tin</b><extra></extra>"
+            hovertemplate=f"<b>{group_name} (Trung bình 3 tháng)</b><br>%{{x}}: <b>%{{y:,.1f}} tin</b><extra></extra>"
         ))
 
     fig.update_xaxes(

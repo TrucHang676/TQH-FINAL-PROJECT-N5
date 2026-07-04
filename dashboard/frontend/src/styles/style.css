@@ -556,6 +556,14 @@ html {
   min-height: 0;
 }
 
+/* Đảm bảo tooltip của Plotly có thể hiển thị vượt ra ngoài khung biểu đồ */
+.chart-content .js-plotly-plot,
+.chart-content .plot-container,
+.chart-content .svg-container,
+.chart-content svg {
+  overflow: visible !important;
+}
+
 /* Chú thích dưới biểu đồ - chữ rất nhỏ, màu muted */
 .chart-caption {
   font-size: 10px;
