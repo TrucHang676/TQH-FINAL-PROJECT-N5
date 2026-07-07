@@ -1,0 +1,46 @@
+/* ============================================================
+   Page 3 - Lương thị trường
+   Layout giống hệt Page 1/2:
+   Sidebar trái cố định + Main panel cuộn + KPI row + Charts container
+   Chỉ override class riêng biệt cho bố cục Page 3.
+   ============================================================ */
+
+/* Container chính trang 3 - giống page1-container / page2-container */
+#page3-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 124px);
+  width: 100vw;
+  background-color: var(--bg-color);
+  overflow: hidden;
+}
+
+/* ---- LEFT CHART: Phân bố lương (Histogram/Box) ---- */
+/* Chiếm ~42% chiều rộng, cao toàn bộ charts-container */
+.salary-dist-card {
+  width: 42%;
+  height: 100%;
+  min-width: 300px;
+}
+
+/* ---- RIGHT PANEL: 2 biểu đồ xếp dọc ---- */
+/* Chiếm ~58% chiều rộng */
+.salary-right-panel {
+  width: 58%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Card biểu đồ lương theo vị trí & kinh nghiệm - chiếm 50% */
+.salary-pos-exp-card {
+  height: 50%;
+  min-height: 0;
+}
+
+/* Card biểu đồ lương theo khu vực - chiếm 50% */
+.salary-location-card {
+  height: 50%;
+  min-height: 0;
+}
