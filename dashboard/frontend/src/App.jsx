@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Dashboard1 from './components/Dashboard_page1';
 import Dashboard2 from './components/Dashboard_page2';
 import Dashboard3 from './components/Dashboard_page3';
@@ -9,6 +10,7 @@ import Dashboard5 from './components/Dashboard_page5';
 import './styles/style.css';
 import './styles/style_page1.css';
 import './styles/style_page2.css';
+import './styles/style_page4.css';
 
 const tabConfig = {
   1: {
@@ -35,6 +37,14 @@ const tabConfig = {
 
 function App() {
   const [activeTab, setActiveTab] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(null);
+
+  // Lấy số bản ghi thật của dataset từ backend (thay cho con số hard-code)
+  useEffect(() => {
+    axios.get('http://localhost:8000/api/meta')
+      .then(res => setTotalRecords(res.data.total_records))
+      .catch(() => setTotalRecords(null));
+  }, []);
 
   return (
     // Bọc toàn bộ ứng dụng trong một thẻ div chung, không dùng id page1-container ở đây
@@ -55,7 +65,7 @@ function App() {
         <div className="global-badge-container">
           <div className="dataset-badge">
             <span className="dataset-name">vietnam_it_jobs_processed.csv</span>
-            <span className="dataset-count">8,452 bản ghi</span>
+            <span className="dataset-count">{totalRecords != null ? `${totalRecords.toLocaleString('en-US')} bản ghi` : '... bản ghi'}</span>
           </div>
         </div>
       </div>
