@@ -9,6 +9,7 @@ import Dashboard5 from './components/Dashboard_page5';
 import './styles/style.css';
 import './styles/style_page1.css';
 import './styles/style_page2.css';
+import './styles/style_page3.css';
 
 const tabConfig = {
   1: {
