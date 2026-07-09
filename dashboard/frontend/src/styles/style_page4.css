@@ -1,0 +1,57 @@
+/* Layout riêng cho Trang 4 - Nhân sự trẻ */
+
+/* Container gốc của trang: chiếm trọn chiều cao còn lại của màn hình
+   (trừ 124px header + nav), y hệt #page1-container / #page2-container —
+   thiếu rule này thì trang co theo nội dung và bị lệch so với các trang khác */
+#page4-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 124px);
+  width: 100vw;
+  background-color: var(--bg-color);
+  overflow: hidden;
+}
+
+/* Vùng biểu đồ: Kế thừa nguyên chiều cao của .charts-container từ style_page1
+   (flex:1 + min 520px) để cân bằng kích thước với các dashboard khác —
+   tự giãn to trên màn hình lớn, không tràn trên màn hình nhỏ.
+   Chỉ đổi hướng chia 2 cột trái phải. */
+.p4-charts {
+  flex-direction: row;
+  gap: 12px;
+}
+
+/* Cột trái: Donut (tổng quan cấp bậc) trên + Treemap (nhóm vị trí) dưới */
+.p4-left-panel {
+  width: 46%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Cột phải: Box plot lương trải toàn bộ chiều cao */
+.p4-right-panel {
+  width: 54%;
+  height: 100%;
+  display: flex;
+}
+
+/* Donut: xếp phía trên cột trái */
+.p4-left-panel .donut-card {
+  height: 50%;
+  min-height: 0;
+}
+
+/* Treemap: phía dưới cột trái */
+.p4-left-panel .treemap-card {
+  height: 50%;
+  min-height: 0;
+}
+
+/* Box plot: chiếm toàn bộ cột phải */
+.p4-right-panel .boxplot-card {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+}
