@@ -27,6 +27,9 @@ app.include_router(router_page2.router, tags=["Page 2"])
 # Gắn router của trang 4 - Nhân sự trẻ
 from backend.routers import router_page4
 app.include_router(router_page4.router, tags=["Page 4"])
+# Gắn router của trang 3 - Lương thị trường
+from backend.routers import router_page3
+app.include_router(router_page3.router, tags=["Page 3"])
 
 # Gắn router của AI Analysis (Trang 5)
 from backend.routers import router_page5
