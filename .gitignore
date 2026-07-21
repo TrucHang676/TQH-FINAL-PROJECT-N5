@@ -31,6 +31,9 @@ env/
 !data/vietnam_it_jobs_raw.csv
 !dashboard/frontend/package.json
 
+# Bộ câu hỏi AI đã chuẩn bị + kiểm chứng sẵn (dùng dự phòng khi vấn đáp/viết báo cáo)
+!dashboard/backend/ai_prepared_questions.json
+
 # Logs
 logs/
 *.log

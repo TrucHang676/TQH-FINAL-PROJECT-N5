@@ -4,3 +4,4 @@ pandas
 plotly
 pydantic
 google-generativeai
+python-dotenv
