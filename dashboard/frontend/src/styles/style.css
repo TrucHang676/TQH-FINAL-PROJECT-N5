@@ -594,6 +594,62 @@ html {
   position: relative;
 }
 
+/* Thanh công tắc "Tự động nhận xét" phía trên khung chat */
+.ai-auto-comment-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 24px;
+  font-size: 12px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.ai-toggle {
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+}
+.ai-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+.ai-toggle-track {
+  width: 34px;
+  height: 19px;
+  background: #d1d5db;
+  border-radius: 999px;
+  position: relative;
+  transition: background 0.2s ease;
+  display: inline-block;
+}
+.ai-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 15px;
+  height: 15px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+.ai-toggle input:checked + .ai-toggle-track { background: #59B292; }
+.ai-toggle input:checked + .ai-toggle-track .ai-toggle-thumb { transform: translateX(15px); }
+
+/* Con trỏ nhấp nháy khi văn bản đang được tạo dần (streaming) */
+.ai-streaming-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 14px;
+  background: #59B292;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: cursorBlink 0.9s steps(1) infinite;
+}
+@keyframes cursorBlink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+
 /* Scrollable messages area */
 .ai-chat-messages {
   flex: 1;
@@ -653,13 +709,21 @@ html {
 
 /* ---- Message Bubbles ---- */
 
-/* Single message row */
+/* Single message row — canh giữa thành 1 cột đọc như Gemini/ChatGPT */
 .ai-msg-row {
   display: flex;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
   animation: msgSlideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
+/* Bong bóng người dùng KHÔNG bó trong cột đọc 860px căn giữa như câu trả lời AI —
+   phải căn theo mép phải THẬT của khung chat, nếu không sẽ trông như bị "căn giữa"
+   khi khung chat rộng hơn 860px (chỉ hugging mép phải của cột con, không phải
+   mép phải thật của trang). */
 .ai-msg-row.user {
+  max-width: 100%;
   justify-content: flex-end;
 }
 
@@ -698,10 +762,70 @@ html {
   text-align: right;
 }
 
-/* AI message bubble (code + result) */
+/* Bọc bong bóng user + nút sửa (nút ẩn, hiện khi hover) */
+.ai-msg-user-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 80%;
+}
+
+.ai-user-edit-btn {
+  flex-shrink: 0;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  color: #9CA3AF;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+.ai-msg-user-wrap:hover .ai-user-edit-btn { opacity: 1; }
+.ai-user-edit-btn:hover { color: #59B292; border-color: #59B292; }
+
+/* Khung sửa câu hỏi */
+.ai-user-edit {
+  width: 75%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ai-user-edit-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1.5px solid #59B292;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+}
+.ai-user-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.ai-mini-btn-primary {
+  background: linear-gradient(135deg, #59B292, #469d7e);
+  color: #fff;
+  border-color: transparent;
+}
+.ai-mini-btn-primary:hover {
+  background: linear-gradient(135deg, #4da583, #3d8b6f);
+  color: #fff;
+  border-color: transparent;
+}
+.ai-mini-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* AI message — chiếm trọn chiều rộng cột đọc (kiểu Gemini), không lệch trái hẹp */
 .ai-msg-ai {
-  max-width: 85%;
-  min-width: 50%;
+  width: 100%;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -917,6 +1041,113 @@ html {
   color: #6B7280;
 }
 
+/* ---- Text Bubble (Chế độ A: AI trả lời bằng văn bản, không có code) ---- */
+.ai-text-bubble {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  padding: 14px 16px;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+/* ---- Xem trước code đang đổ dần trong bong bóng văn bản (Mẫu 6 pha 1) ---- */
+.ai-code-preview-inline {
+  margin-top: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #1e1e1e;
+}
+
+.ai-code-preview-inline-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #9CA3AF;
+  background-color: #2a2a2a;
+  border-bottom: 1px solid #3a3a3a;
+}
+
+.ai-code-preview-inline pre {
+  margin: 0;
+  padding: 12px;
+  max-height: 260px;
+  overflow-y: auto;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: #d4d4d4;
+  font-family: 'Consolas', monospace;
+  white-space: pre-wrap;
+}
+
+/* Dẫn nhập + "Hướng phân tích" hiển thị phía trên khung code đã chốt (ai_code) */
+.ai-code-preamble {
+  margin-bottom: 10px;
+}
+
+/* ---- Biểu đồ THẬT nhúng giữa câu trả lời (Mẫu 5) ---- */
+.ai-embedded-chart {
+  margin: 12px 0;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #fafaf8;
+}
+
+.ai-embedded-chart .ai-result-toolbar {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.ai-embedded-chart .js-plotly-plot {
+  height: 360px;
+}
+
+/* ---- Chip gợi ý câu hỏi tiếp theo (cuối câu trả lời, Mẫu 5) ---- */
+.ai-suggestions {
+  margin-top: 12px;
+}
+
+.ai-suggestions-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.ai-suggestions-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ai-suggestion-chip-follow {
+  background-color: var(--card-bg);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  max-width: 320px;
+}
+
+.ai-suggestion-chip-follow:hover {
+  background-color: rgba(89, 178, 146, 0.1);
+  border-color: #59B292;
+  color: #1F6F5F;
+  transform: translateY(-1px);
+}
+
+.ai-suggestion-chip-follow:active {
+  transform: scale(0.98);
+}
+
 /* ---- Result Bubble ---- */
 .ai-result-bubble {
   background-color: var(--card-bg);
@@ -1019,6 +1250,111 @@ html {
 
 .ai-chat-input-wrapper textarea::placeholder {
   color: var(--text-muted);
+}
+
+/* Gợi ý lệnh nâng cao (/code /hoi /giaithich /nhanxet) khi gõ "/" */
+.ai-command-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  margin: 0 12px 4px 12px;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+}
+.ai-command-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  border-radius: 7px;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text-secondary);
+  transition: background 0.15s ease;
+}
+.ai-command-menu-item:hover { background: rgba(89, 178, 146, 0.08); }
+.ai-command-menu-cmd {
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-weight: 700;
+  font-size: 13px;
+  color: #59B292;
+  flex-shrink: 0;
+}
+.ai-command-menu-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Nút đính kèm ảnh trong ô nhập */
+.ai-chat-attach-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.ai-chat-attach-btn:hover:not(:disabled) {
+  color: #59B292;
+  border-color: #59B292;
+  background: rgba(89, 178, 146, 0.06);
+}
+.ai-chat-attach-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Xem trước ảnh trước khi gửi */
+.ai-image-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  position: relative;
+}
+.ai-image-preview img {
+  height: 60px;
+  width: auto;
+  max-width: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+.ai-image-preview-remove {
+  position: absolute;
+  top: 2px;
+  left: 96px;
+  background: #EF4444;
+  color: #fff;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.ai-image-preview-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Ảnh hiển thị trong bong bóng tin nhắn của người dùng */
+.ai-msg-user-image {
+  max-width: 100%;
+  max-height: 260px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  display: block;
 }
 
 .ai-chat-send-btn {
@@ -1150,4 +1486,284 @@ html {
   border-color: #59B292;
   color: #59B292;
   background-color: rgba(89, 178, 146, 0.05);
+}
+
+/* Nhãn nhóm thời gian / Đã ghim trong lịch sử */
+.ai-history-section-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #9CA3AF;
+  padding: 6px 8px 4px 10px;
+}
+
+/* Cụm nút thao tác (ghim + xóa): ẩn mặc định, hiện khi hover dòng lịch sử */
+.ai-history-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.ai-history-action-btn {
+  border: none;
+  background: transparent;
+  color: #9CA3AF;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+
+.ai-history-item:hover .ai-history-action-btn { opacity: 1; }
+/* Nút ghim đang bật thì luôn hiện (dù không hover) */
+.ai-history-action-btn.pinned { opacity: 1; color: #59B292; }
+.ai-history-action-btn:hover { color: #59B292; background-color: rgba(89, 178, 146, 0.1); }
+.ai-history-action-btn.danger:hover { color: #EF4444; background-color: rgba(239, 68, 68, 0.1); }
+
+/* Modal xác nhận xóa */
+.ai-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+}
+.ai-confirm-box {
+  background: var(--card-bg);
+  border-radius: 14px;
+  padding: 24px;
+  width: 360px;
+  max-width: 90vw;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+.ai-confirm-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.12);
+  color: #EF4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px auto;
+}
+.ai-confirm-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-family: var(--font-heading);
+}
+.ai-confirm-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+.ai-confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+.ai-confirm-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: none;
+  background: #EF4444;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.ai-confirm-delete-btn:hover { background: #dc2626; }
+
+/* Nút mini dùng chung (copy, tải PNG/CSV, phóng to) */
+/* Nút icon-only: chỉ hiện icon, chữ chỉ xuất hiện khi hover qua tooltip CSS
+   (data-tooltip) — không dùng title mặc định của trình duyệt vì chậm/xấu. */
+.ai-mini-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ai-mini-btn:hover {
+  color: #59B292;
+  border-color: #59B292;
+  background: rgba(89, 178, 146, 0.06);
+}
+
+/* Tooltip CSS: hiện văn bản trong data-tooltip phía trên nút khi hover */
+.ai-mini-btn[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: #1f2937;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 5px 9px;
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 20;
+}
+.ai-mini-btn[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.ai-header-copy {
+  margin-left: auto;
+}
+
+/* Thanh công cụ phía trên kết quả biểu đồ */
+.ai-result-toolbar {
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-color);
+  background: #fafaf9;
+}
+
+/* Render Markdown cho câu trả lời văn bản của AI */
+.ai-markdown {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text-primary);
+}
+.ai-markdown p { margin: 0 0 10px 0; }
+.ai-markdown p:last-child { margin-bottom: 0; }
+.ai-markdown ul,
+.ai-markdown ol { margin: 6px 0 12px 0; padding-left: 22px; }
+.ai-markdown li { margin-bottom: 4px; }
+.ai-markdown h1,
+.ai-markdown h2,
+.ai-markdown h3 { margin: 14px 0 8px 0; font-family: var(--font-heading); font-weight: 700; line-height: 1.3; }
+.ai-markdown h1 { font-size: 18px; }
+.ai-markdown h2 { font-size: 16px; }
+.ai-markdown h3 { font-size: 15px; }
+.ai-markdown strong { font-weight: 700; color: var(--text-primary); }
+.ai-markdown code {
+  background: #f0efec;
+  padding: 1px 6px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-family: 'Consolas', 'Monaco', monospace;
+}
+.ai-markdown pre {
+  background: #1e1e1e;
+  color: #e6e6e6;
+  padding: 12px 14px;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+.ai-markdown pre code { background: transparent; padding: 0; color: inherit; }
+.ai-markdown table { border-collapse: collapse; margin: 8px 0; width: 100%; }
+.ai-markdown th,
+.ai-markdown td { border: 1px solid var(--border-color); padding: 6px 10px; text-align: left; font-size: 13px; }
+.ai-markdown th { background: #f5f4f0; font-weight: 600; }
+.ai-markdown a { color: #2F7D60; text-decoration: underline; }
+
+/* Nút phóng to biểu đồ + modal xem biểu đồ kích thước lớn */
+.ai-chart-expand-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 5;
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s ease;
+}
+
+.ai-chart-expand-btn:hover {
+  color: #59B292;
+  border-color: #59B292;
+  background: #fff;
+}
+
+.ai-chart-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+.ai-chart-modal {
+  position: relative;
+  background: var(--card-bg);
+  border-radius: 14px;
+  width: 92vw;
+  max-width: 1150px;
+  height: 84vh;
+  padding: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-chart-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 5;
+  border: none;
+  background: #f3f4f6;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  transition: all 0.15s ease;
+}
+
+.ai-chart-modal-close:hover {
+  background: #EF4444;
+  color: #fff;
+}
+
+.ai-chart-modal-body {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
 }
