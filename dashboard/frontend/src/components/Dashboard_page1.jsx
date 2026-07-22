@@ -291,17 +291,22 @@ const Dashboard_page1 = () => {
         cliponaxis: false
       }],
       layout: {
-        margin: { t: 50, b: 75, l: 50, r: 15 },
+        margin: { t: 50, b: 75, l: 65, r: 15 },
         plot_bgcolor: 'rgba(0,0,0,0)',
         paper_bgcolor: 'rgba(0,0,0,0)',
         xaxis: {
           tickangle: -35,
           automargin: true,
-          tickfont: { size: 10, color: '#6B7280' }
+          tickfont: { size: 9.5, color: '#111827', weight: 'bold' }
         },
         yaxis: {
           gridcolor: 'rgba(0,0,0,0.06)',
-          tickfont: { size: 10 },
+          tickfont: { size: 9, color: '#111827', weight: 'bold' },
+          title: {
+            text: '<b>Số lượng tin</b>',
+            font: { size: 10, color: '#111827', weight: 'bold' },
+            standoff: 15
+          },
           rangemode: 'nonnegative'
         },
         bargap: 0.35,

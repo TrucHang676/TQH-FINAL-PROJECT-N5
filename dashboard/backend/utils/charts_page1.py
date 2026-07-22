@@ -526,11 +526,12 @@ def create_region_vertical_chart(df):
         tickfont=dict(size=9, color='#111827', weight='bold'),
         title_text="<b>Số lượng tin</b>",
         title_font=dict(size=10, color='#111827', weight='bold'),
+        title_standoff=15,
         range=[0, max_count * 1.15] if not pd.isna(max_count) else None
     )
 
     apply_layout_styles(fig)
-    fig.update_layout(margin=dict(l=40, r=20, t=40, b=10), bargap=0.3)
+    fig.update_layout(margin=dict(l=55, r=20, t=40, b=10), bargap=0.3)
 
     return fig
 
