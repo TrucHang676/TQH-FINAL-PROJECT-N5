@@ -15,7 +15,7 @@
   - [Cách 2: Khởi chạy thủ công (Dev / macOS / Linux)](#️-cách-2-khởi-chạy-thủ-công-dành-cho-dev--macos--linux)
 - [4. Cấu trúc 5 Trang Phân tích của Dashboard](#-4-cấu-trúc-5-trang-phân-tích-của-dashboard)
 - [5. Hệ thống AI Analyst (Human-in-the-Loop)](#-5-hệ-thống-ai-analyst-human-in-the-loop)
-- [6. Thành viên thực hiện](#-thành-viên-thực-hiện)
+- [6. Thành viên thực hiện & Phân công nhiệm vụ](#-6-thành-viên-thực-hiện--phân-công-nhiệm-vụ)
 
 ---
 
@@ -144,5 +144,13 @@ Dự án đáp ứng 100% các tiêu chuẩn trong hướng dẫn tích hợp AI
 
 ---
 
-## 👥 Thành viên thực hiện
-Đồ án thuộc môn **Phân tích Quản lý Dữ liệu lớn (TQHDL)** - Nhóm 5.
+## 👥 6. Thành viên thực hiện & Phân công nhiệm vụ
+
+Đồ án thuộc môn **Trực quan hóa dữ liệu (CQ2023/24)** — **Nhóm 5**:
+
+| STT | MSSV | Họ và tên | Nhiệm vụ phân công | Đóng góp |
+|:---:|:---:|:---|:---|:---:|
+| 1 | **23120192** | **Nguyễn Nhật Vy** | • Phân tích chung về bộ dữ liệu<br>• Phân tích mục tiêu cá nhân<br>• Thiết kế dashboard<br>• Viết báo cáo<br>• Kiểm thử AI | **25%** |
+| 2 | **23120193** | **Trần Kim Yến** | • Phân tích chung về bộ dữ liệu<br>• Phân tích mục tiêu cá nhân<br>• Thiết kế dashboard<br>• Viết báo cáo<br>• Kiểm thử AI | **25%** |
+| 3 | **23120201** | **Nguyễn Thị Trúc Hằng** | • Phân công nhiệm vụ<br>• Thu thập dữ liệu<br>• Phân tích mục tiêu cá nhân<br>• Thiết kế dashboard<br>• Tích hợp AI<br>• Viết báo cáo | **25%** |
+| 4 | **23120206** | **Ngô Thuận An** | • Thu thập dữ liệu<br>• Phân tích mục tiêu cá nhân<br>• Thiết kế dashboard<br>• Tích hợp AI<br>• Viết báo cáo | **25%** |
