@@ -102,11 +102,20 @@ def get_dashboard_data(req: FilterRequest):
             spark4_data = [int(x) for x in work_dff.groupby('thang_dang').size().tolist()]
             spark4_fig = charts.create_sparkline(spark4_data, spark_color)
 
-    # Tạo biểu đồ xu hướng và hình thức
-    trend_fig = charts.create_time_trend_chart(dff)
-    work_fig = charts.create_work_type_chart(dff)
-    map_fig = charts.create_vietnam_map(dff)
-    region_chart_fig = charts.create_region_vertical_chart(dff)
+    # Vẽ tất cả biểu đồ song song để tăng tốc độ
+    from concurrent.futures import ThreadPoolExecutor
+
+    _dff = dff  # capture cho closure
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        f_trend       = pool.submit(charts.create_time_trend_chart, _dff)
+        f_work        = pool.submit(charts.create_work_type_chart, _dff)
+        f_map         = pool.submit(charts.create_vietnam_map, _dff)
+        f_region      = pool.submit(charts.create_region_vertical_chart, _dff)
+
+    trend_fig        = f_trend.result()
+    work_fig         = f_work.result()
+    map_fig          = f_map.result()
+    region_chart_fig = f_region.result()
 
     region_counts = dff['vung_mien'].value_counts().to_dict()
     regions_data = {

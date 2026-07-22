@@ -162,10 +162,16 @@ def get_page2_data(req: FilterRequest):
 
     spark4_fig = charts.create_sparkline(spark4_data, spark_color)
 
-    # ---- Tạo 3 biểu đồ chính ----
-    top_skills_fig = charts.create_top_skills_chart(dff)
-    heatmap_fig = charts.create_skills_heatmap(dff)
-    tech_trend_fig = charts.create_tech_trend_chart(dff)
+    # ---- Tạo 3 biểu đồ chính song song ----
+    from concurrent.futures import ThreadPoolExecutor
+    _dff = dff
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        f_skills  = pool.submit(charts.create_top_skills_chart, _dff)
+        f_heatmap = pool.submit(charts.create_skills_heatmap, _dff)
+        f_trend   = pool.submit(charts.create_tech_trend_chart, _dff)
+    top_skills_fig = f_skills.result()
+    heatmap_fig    = f_heatmap.result()
+    tech_trend_fig = f_trend.result()
 
     # ---- Xây dựng response ----
     res = {

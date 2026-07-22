@@ -302,7 +302,7 @@ const page1Cache = new Map();
 
           <div className="charts-container">
             {/* Left map */}
-            <div className="chart-card map-card">
+            <div className={`chart-card map-card${loading ? ' is-loading' : ''}`}>
               <div className="chart-header map-header">
                 <span className="chart-title">
                   {mapToggle === 'map' ? 'Bản đồ phân bố tuyển dụng' : 'Biểu đồ phân bố tuyển dụng'}
@@ -384,7 +384,7 @@ const page1Cache = new Map();
 
             {/* Right Panel */}
             <div className="charts-right-panel">
-              <div className="chart-card trend-card">
+              <div className={`chart-card trend-card${loading ? ' is-loading' : ''}`}>
                 <div className="chart-header">
                   <span className="chart-title">
                     Xu hướng tuyển dụng theo tháng
@@ -396,7 +396,7 @@ const page1Cache = new Map();
               </div>
 
               <div className="split-row">
-                <div className="chart-card donut-card">
+                <div className={`chart-card donut-card${loading ? ' is-loading' : ''}`}>
                   <div className="chart-header">
                     <span className="chart-title">
                       Hình thức làm việc chủ đạo

@@ -498,6 +498,50 @@ html {
 }
 
 /* ==========================================
+   SKELETON LOADING & STALE-WHILE-REVALIDATE
+   ========================================== */
+
+/* Skeleton shimmer animation — dùng cho placeholder cards */
+@keyframes skeleton-shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 800px 100%;
+  animation: skeleton-shimmer 1.5s infinite linear;
+  border-radius: 6px;
+}
+
+/* Loading overlay nhẹ trên chart-card khi đang refetch (stale-while-revalidate) */
+@keyframes subtle-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
+}
+.chart-card.is-loading {
+  animation: subtle-pulse 1.2s ease-in-out infinite;
+  pointer-events: none; /* disable interactions while loading */
+}
+/* Badge "Đang cập nhật..." ở góc trên phải khi chart đang load */
+.chart-card.is-loading::after {
+  content: '⟳ Đang cập nhật...';
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 10px;
+  color: #59B292;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  pointer-events: none;
+  animation: none;
+  opacity: 1;
+}
+/* chart-card cần position: relative để after hoạt động */
+.chart-card {
+  position: relative;
+}
+
+/* ==========================================
    GLOBAL REUSABLE CHART CARD STYLES
    ========================================== */
 /* Thẻ biểu đồ cơ sở - nền card, viền, bo góc, flex dọc */
