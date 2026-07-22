@@ -6,8 +6,20 @@
 
 ---
 
-## 📌 1. Tổng quan Dự án
+## 📑 Mục lục
 
+- [1. Tổng quan Dự án](#-1-tổng-quan-dự-án)
+- [2. Cấu trúc Dự án](#-2-cấu-trúc-dự-án)
+- [3. Hướng dẫn Cài đặt & Khởi chạy](#-3-hướng-dẫn-cài-đặt--khởi-chạy)
+  - [Cách 1: Khởi chạy nhanh bằng file `.exe`](#-cách-1-khởi-chạy-nhanh-bằng-file-exe-khuyên-dùng-trên-windows)
+  - [Cách 2: Khởi chạy thủ công (Dev / macOS / Linux)](#️-cách-2-khởi-chạy-thủ-công-dành-cho-dev--macos--linux)
+- [4. Cấu trúc 5 Trang Phân tích của Dashboard](#-4-cấu-trúc-5-trang-phân-tích-của-dashboard)
+- [5. Hệ thống AI Analyst (Human-in-the-Loop)](#-5-hệ-thống-ai-analyst-human-in-the-loop)
+- [6. Thành viên thực hiện](#-thành-viên-thực-hiện)
+
+---
+
+## 📌 1. Tổng quan Dự án
 Dự án được xây dựng theo kiến trúc **Monorepo**, bao gồm toàn bộ chuỗi cung ứng dữ liệu:
 1. **Crawl & Thu thập Dữ liệu**: Thu thập dữ liệu việc làm IT tự động từ các nền tảng tuyển dụng lớn tại Việt Nam (ITviec, TopCV, TopDev, VietJobs, Vieclam24h, JobsGO).
 2. **Tiền xử lý Dữ liệu (Data Processing & Cleaning)**: Làm sạch, chuẩn hóa kỹ năng, mức lương, cấp bậc kinh nghiệm, hình thức làm việc và vị trí địa lý.

@@ -5,6 +5,43 @@
 
 ---
 
+## 📑 Mục lục
+
+- [🚀 Hướng dẫn Sử dụng Nhanh (Dành cho Người dùng)](#-hướng-dẫn-sử-dụng-nhanh-dành-cho-người-dùng)
+  - [① Bắt đầu — Nhập câu hỏi/yêu cầu](#-bắt-đầu--nhập-câu-hỏiyêu-cầu)
+  - [② Dùng Lệnh Nhanh (Shortcuts)](#-dùng-lệnh-nhanh-shortcuts)
+  - [③ Đính kèm Ảnh để Phân tích (Vision AI)](#-đính-kèm-ảnh-để-phân-tích-vision-ai)
+  - [④ Xem xét & Chỉnh sửa Code](#-xem-xét--chỉnh-sửa-code-bước-quan-trọng-nhất)
+  - [⑤ Duyệt & Chạy Code](#-duyệt--chạy-code)
+  - [⑥ Xem & Quản lý Lịch sử](#-xem--quản-lý-lịch-sử)
+  - [💡 Câu hỏi mẫu hay dùng](#-một-số-câu-hỏi-mẫu-hay-dùng)
+  - [⚠️ Lưu ý quan trọng](#️-lưu-ý-quan-trọng)
+- [🗂️ Cấu trúc Cài đặt Chi tiết](#️-cấu-trúc-cài-đặt-chi-tiết)
+  - [Sơ đồ thư mục](#sơ-đồ-thư-mục-liên-quan-đến-ai)
+  - [Chi tiết Backend](#chi-tiết-từng-file-backend)
+    - [`ai_config.py` — Cấu hình trung tâm](#backendai_configpy--cấu-hình-trung-tâm)
+    - [`chart_catalog.py` — Danh mục biểu đồ](#backendchart_catalogpy--danh-mục-biểu-đồ-sẵn-có)
+    - [`router_page5.py` — Router AI chính](#backendrouters router_page5py--router-ai-chính-786-dòng)
+  - [Chi tiết Frontend](#chi-tiết-từng-file-frontend)
+  - [Sơ đồ luồng dữ liệu nội bộ](#sơ-đồ-luồng-dữ-liệu-nội-bộ)
+- [📌 1. Triết lý Thiết kế & Tuyên ngôn Nguyên tắc](#-1-triết-lý-thiết-kế--tuyên-ngôn-nguyên-tắc)
+  - [1.1 Vai trò phân định rõ ràng](#11-vai-trò-phân-định-rõ-ràng)
+  - [1.2 Nguyên tắc "Không thực thi ngầm"](#12-nguyên-tắc-không-thực-thi-ngầm-no-background-execution)
+  - [1.3 Nguyên tắc Thực thi Local](#13-nguyên-tắc-thực-thi-local-local-execution-only)
+- [🏗️ 2. Cấu trúc Kiến trúc Hệ thống AI](#️-2-cấu-trúc-kiến-trúc-hệ-thống-ai)
+  - [2.1 Backend (Python FastAPI)](#21-backend-python-fastapi)
+  - [2.2 Frontend (ReactJS + Monaco Editor)](#22-frontend-reactjs--monaco-editor)
+- [🔄 3. Luồng Hoạt động Chi tiết (3 Giai đoạn)](#-3-luồng-hoạt-động-chi-tiết-3-giai-đoạn)
+- [📡 4. Danh mục API Endpoints của AI](#-4-danh-mục-api-endpoints-của-ai)
+  - [4.1 POST /api/ai/stream](#41-post-apiai-stream-sse-real-time-streaming)
+  - [4.2 POST /api/ai/execute](#42-post-apiai-execute-thực-thi-mã-nguồn-đã-phê-duyệt)
+  - [4.3 GET & DELETE /api/ai/history](#43-get-apiai-history--delete-apiai-historyid)
+- [🛠️ 5. Hướng dẫn Thiết lập & Khởi chạy Module AI](#️-5-hướng-dẫn-thiết-lập--khởi-chạy-module-ai)
+- [🌟 6. Các Tính năng Độc đáo Nổi bật](#-6-các-tính-năng-độc-đáo-nổi-bật)
+- [📋 7. Quy trình Kiểm thử & Bảo vệ (Demo với Giảng viên)](#-7-quy-trình-kiểm-thử--bảo-vệ-demo-với-giảng-viên)
+
+---
+
 ## 🚀 HƯỚNG DẪN SỬ DỤNG NHANH DÀNH CHO NGƯỜI DÙNG
 
 > 📍 Chức năng AI nằm ở **Tab cuối cùng** của Dashboard — Tab có icon 🤖 hoặc nhãn **AI Analyst**.
