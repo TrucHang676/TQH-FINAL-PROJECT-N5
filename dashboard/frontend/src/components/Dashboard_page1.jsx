@@ -205,31 +205,57 @@ const page1Cache = new Map();
     if (cities.length === 0) return null;
     const labels = cities.map(c => c.city);
     const values = cities.map(c => c.count);
+    const max = Math.max(...values);
+
+    // Màu theme theo vùng miền (khớp với màu cột vùng gốc)
+    const regionTheme = {
+      'Bắc':  { r: 250, g: 103, b: 129 }, // #FA6781 – đỏ hồng
+      'Trung':{ r: 255, g: 201, b:  77 }, // #FFC94D – vàng
+      'Nam':  { r:  89, g: 178, b: 146 }, // #59B292 – xanh lá
+    };
+    const theme = regionTheme[regionName] || { r: 89, g: 178, b: 146 };
+
+    // Gradient opacity: cột cao nhất = 100%, thấp nhất = 40%
     const colors = values.map(v => {
-      const max = Math.max(...values);
-      const ratio = v / max;
-      const r = Math.round(89 + (250 - 89) * (1 - ratio));
-      const g = Math.round(178 + (103 - 178) * (1 - ratio));
-      const b = Math.round(146 + (129 - 146) * (1 - ratio));
-      return `rgb(${r},${g},${b})`;
+      const opacity = 0.40 + (v / max) * 0.60;
+      return `rgba(${theme.r},${theme.g},${theme.b},${opacity.toFixed(2)})`;
     });
+
+    // Chỉ hiện số trên cột khi giá trị đủ lớn (top 3), ẩn các cột nhỏ tránh lộn xộn
+    const threshold = max * 0.05;
+    const barText = values.map(v => v >= threshold ? v.toLocaleString('vi-VN') : '');
+
     return {
       data: [{
         type: 'bar',
         x: labels,
         y: values,
-        marker: { color: colors },
-        text: values.map(v => v.toLocaleString()),
+        marker: {
+          color: colors,
+          line: { color: colors.map(c => c.replace(/[\d.]+\)$/, '1)')), width: 1 }
+        },
+        text: barText,
         textposition: 'outside',
-        hovertemplate: '<b>%{x}</b><br>%{y:,} tin<extra></extra>'
+        textfont: { size: 11, color: '#374151' },
+        hovertemplate: '<b>%{x}</b><br>%{y:,} tin<extra></extra>',
+        cliponaxis: false
       }],
       layout: {
-        margin: { t: 10, b: 80, l: 40, r: 10 },
+        margin: { t: 50, b: 75, l: 50, r: 15 },
         plot_bgcolor: 'rgba(0,0,0,0)',
         paper_bgcolor: 'rgba(0,0,0,0)',
-        xaxis: { tickangle: -35, automargin: true },
-        yaxis: { gridcolor: 'rgba(0,0,0,0.06)' },
-        bargap: 0.3
+        xaxis: {
+          tickangle: -35,
+          automargin: true,
+          tickfont: { size: 10, color: '#6B7280' }
+        },
+        yaxis: {
+          gridcolor: 'rgba(0,0,0,0.06)',
+          tickfont: { size: 10 },
+          rangemode: 'nonnegative'
+        },
+        bargap: 0.35,
+        uniformtext: { minsize: 9, mode: 'hide' }
       }
     };
   };
@@ -372,16 +398,22 @@ const page1Cache = new Map();
                 {/* Drill-down: hiện tỉnh/thành theo vùng đã chọn */}
                 {mapToggle === 'region_chart' && drillRegion && (() => {
                   const drillFigure = buildDrillChart(drillRegion);
+                  const btnColors = {
+                    'Bắc':  { border: '#FA6781', bg: 'rgba(250,103,129,0.1)', text: '#c0324e' },
+                    'Trung':{ border: '#e6a800', bg: 'rgba(255,201,77,0.15)',  text: '#9a6d00' },
+                    'Nam':  { border: '#59B292', bg: 'rgba(89,178,146,0.1)',   text: '#469d7e' },
+                  };
+                  const btn = btnColors[drillRegion] || btnColors['Nam'];
                   return drillFigure ? (
-                    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                    <div className="drill-chart-wrapper">
                       <button
                         onClick={() => setDrillRegion(null)}
                         style={{
-                          position: 'absolute', top: 6, left: 8, zIndex: 10,
+                          position: 'absolute', top: 8, left: 8, zIndex: 10,
                           display: 'flex', alignItems: 'center', gap: 5,
-                          padding: '4px 12px', border: '1px solid #59B292',
-                          borderRadius: 20, background: 'rgba(89,178,146,0.1)',
-                          color: '#469d7e', fontSize: 12, fontWeight: 600,
+                          padding: '4px 12px', border: `1px solid ${btn.border}`,
+                          borderRadius: 20, background: btn.bg,
+                          color: btn.text, fontSize: 12, fontWeight: 600,
                           cursor: 'pointer'
                         }}
                       >

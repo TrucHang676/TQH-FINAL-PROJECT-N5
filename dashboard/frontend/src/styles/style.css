@@ -625,6 +625,18 @@ html {
   cursor: pointer !important;
 }
 
+/* Fade-in animation khi drill-down chart xuất hiện */
+@keyframes drillFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.drill-chart-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  animation: drillFadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
 /* ==========================================
    DASHBOARD 5 - AI CHAT UI STYLES
    Chat/Conversation style layout for AI Analysis
