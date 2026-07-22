@@ -447,6 +447,8 @@ def create_salary_by_location_chart(dff):
             title="",
             tickfont=dict(size=11, color='#0f172a', weight='bold'),
             autorange="reversed", # Hiển thị từ trên xuống dưới
+            showline=False,
+            ticks="",
         ),
         margin=dict(l=10, r=85, t=30, b=40),
     )

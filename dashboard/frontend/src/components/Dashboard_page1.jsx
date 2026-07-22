@@ -395,7 +395,7 @@ const page1Cache = new Map();
                     </label>
                     <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <input type="radio" value="map" checked={mapToggle === 'map'} onChange={(e) => setMapToggle(e.target.value)} />
-                      <span className="radio-label-text">Bản đồ</span>
+                      <span className="radio-label-text">Theo tỉnh</span>
                     </label>
                   </div>
                 </div>
