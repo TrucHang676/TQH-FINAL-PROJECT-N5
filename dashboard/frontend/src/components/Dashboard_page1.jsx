@@ -4,6 +4,8 @@ import PlotlyChart from './PlotlyChart';
 import Select from 'react-select';
 import KpiCard from './KpiCard';
 
+const page1Cache = new Map();
+
 const Dashboard_page1 = () => {
   // =============================================================================
   // Quản lý trạng thái (State) của các bộ lọc
@@ -12,10 +14,8 @@ const Dashboard_page1 = () => {
   const [sources, setSources] = useState([...sourceOptions]);
   const [position, setPosition] = useState(null);
   const [experience, setExperience] = useState(null);
-  const [region, setRegion] = useState(null);
-
-  // Trạng thái chuyển đổi chế độ xem bản đồ / biểu đồ cột
   const [mapToggle, setMapToggle] = useState('region_chart');
+  const [region, setRegion] = useState(null);
 
   // Trạng thái drill-down: null = đang xem 3 vùng, 'Nam'/'Bắc'/'Trung' = đang xem tỉnh của vùng đó
   const [drillRegion, setDrillRegion] = useState(null);
@@ -69,8 +69,6 @@ const Dashboard_page1 = () => {
     setExperience(experienceOptions[0]);
     setRegion(regionOptions[0]);
   }, []);
-
-const page1Cache = new Map();
 
   useEffect(() => {
     if (!position || !experience || !region) return;
@@ -126,7 +124,7 @@ const page1Cache = new Map();
     setExperience(experienceOptions[0]);
     setRegion(regionOptions[0]);
     setWorkType(null);
-    setMapToggle('map');
+    setMapToggle('region_chart');
   };
 
   // Custom styles for react-select to match the palette
@@ -408,7 +406,9 @@ const page1Cache = new Map();
 
                 {/* Vertical Region Bar Chart — hỗ trợ Drill-down */}
                 {mapToggle === 'region_chart' && data?.charts?.region_chart && !drillRegion && (
-                  <PlotlyChart key="region-view" figure={data.charts.region_chart} onChartClick={handleRegionClick} />
+                  <div className="plotly-clickable" style={{ width: '100%', height: '100%' }}>
+                    <PlotlyChart key="region-view" figure={data.charts.region_chart} onChartClick={handleRegionClick} />
+                  </div>
                 )}
 
                 {/* Drill-down: hiện tỉnh/thành theo vùng đã chọn */}
@@ -531,7 +531,7 @@ const page1Cache = new Map();
                       </span>
                     </span>
                   </div>
-                  <div className="chart-content">
+                  <div className="chart-content plotly-clickable">
                     {data?.charts?.work && <PlotlyChart figure={data.charts.work} onChartClick={handleWorkClick} />}
                   </div>
                 </div>

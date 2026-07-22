@@ -635,6 +635,21 @@ html {
   cursor: pointer !important;
 }
 
+/* Giới hạn stroke hover của Plotly Treemap — mặc định nó vẽ đường đen dày khi hover */
+.treemap-card path,
+.plotly-clickable .treemap path {
+  stroke-width: 1px !important;
+  transition: stroke 0.12s ease-in-out, stroke-width 0.12s ease-in-out !important;
+}
+
+/* Border xanh lá đậm quanh phần tử được hover (class thêm bởi JS handleHover) */
+.plotly-clickable path.hovered-bar {
+  stroke: #1a5944 !important;
+  stroke-width: 1.25px !important;
+  transition: stroke 0.12s ease-in-out, stroke-width 0.12s ease-in-out !important;
+}
+
+
 /* Fade-in animation khi drill-down chart xuất hiện */
 @keyframes drillFadeIn {
   from { opacity: 0; transform: translateY(6px); }

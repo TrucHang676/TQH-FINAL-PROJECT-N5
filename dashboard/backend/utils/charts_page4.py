@@ -131,7 +131,7 @@ def create_youth_opportunity_treemap(df):
         textfont=dict(size=12, color=text_colors),
         marker=dict(
             colors=tile_colors,
-            line=dict(width=2, color='#ffffff')
+            line=dict(width=1, color='#ffffff')
         ),
         hovertext=hover_texts,
         hovertemplate="%{hovertext}<extra></extra>",

@@ -4,6 +4,8 @@ import PlotlyChart from './PlotlyChart';
 import Select from 'react-select';
 import KpiCard from './KpiCard';
 
+const page3Cache = new Map();
+
 const Dashboard_page3 = () => {
   // =========================================================================
   // State: Bộ lọc (giống hệt Page 1 & 2)
@@ -57,8 +59,6 @@ const Dashboard_page3 = () => {
     setExperience(experienceOptions[0]);
     setRegion(regionOptions[0]);
   }, []);
-
-const page3Cache = new Map();
 
   // Gọi API khi bộ lọc thay đổi
   useEffect(() => {

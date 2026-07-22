@@ -4,6 +4,8 @@ import PlotlyChart from './PlotlyChart';
 import Select from 'react-select';
 import KpiCard from './KpiCard';
 
+const page2Cache = new Map();
+
 const Dashboard_page2 = () => {
   // =========================================================================
   // State: Bộ lọc
@@ -17,7 +19,7 @@ const Dashboard_page2 = () => {
   const [region, setRegion] = useState(null);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [trendMode, setTrendMode] = useState('smoothed'); // 'actual' hoặc 'smoothed'
+  const [trendMode, setTrendMode] = useState('actual'); // 'actual' hoặc 'smoothed'
 
   // ---- Dropdown options (giống Page 1 nhưng với nhóm vị trí cập nhật) ----
   const positionOptions = [
@@ -58,8 +60,6 @@ const Dashboard_page2 = () => {
     setExperience(experienceOptions[0]);
     setRegion(regionOptions[0]);
   }, []);
-
-const page2Cache = new Map();
 
   // Gọi API khi bộ lọc thay đổi
   useEffect(() => {

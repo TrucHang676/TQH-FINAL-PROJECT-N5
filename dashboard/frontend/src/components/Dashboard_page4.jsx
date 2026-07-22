@@ -4,6 +4,8 @@ import PlotlyChart from './PlotlyChart';
 import Select from 'react-select';
 import KpiCard from './KpiCard';
 
+const page4Cache = new Map();
+
 const Dashboard_page4 = () => {
   // =========================================================================
   // State: Bộ lọc
@@ -59,8 +61,6 @@ const Dashboard_page4 = () => {
     setWorkType(workTypeOptions[0]);
   }, []);
 
-const page4Cache = new Map();
-
   // Gọi API khi bộ lọc thay đổi
   useEffect(() => {
     if (!region || !position || !workType) return;
@@ -113,7 +113,15 @@ const page4Cache = new Map();
         opt => opt.value !== 'All' && (opt.value === cleanText || opt.label === cleanText || cleanText.includes(opt.value))
       );
       if (matchedOption) {
-        setPosition(matchedOption);
+        // NẾU Ô NÀY ĐANG ĐƯỢC CHỌN -> BẤM LẠI SẼ HỦY LỌC (QUAY VỀ BIỂU ĐỒ GỐC)!
+        if (position?.value === matchedOption.value) {
+          setPosition(positionOptions[0]);
+        } else {
+          setPosition(matchedOption);
+        }
+      } else {
+        // Bấm ngoài ô hoặc ô tổng -> Quay về biểu đồ gốc
+        setPosition(positionOptions[0]);
       }
     }
   };
@@ -299,9 +307,17 @@ const page4Cache = new Map();
                 <div className="chart-header">
                   <span className="chart-title">
                     Nhóm vị trí nào cởi mở nhất với Fresher/Intern?
-                    {position?.value !== 'All' && (
-                      <span style={{ fontSize: '11px', fontWeight: 400, color: '#59B292', marginLeft: 8 }}>
-                        (Đang lọc: {position.label})
+                    {position?.value && position.value !== 'All' && (
+                      <span
+                        onClick={() => setPosition(positionOptions[0])}
+                        style={{
+                          fontSize: '11px', fontWeight: 600, color: '#059669',
+                          marginLeft: 8, cursor: 'pointer', background: '#ecfdf5',
+                          padding: '2px 8px', borderRadius: '12px', border: '1px solid #a7f3d0'
+                        }}
+                        title="Bấm để quay lại biểu đồ gốc"
+                      >
+                        📍 Đang lọc: {position.label} (Click lại ô để quay về ↩)
                       </span>
                     )}
                   </span>
@@ -309,6 +325,7 @@ const page4Cache = new Map();
                 <div className="chart-content plotly-clickable">
                   {data?.charts?.youth_opportunity_treemap && (
                     <PlotlyChart
+                      key={`treemap-${position?.value || 'all'}`}
                       figure={data.charts.youth_opportunity_treemap}
                       onChartClick={handleTreemapClick}
                     />
