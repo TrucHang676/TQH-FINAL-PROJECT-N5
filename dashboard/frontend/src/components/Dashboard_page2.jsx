@@ -17,6 +17,7 @@ const Dashboard_page2 = () => {
   const [position, setPosition] = useState(null);
   const [experience, setExperience] = useState(null);
   const [region, setRegion] = useState(null);
+  const [selectedSkill, setSelectedSkill] = useState(null);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [trendMode, setTrendMode] = useState('actual'); // 'actual' hoặc 'smoothed'
@@ -66,7 +67,13 @@ const Dashboard_page2 = () => {
     if (!position || !experience || !region) return;
     let isActive = true;
 
-    const cacheKey = JSON.stringify({ sources: [...sources].sort(), position: position.value, experience: experience.value, region: region.value });
+    const cacheKey = JSON.stringify({
+      sources: [...sources].sort(),
+      position: position.value,
+      experience: experience.value,
+      region: region.value,
+      skill: selectedSkill
+    });
     if (page2Cache.has(cacheKey)) {
       setData(page2Cache.get(cacheKey));
       setLoading(false);
@@ -81,6 +88,7 @@ const Dashboard_page2 = () => {
           position: position.value,
           experience: experience.value,
           region: region.value,
+          skill: selectedSkill || null,
         });
         if (isActive) {
           page2Cache.set(cacheKey, response.data);
@@ -95,7 +103,7 @@ const Dashboard_page2 = () => {
 
     fetchData();
     return () => { isActive = false; };
-  }, [sources, position, experience, region]);
+  }, [sources, position, experience, region, selectedSkill]);
 
   const handleSourceChange = (val) => {
     setSources(prev =>
@@ -108,6 +116,7 @@ const Dashboard_page2 = () => {
     setPosition(positionOptions[0]);
     setExperience(experienceOptions[0]);
     setRegion(regionOptions[0]);
+    setSelectedSkill(null);
   };
 
   // Custom styles cho react-select (giống hệt Page 1)
@@ -169,6 +178,105 @@ const Dashboard_page2 = () => {
       ...figure,
       data: filteredData
     };
+  };
+
+  // 1. Click Handler cho Top 15 Skills Bar Chart
+  const handleSkillClick = (e) => {
+    if (!e.points || e.points.length === 0) return;
+    const pt = e.points[0];
+    const rawSkill = pt.y || pt.label;
+    if (!rawSkill) return;
+
+    const cleanedSkill = String(rawSkill).trim().replace(/\.\.\.$/, '').trim();
+
+    if (selectedSkill && selectedSkill.toLowerCase() === cleanedSkill.toLowerCase()) {
+      setSelectedSkill(null); // Click lại để bỏ chọn
+    } else {
+      setSelectedSkill(cleanedSkill); // Click chọn kỹ năng → lọc toàn trang
+    }
+  };
+
+  // 2. Click Handler cho Heatmap
+  const posGroupMap = [
+    'Software Development',
+    'AI / ML / Data Science',
+    'Mobile / Game / Embedded',
+    'Cloud / DevOps / SRE',
+    'QA / Testing',
+    'Data Engineering / Database'
+  ];
+
+  const handleHeatmapClick = (e) => {
+    if (!e.points || e.points.length === 0) return;
+    const pt = e.points[0];
+
+    let clickedPosVal = null;
+    if (typeof pt.pointIndex === 'number' && Array.isArray(pt.pointIndex) && pt.pointIndex.length >= 2) {
+      const colIdx = pt.pointIndex[1];
+      if (colIdx >= 0 && colIdx < posGroupMap.length) {
+        clickedPosVal = posGroupMap[colIdx];
+      }
+    } else if (typeof pt.x === 'string') {
+      const cleanX = pt.x.replace('\n', ' ');
+      if (cleanX.includes('Software')) clickedPosVal = 'Software Development';
+      else if (cleanX.includes('AI') || cleanX.includes('ML')) clickedPosVal = 'AI / ML / Data Science';
+      else if (cleanX.includes('Mobile') || cleanX.includes('Game')) clickedPosVal = 'Mobile / Game / Embedded';
+      else if (cleanX.includes('Cloud') || cleanX.includes('DevOps')) clickedPosVal = 'Cloud / DevOps / SRE';
+      else if (cleanX.includes('QA') || cleanX.includes('Testing')) clickedPosVal = 'QA / Testing';
+      else if (cleanX.includes('Data') || cleanX.includes('Engineering')) clickedPosVal = 'Data Engineering / Database';
+    }
+
+    if (clickedPosVal) {
+      if (position && position.value === clickedPosVal) {
+        setPosition(positionOptions[0]); // Reset về Tất cả
+      } else {
+        const matchOpt = positionOptions.find(o => o.value === clickedPosVal);
+        if (matchOpt) setPosition(matchOpt);
+      }
+    }
+  };
+
+  // 3. Click Handler cho Tech Trend Chart
+  const handleTrendClick = (e) => {
+    if (!e.points || e.points.length === 0) return;
+    const pt = e.points[0];
+    const traceName = pt.data?.name || '';
+    let targetPos = null;
+
+    if (traceName.includes('AI') || traceName.includes('ML')) targetPos = 'AI / ML / Data Science';
+    else if (traceName.includes('Cloud')) targetPos = 'Cloud / DevOps / SRE';
+    else if (traceName.includes('DevOps') || traceName.includes('Container')) targetPos = 'Cloud / DevOps / SRE';
+    else if (traceName.includes('Data Engineering')) targetPos = 'Data Engineering / Database';
+
+    if (targetPos) {
+      if (position && position.value === targetPos) {
+        setPosition(positionOptions[0]);
+      } else {
+        const matchOpt = positionOptions.find(o => o.value === targetPos);
+        if (matchOpt) setPosition(matchOpt);
+      }
+    }
+  };
+
+  // Highlight Helper cho Top Skills Bar Chart
+  const getHighlightedSkillsFigure = (figure, skill) => {
+    if (!figure || !figure.data || !skill) return figure;
+    const newData = figure.data.map(trace => {
+      const yVals = Array.isArray(trace.y) ? trace.y : [];
+      if (!yVals.length) return trace;
+      const opacities = yVals.map(y => {
+        const cleanY = String(y).trim().replace(/\.\.\.$/, '').trim();
+        return cleanY.toLowerCase() === skill.toLowerCase() ? 1.0 : 0.35;
+      });
+      return {
+        ...trace,
+        marker: {
+          ...trace.marker,
+          opacity: opacities
+        }
+      };
+    });
+    return { ...figure, data: newData };
   };
 
   return (
@@ -260,7 +368,6 @@ const Dashboard_page2 = () => {
               badge="Đa năng"
               value={(() => {
                 const name = data?.kpi?.most_diverse_position?.name || 'N/A';
-                // Rút gọn tên dài
                 const shortMap = {
                   'Software Development': 'Software Dev',
                   'AI / ML / Data Science': 'AI / ML',
@@ -297,7 +404,10 @@ const Dashboard_page2 = () => {
               </div>
               <div className="chart-content">
                 {data?.charts?.top_skills && (
-                  <PlotlyChart figure={data.charts.top_skills} />
+                  <PlotlyChart
+                    figure={getHighlightedSkillsFigure(data.charts.top_skills, selectedSkill)}
+                    onChartClick={handleSkillClick}
+                  />
                 )}
               </div>
             </div>
@@ -315,7 +425,10 @@ const Dashboard_page2 = () => {
                 </div>
                 <div className="chart-content">
                   {data?.charts?.heatmap && (
-                    <PlotlyChart figure={data.charts.heatmap} />
+                    <PlotlyChart
+                      figure={data.charts.heatmap}
+                      onChartClick={handleHeatmapClick}
+                    />
                   )}
                 </div>
               </div>
@@ -358,7 +471,10 @@ const Dashboard_page2 = () => {
                 </div>
                 <div className="chart-content">
                   {data?.charts?.tech_trend && (
-                    <PlotlyChart figure={getFilteredTrendFigure(data.charts.tech_trend, trendMode)} />
+                    <PlotlyChart
+                      figure={getFilteredTrendFigure(data.charts.tech_trend, trendMode)}
+                      onChartClick={handleTrendClick}
+                    />
                   )}
                 </div>
               </div>

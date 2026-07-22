@@ -16,6 +16,7 @@ class FilterRequest(BaseModel):
     position: Optional[str] = None
     experience: Optional[str] = None
     region: Optional[str] = None
+    skill: Optional[str] = None
 
 
 @router.post("/api/dashboard/page2")
@@ -48,6 +49,11 @@ def get_page2_data(req: FilterRequest):
 
     if req.region and req.region != 'All':
         dff = dff[dff['vung_mien'] == req.region]
+
+    if req.skill:
+        # Lọc tương tác theo kỹ năng cụ thể
+        pattern = rf'(?<![a-zA-Z]){req.skill.strip()}(?![a-zA-Z])'
+        dff = dff[dff['ky_nang'].fillna('').str.contains(pattern, case=False, regex=True)]
 
     # ---- Lấy danh sách kỹ năng kỹ thuật đã lọc (phục vụ KPI) ----
     tech_skills_series = charts._get_tech_skills(dff)
