@@ -643,7 +643,10 @@ html {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 24px;
+  padding: 8px 32px;
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
   font-size: 12px;
   color: var(--text-muted);
   border-bottom: 1px solid var(--border-color);
@@ -753,25 +756,22 @@ html {
 
 /* ---- Message Bubbles ---- */
 
-/* Single message row — canh giữa thành 1 cột đọc như Gemini/ChatGPT */
+/* Single message row — canh giữa đồng bộ trong 1 cột đọc 960px như ChatGPT/Claude/Gemini */
 .ai-msg-row {
   display: flex;
   width: 100%;
-  max-width: 860px;
+  max-width: 960px;
   margin: 0 auto;
   animation: msgSlideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
-/* Bong bóng người dùng KHÔNG bó trong cột đọc 860px căn giữa như câu trả lời AI —
-   phải căn theo mép phải THẬT của khung chat, nếu không sẽ trông như bị "căn giữa"
-   khi khung chat rộng hơn 860px (chỉ hugging mép phải của cột con, không phải
-   mép phải thật của trang). */
 .ai-msg-row.user {
-  max-width: 100%;
+  max-width: 960px;
   justify-content: flex-end;
 }
 
 .ai-msg-row.ai {
+  max-width: 960px;
   justify-content: flex-start;
 }
 
@@ -788,7 +788,7 @@ html {
 
 /* User message bubble */
 .ai-msg-user {
-  max-width: 65%;
+  max-width: 100%;
   background: linear-gradient(135deg, #59B292, #469d7e);
   color: #ffffff;
   padding: 14px 20px;
@@ -810,8 +810,10 @@ html {
 .ai-msg-user-wrap {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 6px;
   max-width: 80%;
+  margin-left: auto;
 }
 
 .ai-user-edit-btn {
@@ -1257,6 +1259,8 @@ html {
 }
 
 .ai-chat-input-inner {
+  max-width: 960px;
+  margin: 0 auto;
   background-color: var(--card-bg);
   border: 1.5px solid var(--border-color);
   border-radius: 16px;
