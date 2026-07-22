@@ -331,24 +331,9 @@ const page1Cache = new Map();
                   <PlotlyChart key="region-view" figure={data.charts.region_chart} onChartClick={handleRegionClick} />
                 )}
 
-                {/* Floating Widgets on Left and Right of Vietnam Map */}
+                {/* Floating Widget on Right of Vietnam Map */}
                 {mapToggle === 'map' && data?.regions && (
                   <>
-                    {/* Left overlay for Remote / Other jobs */}
-                    <div className="map-overlay-box overlay-left">
-                      <div className="overlay-box-title">Ngoài địa lý cụ thể</div>
-                      <div className="overlay-item">
-                        <span className="overlay-dot" style={{ backgroundColor: '#0d9488' }}></span>
-                        <span className="overlay-label">Từ xa / Remote:</span>
-                        <span className="overlay-val-bold">{data.regions['Từ xa / Remote']?.toLocaleString() || 0} tin</span>
-                      </div>
-                      <div className="overlay-item">
-                        <span className="overlay-dot" style={{ backgroundColor: '#9ca3af' }}></span>
-                        <span className="overlay-label">Khác / Không rõ:</span>
-                        <span className="overlay-val-bold">{data.regions['Khác']?.toLocaleString() || 0} tin</span>
-                      </div>
-                    </div>
-
                     {/* Right overlay for region breakdown */}
                     <div className="map-overlay-box overlay-right">
                       <div className="overlay-box-title">Thống kê theo 3 Miền</div>
