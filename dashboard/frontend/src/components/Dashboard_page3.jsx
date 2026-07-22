@@ -8,7 +8,7 @@ const Dashboard_page3 = () => {
   // =========================================================================
   // State: Bộ lọc (giống hệt Page 1 & 2)
   // =========================================================================
-  const sourceOptions = ['ITviec', 'JobsGO', 'TopCV', 'TopDev', 'VietnamWorks'];
+  const sourceOptions = ['ITviec', 'TopDev', 'VietJobs', 'Vieclam24h', 'TopCV', 'JobsGO'];
 
   const [sources, setSources] = useState([...sourceOptions]);
   const [position, setPosition] = useState(null);

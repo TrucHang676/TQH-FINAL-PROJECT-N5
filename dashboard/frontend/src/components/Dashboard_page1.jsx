@@ -8,7 +8,8 @@ const Dashboard_page1 = () => {
   // =============================================================================
   // Quản lý trạng thái (State) của các bộ lọc
   // =============================================================================
-  const [sources, setSources] = useState(['TopCV', 'VietnamWorks', 'ITviec', 'JobsGO', 'TopDev']);
+  const sourceOptions = ['ITviec', 'TopDev', 'VietJobs', 'Vieclam24h', 'TopCV', 'JobsGO'];
+  const [sources, setSources] = useState([...sourceOptions]);
   const [position, setPosition] = useState(null);
   const [experience, setExperience] = useState(null);
   const [region, setRegion] = useState(null);
@@ -63,8 +64,6 @@ const Dashboard_page1 = () => {
     setRegion(regionOptions[0]);
   }, []);
 
-  const sourceOptions = ['ITviec', 'JobsGO', 'TopCV', 'TopDev', 'VietnamWorks'];
-
   useEffect(() => {
     if (!position || !experience || !region) return;
     let isActive = true;
@@ -105,7 +104,7 @@ const Dashboard_page1 = () => {
   };
 
   const resetFilters = () => {
-    setSources(['TopCV', 'VietnamWorks', 'ITviec', 'JobsGO', 'TopDev']);
+    setSources([...sourceOptions]);
     setPosition(positionOptions[0]);
     setExperience(experienceOptions[0]);
     setRegion(regionOptions[0]);
