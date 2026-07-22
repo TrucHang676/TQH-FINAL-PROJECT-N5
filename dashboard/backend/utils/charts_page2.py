@@ -51,7 +51,7 @@ EMERGING_TECH_GROUPS = {
 # Màu sắc cho 4 nhóm công nghệ (đảm bảo độ tương phản cao, dễ phân biệt)
 EMERGING_COLORS = {
     'AI / ML': '#FA6781',           # Coral Red (Đỏ san hô)
-    'Cloud': '#2563EB',             # Royal Blue (Xanh dương nổi bật đại diện cho Cloud)
+    'Cloud': '#4A89F3',             # Soft Sky Blue (Xanh dương sáng dịu nhẹ đại diện cho Cloud)
     'DevOps / Container': '#FFC94D', # Amber Gold (Vàng hổ phách)
     'Data Engineering': '#0D9488',  # Teal (Xanh mòng két)
 }
