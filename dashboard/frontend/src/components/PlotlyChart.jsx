@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Plot from 'react-plotly.js';
 
-const PlotlyChart = ({ figure, style, onChartClick, onGraphReady }) => {
+const PlotlyChart = ({ figure, style, onChartClick, onGraphReady, scrollZoom = false }) => {
   const [revision, setRevision] = useState(0);
 
   // Trigger a full Plotly recalculation/redraw when the figure data changes
@@ -52,7 +52,7 @@ const PlotlyChart = ({ figure, style, onChartClick, onGraphReady }) => {
       config={{
         displayModeBar: false,
         responsive: true,
-        scrollZoom: false,
+        scrollZoom: scrollZoom,
         doubleClick: 'reset'
       }}
       onClick={onChartClick ? (e) => onChartClick(e) : undefined}

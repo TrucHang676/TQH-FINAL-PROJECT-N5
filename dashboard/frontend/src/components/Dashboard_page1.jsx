@@ -323,7 +323,7 @@ const page1Cache = new Map();
               <div className="chart-content" style={{ position: 'relative' }}>
                 {/* Geographic Map */}
                 {mapToggle === 'map' && data?.charts?.map && (
-                  <PlotlyChart key="map-view" figure={data.charts.map} />
+                  <PlotlyChart key="map-view" figure={data.charts.map} scrollZoom={true} />
                 )}
 
                 {/* Vertical Region Bar Chart */}
