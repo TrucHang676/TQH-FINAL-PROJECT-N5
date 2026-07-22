@@ -69,23 +69,23 @@ sequenceDiagram
     participant AI as Gemini Model API
 
     Note over User, AI: GIAI ĐOẠN 1: TIẾP NHẬN & SINH CODE/VĂN BẢN (GENERATION)
-    User->>FE: Nhập yêu cầu ("Vẽ biểu đồ Top 10 kỹ năng...")
-    FE->>BE: POST /api/ai/stream (Prompt + Conversation Context)
-    BE->>AI: Gửi System Prompt + Context (Max 8 turns)
+    User->{FE}: Nhập yêu cầu ("Vẽ biểu đồ Top 10 kỹ năng...")
+    FE->{BE}: POST /api/ai/stream (Prompt + Conversation Context)
+    BE->{AI}: Gửi System Prompt + Context (Max 8 turns)
     AI-->>BE: Stream nội dung (Văn bản dẫn nhập + Python Code)
     BE-->>FE: Stream SSE Events (phase: delta)
-    FE->>FE: Hiển thị Code trên Monaco Editor với badge "⚠️ Chờ duyệt"
+    FE->{FE}: Hiển thị Code trên Monaco Editor với badge "⚠️ Chờ duyệt"
 
     Note over User, AI: GIAI ĐOẠN 2: PHÊ DUYỆT & CHỈNH SỬA (HUMAN REVIEW & EDIT)
-    User->>FE: Xem xét code, trực tiếp gõ sửa tham số (VD: đổi top 10 -> top 15)
-    User->>FE: Bấm nút "Duyệt & Chạy" (Play Icon)
+    User->{FE}: Xem xét code, trực tiếp gõ sửa tham số (VD: đổi top 10 -> top 15)
+    User->{FE}: Bấm nút "Duyệt & Chạy" (Play Icon)
 
     Note over User, AI: GIAI ĐOẠN 3: THỰC THI LOCAL & HIỂN THỊ KẾT QUẢ (LOCAL EXECUTION)
-    FE->>BE: POST /api/ai/execute (requestId, editedCode)
-    BE->>BE: Thực thi exec(editedCode, local_env) trên local DataFrame
-    BE->>BE: Trích xuất Plotly JSON Figure & Bảng dữ liệu Long-format CSV
+    FE->{BE}: POST /api/ai/execute (requestId, editedCode)
+    BE->{BE}: Thực thi exec(editedCode, local_env) trên local DataFrame
+    BE->{BE}: Trích xuất Plotly JSON Figure & Bảng dữ liệu Long-format CSV
     BE-->>FE: Trả về { status: "success", result: { plotly_json, csv } }
-    FE->>FE: Render biểu đồ Plotly tương tác & nút Tải file CSV
+    FE->{FE}: Render biểu đồ Plotly tương tác & nút Tải file CSV
 ```
 
 ---
@@ -99,8 +99,8 @@ sequenceDiagram
   {
     "prompt": "Phân tích xu hướng tuyển dụng theo cấp độ kinh nghiệm",
     "conversationId": "conv_1721643200",
-    "image": "data:image/png;base64,...", // (Tùy chọn cho Vision AI)
-    "mode": "auto" // 'auto' | 'code' | 'ask' | 'explain' | 'comment'
+    "image": "data:image/png;base64,...",
+    "mode": "auto"
   }
   ```
 - **Response Format**: `text/event-stream` (Server-Sent Events)
@@ -132,7 +132,30 @@ sequenceDiagram
 
 ---
 
-## 🌟 5. Các Tính năng Độc đáo Nổi bật
+## 🛠️ 5. Hướng dẫn Thiết lập & Khởi chạy Module AI
+
+1. **Cấu hình Gemini API Key**:
+   Tạo hoặc chỉnh sửa file `.env` tại thư mục `dashboard/backend/.env`:
+   ```env
+   GEMINI_API_KEY=AIzaSy...your_gemini_key_1
+   # Bạn có thể thêm nhiều key cách nhau bởi dấu phẩy để hệ thống tự động Fallback:
+   # GEMINI_API_KEYS=key1,key2,key3
+   ```
+2. **Chạy Backend**:
+   ```bash
+   cd dashboard
+   uvicorn backend.main:app --reload --port 8000
+   ```
+3. **Chạy Frontend**:
+   ```bash
+   cd dashboard/frontend
+   npm run dev
+   ```
+4. **Truy cập**: Mở trình duyệt tại `http://localhost:5173` và chuyển sang **Tab 5 (AI Analyst)**.
+
+---
+
+## 🌟 6. Các Tính năng Độc đáo Nổi bật
 
 1. **Monaco Code Editor tích hợp**: Trải nghiệm chỉnh sửa code chuyên nghiệp như trên VS Code với syntax highlighting, line numbers và auto-wrap.
 2. **Cơ chế API Key Fallback tự động**: Khi một Gemini API Key chạm ngưỡng giới hạn 429 (ResourceExhausted), hệ thống tự động chuyển sang API Key dự phòng mà không ngắt đoạn trải nghiệm của người dùng.
@@ -142,7 +165,7 @@ sequenceDiagram
 
 ---
 
-## 📋 6. Quy trình Kiểm thử & Bảo vệ (Demo với Giảng viên)
+## 📋 7. Quy trình Kiểm thử & Bảo vệ (Demo với Giảng viên)
 
 Khi trình diễn chức năng AI cho môn học, thực hiện theo đúng 3 bước minh họa chuẩn **Human-in-the-Loop**:
 
