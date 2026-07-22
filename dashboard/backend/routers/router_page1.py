@@ -49,6 +49,9 @@ def get_dashboard_data(req: FilterRequest):
     if req.region and req.region != 'All':
         dff = dff[dff['vung_mien'] == req.region]
 
+    if req.work_type:
+        dff = dff[dff['hinh_thuc_lam_viec'] == req.work_type]
+
     # Tính toán tổng tin
     total_jobs = int(len(dff))
 
@@ -103,10 +106,7 @@ def get_dashboard_data(req: FilterRequest):
             spark4_data = [int(x) for x in work_dff.groupby('thang_dang').size().tolist()]
             spark4_fig = charts.create_sparkline(spark4_data, spark_color)
 
-    # Nếu có lọc theo Cross-filter Hình thức làm việc thì chỉ lọc dữ liệu cho Line chart
-    trend_dff = dff.copy()
-    if req.work_type:
-        trend_dff = trend_dff[trend_dff['hinh_thuc_lam_viec'] == req.work_type]
+    trend_dff = dff
 
     # Vẽ tất cả biểu đồ song song để tăng tốc độ
     from concurrent.futures import ThreadPoolExecutor
