@@ -415,13 +415,7 @@ const Dashboard_page1 = () => {
                       ? `📍 Miền ${drillRegion} — Top tỉnh/thành`
                       : 'Biểu đồ phân bố tuyển dụng'
                   )}
-                  {mapToggle === 'region_chart' && !drillRegion && (
-                    <span style={{ fontSize: '11px', fontWeight: 400, color: '#9CA3AF', marginLeft: 8 }}>
-                      {selectedRegion
-                        ? '(click lại để drill-down)'
-                        : '(click cột để lọc)'}
-                    </span>
-                  )}
+                  
                 </span>
                 <div className="toggle-container">
                   <div className="toggle-switch" style={{ display: 'flex', gap: '10px' }}>
@@ -570,9 +564,6 @@ const Dashboard_page1 = () => {
                   <div className="chart-header">
                     <span className="chart-title">
                       Hình thức làm việc chủ đạo
-                      <span style={{ fontSize: '11px', fontWeight: 400, color: '#9CA3AF', marginLeft: 8 }}>
-                        (click cột để lọc line chart)
-                      </span>
                     </span>
                   </div>
                   <div className="chart-content plotly-clickable">
