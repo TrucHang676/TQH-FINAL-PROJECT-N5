@@ -159,11 +159,15 @@ def create_top_skills_chart(df):
     fig.update_yaxes(
         showgrid=False,
         linecolor='#e5e7eb',
-        tickfont=dict(size=10, color='#111827', weight='bold')
+        tickfont=dict(size=10, color='#111827', weight='bold'),
+        automargin=True
     )
 
     apply_layout_styles(fig)
-    fig.update_layout(margin=dict(l=75, r=35, t=10, b=20))
+    # Tự động tính margin trái dựa trên nhãn dài nhất để tránh bị cắt chữ khi lọc
+    max_label_len = max(len(name) for name in display_names) if display_names else 10
+    left_margin = max(80, min(max_label_len * 7 + 10, 140))
+    fig.update_layout(margin=dict(l=left_margin, r=35, t=10, b=20))
 
     return fig
 
