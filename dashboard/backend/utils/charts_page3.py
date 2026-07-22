@@ -166,6 +166,7 @@ def create_salary_distribution_chart(dff):
             title=dict(text="Mức lương trung bình (triệu VNĐ)", font=dict(size=10, color='#4b5563', weight='bold')),
             tickfont=dict(size=9, color='#4b5563'),
             gridcolor='rgba(0,0,0,0.05)',
+            tick0=10,
             dtick=10,
         ),
         yaxis=dict(
@@ -258,6 +259,23 @@ def create_salary_by_position_experience_chart(dff):
         [1.0, "#1a5944"],
     ]
 
+    # Tính min, max để xác định ô nào xanh đậm thì dùng chữ trắng nổi bật (dùng HTML span trong text)
+    valid_z = [v for row in z_values for v in row if v is not None]
+    z_min = min(valid_z) if valid_z else 0
+    z_max = max(valid_z) if valid_z else 1
+    z_span = (z_max - z_min) or 1.0
+
+    formatted_text_matrix = []
+    for z_row in z_values:
+        f_row = []
+        for val in z_row:
+            if val is None:
+                f_row.append("-")
+            else:
+                c = "#ffffff" if (val - z_min) / z_span > 0.5 else "#111827"
+                f_row.append(f"<span style='color:{c}'>{val:.1f}</span>")
+        formatted_text_matrix.append(f_row)
+
     # Map lại pos_order sang tên ngắn gọn
     display_pos_order = [short_pos_map.get(pos, pos) for pos in pos_order]
 
@@ -265,9 +283,9 @@ def create_salary_by_position_experience_chart(dff):
         z=z_values,
         x=exp_order,
         y=display_pos_order,
-        text=text_values,
+        text=formatted_text_matrix,
         texttemplate="%{text}",
-        textfont=dict(size=9, color='#111827'), # Size 9 giống Page 2
+        textfont=dict(size=9.5),
         hoverinfo="text",
         hovertext=hover_text,
         colorscale=custom_colorscale,
@@ -283,6 +301,8 @@ def create_salary_by_position_experience_chart(dff):
     ))
 
     apply_layout_styles(fig)
+    fig.update_xaxes(showline=False, ticks="")
+    fig.update_yaxes(showline=False, ticks="")
     fig.update_layout(
         height=400,
         xaxis=dict(
@@ -365,7 +385,7 @@ def create_salary_by_location_chart(dff):
     colors = []
     for loc in city_salary['location']:
         if 'Remote' in str(loc):
-            colors.append('#8b5cf6') # Màu tím nhấn riêng cho Remote
+            colors.append(REGION_COLORS.get('Từ xa / Remote', '#3B82F6'))
         else:
             region = city_region_map.get(loc, 'Khác')
             colors.append(REGION_COLORS.get(region, '#9ca3af'))
@@ -418,17 +438,17 @@ def create_salary_by_location_chart(dff):
     fig.update_layout(
         height=400,
         xaxis=dict(
-            title=dict(text="Lương trung bình (triệu VNĐ)", font=dict(size=10, color='#4b5563', weight='bold')),
-            tickfont=dict(size=9, color='#4b5563'),
+            title=dict(text="Lương trung bình (triệu VNĐ)", font=dict(size=11, color='#1e293b', weight='bold')),
+            tickfont=dict(size=10, color='#374151', weight='bold'),
             gridcolor='rgba(0,0,0,0.05)',
-            range=[0, float(city_salary['avg_salary'].max()) * 1.3],
+            range=[0, float(city_salary['avg_salary'].max()) * 1.35],
         ),
         yaxis=dict(
             title="",
-            tickfont=dict(size=10, color='#111827', weight='bold'),
+            tickfont=dict(size=11, color='#0f172a', weight='bold'),
             autorange="reversed", # Hiển thị từ trên xuống dưới
         ),
-        margin=dict(l=10, r=60, t=30, b=40),
+        margin=dict(l=10, r=85, t=30, b=40),
     )
     return fig
 

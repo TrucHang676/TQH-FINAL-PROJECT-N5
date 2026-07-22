@@ -16,6 +16,7 @@ class FilterRequest(BaseModel):
     position: Optional[str] = None
     experience: Optional[str] = None
     region: Optional[str] = None
+    work_type: Optional[str] = None
     map_toggle: Optional[str] = 'map'
 
 @router.post("/api/dashboard/page1")
@@ -102,13 +103,18 @@ def get_dashboard_data(req: FilterRequest):
             spark4_data = [int(x) for x in work_dff.groupby('thang_dang').size().tolist()]
             spark4_fig = charts.create_sparkline(spark4_data, spark_color)
 
+    # Nếu có lọc theo Cross-filter Hình thức làm việc thì chỉ lọc dữ liệu cho Line chart
+    trend_dff = dff.copy()
+    if req.work_type:
+        trend_dff = trend_dff[trend_dff['hinh_thuc_lam_viec'] == req.work_type]
+
     # Vẽ tất cả biểu đồ song song để tăng tốc độ
     from concurrent.futures import ThreadPoolExecutor
 
     _dff = dff  # capture cho closure
     with ThreadPoolExecutor(max_workers=4) as pool:
-        f_trend       = pool.submit(charts.create_time_trend_chart, _dff)
-        f_work        = pool.submit(charts.create_work_type_chart, _dff)
+        f_trend       = pool.submit(charts.create_time_trend_chart, trend_dff)
+        f_work        = pool.submit(charts.create_work_type_chart, _dff, selected_work_type=req.work_type)
         f_map         = pool.submit(charts.create_vietnam_map, _dff)
         f_region      = pool.submit(charts.create_region_vertical_chart, _dff)
 

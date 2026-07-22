@@ -326,7 +326,7 @@ def create_regional_vietnam_map(df):
 
 
 # Vẽ biểu đồ cột ngang thể hiện tỷ trọng và số lượng tin của từng hình thức làm việc
-def create_work_type_chart(df):
+def create_work_type_chart(df, selected_work_type=None):
     work_counts = df['hinh_thuc_lam_viec'].value_counts().reset_index(name='count')
 
     if work_counts.empty:
@@ -341,6 +341,15 @@ def create_work_type_chart(df):
 
     y_labels = [row['hinh_thuc_lam_viec'] for _, row in work_counts.iterrows()]
 
+    # Highlight cột được chọn (cross-filter), làm mờ các cột còn lại
+    if selected_work_type:
+        bar_colors = [
+            '#59B292' if row['hinh_thuc_lam_viec'] == selected_work_type else 'rgba(89,178,146,0.3)'
+            for _, row in work_counts.iterrows()
+        ]
+    else:
+        bar_colors = '#59B292'
+
     fig = go.Figure(data=[go.Bar(
         x=work_counts['count'],
         y=y_labels,
@@ -349,7 +358,7 @@ def create_work_type_chart(df):
         textposition='outside',
         cliponaxis=False,
         marker=dict(
-            color='#59B292',
+            color=bar_colors,
             line=dict(width=0)
         ),
         hovertext=[f"<span style='font-size:4px'> </span><br> &nbsp;<b><span style='color:#59B292'>▍</span> {row['hinh_thuc_lam_viec']}</b>&nbsp; <br><span style='font-size:4px'> </span><br><span style='color:#5a4000'> &nbsp;Số lượng: <b>{row['count']:,} tin</b>&nbsp; <br> &nbsp;Tỉ lệ: <b>{row['pct']:.1f}%</b>&nbsp; </span><br><span style='font-size:4px'> </span>" for _, row in work_counts.iterrows()],
@@ -469,7 +478,7 @@ def create_region_vertical_chart(df):
         'Bắc': '#881337',
         'Nam': '#064e3b',
         'Trung': '#78350f',
-        'Từ xa / Remote': '#115e59',
+        'Từ xa / Remote': '#1e40af',
         'Khác': '#374151'
     }
     colors = [REGION_COLORS.get(r, '#9ca3af') for r in region_counts['vung_mien']]

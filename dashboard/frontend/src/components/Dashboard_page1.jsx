@@ -20,6 +20,9 @@ const Dashboard_page1 = () => {
   // Trạng thái drill-down: null = đang xem 3 vùng, 'Nam'/'Bắc'/'Trung' = đang xem tỉnh của vùng đó
   const [drillRegion, setDrillRegion] = useState(null);
 
+  // Trạng thái lọc chéo (Cross-filter): Hình thức làm việc -> Line chart xu hướng
+  const [workType, setWorkType] = useState(null);
+
   // =============================================================================
   // Quản lý trạng thái dữ liệu trả về từ API và trạng thái tải (Loading)
   // =============================================================================
@@ -73,7 +76,7 @@ const page1Cache = new Map();
     if (!position || !experience || !region) return;
     let isActive = true;
 
-    const cacheKey = JSON.stringify({ sources: [...sources].sort(), position: position.value, experience: experience.value, region: region.value });
+    const cacheKey = JSON.stringify({ sources: [...sources].sort(), position: position.value, experience: experience.value, region: region.value, work_type: workType });
     if (page1Cache.has(cacheKey)) {
       setData(page1Cache.get(cacheKey));
       setLoading(false);
@@ -87,7 +90,8 @@ const page1Cache = new Map();
           sources,
           position: position.value,
           experience: experience.value,
-          region: region.value
+          region: region.value,
+          work_type: workType
         });
         if (isActive) {
           page1Cache.set(cacheKey, response.data);
@@ -106,7 +110,7 @@ const page1Cache = new Map();
     return () => {
       isActive = false;
     };
-  }, [sources, position, experience, region]);
+  }, [sources, position, experience, region, workType]);
 
   const handleSourceChange = (val) => {
     if (sources.includes(val)) {
@@ -121,6 +125,7 @@ const page1Cache = new Map();
     setPosition(positionOptions[0]);
     setExperience(experienceOptions[0]);
     setRegion(regionOptions[0]);
+    setWorkType(null);
     setMapToggle('map');
   };
 
@@ -195,6 +200,17 @@ const page1Cache = new Map();
         if (!drillRegion && ['Bắc', 'Trung', 'Nam'].includes(clickedLabel)) {
           setDrillRegion(clickedLabel);
         }
+      }
+    }
+  };
+
+  // Cross-filter: click thanh hình thức làm việc → lọc Line chart xu hướng
+  const handleWorkClick = (e) => {
+    if (e.points && e.points.length > 0) {
+      // Vì là horizontal bar chart nên tên hình thức nằm ở trục Y (point.y)
+      let clickedLabel = e.points[0].y || e.points[0].label || e.points[0].x;
+      if (clickedLabel) {
+        setWorkType((prev) => (prev === clickedLabel ? null : clickedLabel));
       }
     }
   };
@@ -466,6 +482,38 @@ const page1Cache = new Map();
                 <div className="chart-header">
                   <span className="chart-title">
                     Xu hướng tuyển dụng theo tháng
+                    {workType && (
+                      <span style={{
+                        marginLeft: 8,
+                        fontSize: '11px',
+                        padding: '2px 8px',
+                        borderRadius: '12px',
+                        background: 'rgba(89, 178, 146, 0.15)',
+                        color: '#469d7e',
+                        fontWeight: 600,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}>
+                        📍 Đã lọc: {workType}
+                        <button
+                          onClick={() => setWorkType(null)}
+                          style={{
+                            border: 'none',
+                            background: 'none',
+                            cursor: 'pointer',
+                            color: '#469d7e',
+                            fontSize: '11px',
+                            fontWeight: 'bold',
+                            padding: 0,
+                            marginLeft: '2px'
+                          }}
+                          title="Bỏ lọc"
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    )}
                   </span>
                 </div>
                 <div className="chart-content">
@@ -478,10 +526,13 @@ const page1Cache = new Map();
                   <div className="chart-header">
                     <span className="chart-title">
                       Hình thức làm việc chủ đạo
+                      <span style={{ fontSize: '11px', fontWeight: 400, color: '#9CA3AF', marginLeft: 8 }}>
+                        (click cột để lọc line chart)
+                      </span>
                     </span>
                   </div>
                   <div className="chart-content">
-                    {data?.charts?.work && <PlotlyChart figure={data.charts.work} />}
+                    {data?.charts?.work && <PlotlyChart figure={data.charts.work} onChartClick={handleWorkClick} />}
                   </div>
                 </div>
               </div>

@@ -32,15 +32,15 @@ REGION_COLORS = {
     'Bắc': '#FA6781',       # Đỏ san hô (Bắc)
     'Nam': '#59B292',       # Xanh lá cây (Nam)
     'Trung': '#FFC94D',     # Vàng hổ phách (Trung)
-    'Từ xa / Remote': '#0d9488', # Xanh mòng két
+    'Từ xa / Remote': '#3B82F6', # Xanh dương (Remote)
     'Khác': '#9ca3af'       # Xám trung tính
 }
 
-# Hàm cấu hình layout chung cho tất cả biểu đồ (font, màu nền, tooltip style)
+# Hàm cấu hình layout chung cho tất cả biểu đồ (font, màu nền, tooltip style, trục X/Y sắc nét)
 def apply_layout_styles(fig):
     fig.update_layout(
         font_family="Inter, system-ui, -apple-system, sans-serif",
-        font_color="#111827",
+        font_color="#1e293b",
         margin=dict(l=10, r=10, t=10, b=10),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
@@ -56,5 +56,26 @@ def apply_layout_styles(fig):
             namelength=-1,
             align="left"
         )
+    )
+    # Tự động định dạng đường trục X & Y sắc nét, rõ ràng cho tất cả biểu đồ
+    fig.update_xaxes(
+        showline=True,
+        linecolor='#94a3b8',
+        linewidth=1.2,
+        ticks="outside",
+        ticklen=4,
+        tickcolor='#94a3b8',
+        tickfont=dict(size=10, color='#374151'),
+        title_font=dict(size=11, color='#1e293b', weight='bold')
+    )
+    fig.update_yaxes(
+        showline=True,
+        linecolor='#94a3b8',
+        linewidth=1.2,
+        ticks="outside",
+        ticklen=4,
+        tickcolor='#94a3b8',
+        tickfont=dict(size=10, color='#374151'),
+        title_font=dict(size=11, color='#1e293b', weight='bold')
     )
     return fig
