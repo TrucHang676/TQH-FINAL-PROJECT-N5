@@ -34,17 +34,17 @@ const Dashboard_page1 = () => {
   // Thêm đầy đủ options từ file page1.py cũ
   const positionOptions = [
     { value: 'All', label: 'Tất cả vị trí' },
-    { value: 'Backend', label: 'Backend' },
-    { value: 'Frontend', label: 'Frontend' },
-    { value: 'Fullstack', label: 'Fullstack' },
-    { value: 'Mobile', label: 'Mobile' },
-    { value: 'Data', label: 'Data' },
-    { value: 'DevOps/System', label: 'DevOps/System' },
-    { value: 'Tester/QA/QC', label: 'Tester/QA/QC' },
-    { value: 'Manager/Leader', label: 'Manager/Leader' },
-    { value: 'Security', label: 'Security' },
-    { value: 'BA', label: 'Business Analyst' },
-    { value: 'Khác', label: 'Khác' }
+    { value: 'Software Development', label: 'Software Development' },
+    { value: 'AI / ML / Data Science', label: 'AI / ML / Data Science' },
+    { value: 'Mobile / Game / Embedded', label: 'Mobile / Game / Embedded' },
+    { value: 'Cloud / DevOps / SRE', label: 'Cloud / DevOps / SRE' },
+    { value: 'QA / Testing', label: 'QA / Testing' },
+    { value: 'Data Engineering / Database', label: 'Data Engineering / Database' },
+    { value: 'IT Support / ERP', label: 'IT Support / ERP' },
+    { value: 'Management / Architecture', label: 'Management / Architecture' },
+    { value: 'Product / Business / UX', label: 'Product / Business / UX' },
+    { value: 'Cybersecurity', label: 'Cybersecurity' },
+    { value: 'Other', label: 'Khác' }
   ];
 
   const experienceOptions = [

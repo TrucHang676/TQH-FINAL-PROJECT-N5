@@ -289,7 +289,7 @@ const Dashboard_page4 = () => {
             <div className="p4-left-panel">
 
               {/* Donut: Nhóm trẻ chiếm tỷ trọng bao nhiêu */}
-              <div className="chart-card donut-card">
+              <div className={`chart-card donut-card${loading ? ' is-loading' : ''}`}>
                 <div className="chart-header">
                   <span className="chart-title">
                     Nhóm ít kinh nghiệm chiếm tỷ trọng bao nhiêu?
@@ -303,7 +303,7 @@ const Dashboard_page4 = () => {
               </div>
 
               {/* Treemap: Quy mô & độ cởi mở với nhân sự trẻ theo nhóm vị trí */}
-              <div className="chart-card treemap-card">
+              <div className={`chart-card treemap-card${loading ? ' is-loading' : ''}`}>
                 <div className="chart-header">
                   <span className="chart-title">
                     Nhóm vị trí nào cởi mở nhất với Fresher/Intern?
@@ -326,7 +326,7 @@ const Dashboard_page4 = () => {
             {/* CỘT PHẢI: Câu 3 (Box plot) trải toàn bộ chiều cao */}
             <div className="p4-right-panel">
 
-              <div className="chart-card boxplot-card">
+              <div className={`chart-card boxplot-card${loading ? ' is-loading' : ''}`}>
                 <div className="chart-header">
                   <span className="chart-title">
                     Lương khởi điểm Intern/Fresher chênh lệch thế nào giữa các nhóm vị trí?

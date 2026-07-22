@@ -513,32 +513,63 @@ html {
   border-radius: 6px;
 }
 
-/* Loading overlay nhẹ trên chart-card khi đang refetch (stale-while-revalidate) */
-@keyframes subtle-pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.7; }
-}
-.chart-card.is-loading {
-  animation: subtle-pulse 1.2s ease-in-out infinite;
-  pointer-events: none; /* disable interactions while loading */
-}
-/* Badge "Đang cập nhật..." ở góc trên phải khi chart đang load */
-.chart-card.is-loading::after {
-  content: '⟳ Đang cập nhật...';
-  position: absolute;
-  top: 8px;
-  right: 10px;
-  font-size: 10px;
-  color: #59B292;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  pointer-events: none;
-  animation: none;
-  opacity: 1;
-}
-/* chart-card cần position: relative để after hoạt động */
+/* Loading overlay & Badge "Đang cập nhật..." hiện đại, không bị đè chữ */
 .chart-card {
   position: relative;
+}
+
+.chart-card.is-loading {
+  pointer-events: none;
+}
+
+/* Lớp phủ mờ glassmorphic nhẹ trên biểu đồ khi đang tải lại */
+.chart-card.is-loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 15;
+  border-radius: inherit;
+  transition: opacity 0.2s ease;
+}
+
+/* Floating pill badge "Đang cập nhật dữ liệu..." nằm chính giữa phía trên, phát sáng nhẹ */
+.chart-card.is-loading::after {
+  content: 'Đang cập nhật dữ liệu...';
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  font-size: 11px;
+  font-weight: 600;
+  color: #059669;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.22), 0 2px 4px rgba(0, 0, 0, 0.04);
+  padding: 4px 14px;
+  border-radius: 20px;
+  letter-spacing: 0.2px;
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  animation: badgePulse 1.4s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.22);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.45);
+    opacity: 0.88;
+  }
 }
 
 /* ==========================================

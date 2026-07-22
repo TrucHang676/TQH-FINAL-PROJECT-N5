@@ -289,7 +289,7 @@ const Dashboard_page2 = () => {
           <div className="charts-container">
 
             {/* LEFT: Top 15 Skills (Bar ngang) */}
-            <div className="chart-card skills-bar-card">
+            <div className={`chart-card skills-bar-card${loading ? ' is-loading' : ''}`}>
               <div className="chart-header">
                 <span className="chart-title">
                   Top 15 kỹ năng công nghệ được săn đón nhất
@@ -306,7 +306,7 @@ const Dashboard_page2 = () => {
             <div className="skills-right-panel">
 
               {/* RIGHT TOP: Heatmap kỹ năng × vị trí */}
-              <div className="chart-card heatmap-card">
+              <div className={`chart-card heatmap-card${loading ? ' is-loading' : ''}`}>
                 <div className="chart-header">
                   <span className="chart-title">
                     Kỹ năng theo nhóm vị trí công việc
@@ -321,7 +321,7 @@ const Dashboard_page2 = () => {
               </div>
 
               {/* RIGHT BOTTOM: Xu hướng công nghệ theo thời gian */}
-              <div className="chart-card trend-tech-card">
+              <div className={`chart-card trend-tech-card${loading ? ' is-loading' : ''}`}>
                 <div className="chart-header map-header" style={{ flexWrap: 'wrap', gap: '8px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', flex: '1', minWidth: '280px' }}>
                     <span className="chart-title">
