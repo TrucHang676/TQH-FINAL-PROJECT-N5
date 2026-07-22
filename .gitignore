@@ -45,6 +45,3 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
-
-# Tài liệu làm việc riêng với Claude, không đưa vào repo chung
-CLAUDE.md
