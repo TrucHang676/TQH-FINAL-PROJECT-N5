@@ -17,6 +17,9 @@ const Dashboard_page1 = () => {
   // Trạng thái chuyển đổi chế độ xem bản đồ / biểu đồ cột
   const [mapToggle, setMapToggle] = useState('region_chart');
 
+  // Trạng thái drill-down: null = đang xem 3 vùng, 'Nam'/'Bắc'/'Trung' = đang xem tỉnh của vùng đó
+  const [drillRegion, setDrillRegion] = useState(null);
+
   // =============================================================================
   // Quản lý trạng thái dữ liệu trả về từ API và trạng thái tải (Loading)
   // =============================================================================
@@ -183,26 +186,52 @@ const page1Cache = new Map();
     })
   };
 
+  // Drill-down: click vùng miền → hiện các tỉnh thuộc vùng đó
   const handleRegionClick = (e) => {
     if (e.points && e.points.length > 0) {
-      // For vertical bar chart, x is the label (Region)
-      let clickedLabel = e.points[0].x;
-      // Also try y if the chart is horizontal
-      if (!clickedLabel && e.points[0].y) {
-         clickedLabel = e.points[0].y;
-      }
-      if (!clickedLabel && e.points[0].label) {
-         clickedLabel = e.points[0].label;
-      }
-
+      let clickedLabel = e.points[0].x || e.points[0].y || e.points[0].label;
       if (clickedLabel) {
-        // Match with regionOptions
-        const matchedRegion = regionOptions.find(r => r.value === clickedLabel || r.label === clickedLabel);
-        if (matchedRegion) {
-          setRegion(matchedRegion);
+        // Nếu đang ở cấp vùng miền và click vào Bắc/Trung/Nam → drill-down
+        if (!drillRegion && ['Bắc', 'Trung', 'Nam'].includes(clickedLabel)) {
+          setDrillRegion(clickedLabel);
         }
       }
     }
+  };
+
+  // Tạo Plotly figure cho drill-down từ city_breakdown data
+  const buildDrillChart = (regionName) => {
+    const cities = data?.city_breakdown?.[regionName] || [];
+    if (cities.length === 0) return null;
+    const labels = cities.map(c => c.city);
+    const values = cities.map(c => c.count);
+    const colors = values.map(v => {
+      const max = Math.max(...values);
+      const ratio = v / max;
+      const r = Math.round(89 + (250 - 89) * (1 - ratio));
+      const g = Math.round(178 + (103 - 178) * (1 - ratio));
+      const b = Math.round(146 + (129 - 146) * (1 - ratio));
+      return `rgb(${r},${g},${b})`;
+    });
+    return {
+      data: [{
+        type: 'bar',
+        x: labels,
+        y: values,
+        marker: { color: colors },
+        text: values.map(v => v.toLocaleString()),
+        textposition: 'outside',
+        hovertemplate: '<b>%{x}</b><br>%{y:,} tin<extra></extra>'
+      }],
+      layout: {
+        margin: { t: 10, b: 80, l: 40, r: 10 },
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        xaxis: { tickangle: -35, automargin: true },
+        yaxis: { gridcolor: 'rgba(0,0,0,0.06)' },
+        bargap: 0.3
+      }
+    };
   };
 
   return (
@@ -305,7 +334,16 @@ const page1Cache = new Map();
             <div className={`chart-card map-card${loading ? ' is-loading' : ''}`}>
               <div className="chart-header map-header">
                 <span className="chart-title">
-                  {mapToggle === 'map' ? 'Bản đồ phân bố tuyển dụng' : 'Biểu đồ phân bố tuyển dụng'}
+                  {mapToggle === 'map' ? 'Bản đồ phân bố tuyển dụng' : (
+                    drillRegion
+                      ? `📍 Miền ${drillRegion} — Top tỉnh/thành`
+                      : 'Biểu đồ phân bố tuyển dụng'
+                  )}
+                  {mapToggle === 'region_chart' && !drillRegion && (
+                    <span style={{ fontSize: '11px', fontWeight: 400, color: '#9CA3AF', marginLeft: 8 }}>
+                      (click cột để drill-down)
+                    </span>
+                  )}
                 </span>
                 <div className="toggle-container">
                   <div className="toggle-switch" style={{ display: 'flex', gap: '10px' }}>
@@ -326,10 +364,33 @@ const page1Cache = new Map();
                   <PlotlyChart key="map-view" figure={data.charts.map} scrollZoom={true} />
                 )}
 
-                {/* Vertical Region Bar Chart */}
-                {mapToggle === 'region_chart' && data?.charts?.region_chart && (
+                {/* Vertical Region Bar Chart — hỗ trợ Drill-down */}
+                {mapToggle === 'region_chart' && data?.charts?.region_chart && !drillRegion && (
                   <PlotlyChart key="region-view" figure={data.charts.region_chart} onChartClick={handleRegionClick} />
                 )}
+
+                {/* Drill-down: hiện tỉnh/thành theo vùng đã chọn */}
+                {mapToggle === 'region_chart' && drillRegion && (() => {
+                  const drillFigure = buildDrillChart(drillRegion);
+                  return drillFigure ? (
+                    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                      <button
+                        onClick={() => setDrillRegion(null)}
+                        style={{
+                          position: 'absolute', top: 6, left: 8, zIndex: 10,
+                          display: 'flex', alignItems: 'center', gap: 5,
+                          padding: '4px 12px', border: '1px solid #59B292',
+                          borderRadius: 20, background: 'rgba(89,178,146,0.1)',
+                          color: '#469d7e', fontSize: 12, fontWeight: 600,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ↩ Quay lại
+                      </button>
+                      <PlotlyChart key={`drill-${drillRegion}`} figure={drillFigure} />
+                    </div>
+                  ) : null;
+                })()}
 
                 {/* Floating Widget on Right of Vietnam Map */}
                 {mapToggle === 'map' && data?.regions && (

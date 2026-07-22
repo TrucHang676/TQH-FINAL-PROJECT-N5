@@ -616,6 +616,15 @@ html {
   line-height: 1.3;
 }
 
+/* Cursor bàn tay cho biểu đồ Plotly có thể click (drill-down) */
+.plotly-clickable,
+.plotly-clickable .nsewdrag,
+.plotly-clickable .bars path,
+.plotly-clickable .point path,
+.plotly-clickable svg {
+  cursor: pointer !important;
+}
+
 /* ==========================================
    DASHBOARD 5 - AI CHAT UI STYLES
    Chat/Conversation style layout for AI Analysis

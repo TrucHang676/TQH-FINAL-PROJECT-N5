@@ -45,22 +45,27 @@ const PlotlyChart = ({ figure, style, onChartClick, onGraphReady, scrollZoom = f
   }
 
   return (
-    <Plot
-      data={figure.data}
-      layout={modifiedLayout}
-      revision={revision}
-      config={{
-        displayModeBar: false,
-        responsive: true,
-        scrollZoom: scrollZoom,
-        doubleClick: 'reset'
-      }}
-      onClick={onChartClick ? (e) => onChartClick(e) : undefined}
-      onInitialized={(fig, graphDiv) => onGraphReady && onGraphReady(graphDiv)}
-      onUpdate={(fig, graphDiv) => onGraphReady && onGraphReady(graphDiv)}
-      style={{ width: '100%', height: '100%', cursor: onChartClick ? 'pointer' : 'default', ...style }}
-      useResizeHandler={true}
-    />
+    <div
+      className={onChartClick ? 'plotly-clickable' : undefined}
+      style={{ width: '100%', height: '100%' }}
+    >
+      <Plot
+        data={figure.data}
+        layout={modifiedLayout}
+        revision={revision}
+        config={{
+          displayModeBar: false,
+          responsive: true,
+          scrollZoom: scrollZoom,
+          doubleClick: 'reset'
+        }}
+        onClick={onChartClick ? (e) => onChartClick(e) : undefined}
+        onInitialized={(fig, graphDiv) => onGraphReady && onGraphReady(graphDiv)}
+        onUpdate={(fig, graphDiv) => onGraphReady && onGraphReady(graphDiv)}
+        style={{ width: '100%', height: '100%', ...style }}
+        useResizeHandler={true}
+      />
+    </div>
   );
 };
 

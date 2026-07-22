@@ -126,6 +126,19 @@ def get_dashboard_data(req: FilterRequest):
         "Khác": int(region_counts.get('Khác', 0))
     }
 
+    # Drill-down data: top 15 tỉnh/thành cho mỗi vùng miền
+    city_breakdown = {}
+    for vung in ['Bắc', 'Trung', 'Nam']:
+        vung_df = dff[dff['vung_mien'] == vung]
+        if not vung_df.empty:
+            city_counts = vung_df['tinh_thanh'].value_counts().head(15)
+            city_breakdown[vung] = [
+                {"city": str(k), "count": int(v)}
+                for k, v in city_counts.items()
+            ]
+        else:
+            city_breakdown[vung] = []
+
     res = {
         "kpi": {
             "total_jobs": total_jobs,
@@ -134,6 +147,7 @@ def get_dashboard_data(req: FilterRequest):
             "top_work": {"work": top_work, "pct": top_work_pct},
         },
         "regions": regions_data,
+        "city_breakdown": city_breakdown,
         "caption": "Không hiển thị nhóm Khác và Từ xa/Remote trên bản đồ do không có tọa độ địa lý cụ thể.",
         "charts": {
             "spark1": json.loads(spark1_fig.to_json()),
