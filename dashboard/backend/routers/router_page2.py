@@ -35,11 +35,14 @@ def get_page2_data(req: FilterRequest):
     df = get_df()
     dff = df.copy()
 
-    # ---- Áp dụng bộ lọc chung (Sources, Experience, Region, Skill) ----
+    # ---- Áp dụng bộ lọc ----
     if req.sources:
         dff = dff[dff['nguon'].isin(req.sources)]
     else:
         dff = dff.iloc[0:0]  # Không chọn nguồn nào thì trả về rỗng
+
+    if req.position and req.position != 'All':
+        dff = dff[dff['nhom_vi_tri'] == req.position]
 
     if req.experience and req.experience != 'All':
         dff = dff[dff['cap_do_kinh_nghiem'] == req.experience]
@@ -47,23 +50,17 @@ def get_page2_data(req: FilterRequest):
     if req.region and req.region != 'All':
         dff = dff[dff['vung_mien'] == req.region]
 
+    dff_base = dff.copy()
+
     if req.skill:
         # Lọc tương tác theo kỹ năng cụ thể
         pattern = rf'(?<![a-zA-Z]){req.skill.strip()}(?![a-zA-Z])'
         dff = dff[dff['ky_nang'].fillna('').str.contains(pattern, case=False, regex=True)]
 
-    # dff_global: Dữ liệu dùng cho Heatmap và Tech Trend (giữ các cột so sánh)
-    dff_global = dff.copy()
-
-    # dff_pos: Dữ liệu lọc sâu theo Nhóm vị trí cụ thể (dùng cho KPI và Top Skills)
-    dff_pos = dff.copy()
-    if req.position and req.position != 'All':
-        dff_pos = dff_pos[dff_pos['nhom_vi_tri'] == req.position]
-
     # ---- Lấy danh sách kỹ năng kỹ thuật đã lọc (phục vụ KPI) ----
-    tech_skills_series = charts._get_tech_skills(dff_pos)
+    tech_skills_series = charts._get_tech_skills(dff)
 
-    total_jobs = int(len(dff_pos))
+    total_jobs = int(len(dff))
     total_unique_skills = int(tech_skills_series.nunique()) if not tech_skills_series.empty else 0
 
     spark_color = "#FAE7CB"
@@ -79,13 +76,10 @@ def get_page2_data(req: FilterRequest):
     spark1_fig = charts.create_sparkline(skill_monthly_data, spark_color)
 
     # ---- KPI 2: Kỹ năng hot nhất ----
-    top_skill_name = "N/A"
-    top_skill_count = 0
+    top_skill_name = req.skill if req.skill else ("N/A" if tech_skills_series.empty else str(tech_skills_series.value_counts().index[0]))
+    top_skill_count = total_jobs if req.skill else (0 if tech_skills_series.empty else int(tech_skills_series.value_counts().iloc[0]))
     spark2_data = []
     if not tech_skills_series.empty:
-        top_skill_name = str(tech_skills_series.value_counts().index[0])
-        top_skill_count = int(tech_skills_series.value_counts().iloc[0])
-
         # Sparkline: tần suất của kỹ năng hot nhất theo tháng
         dff_time = dff.dropna(subset=['thang_dang', 'ky_nang'])
         spark2_data = []
@@ -176,9 +170,9 @@ def get_page2_data(req: FilterRequest):
     # ---- Tạo 3 biểu đồ chính song song ----
     from concurrent.futures import ThreadPoolExecutor
     with ThreadPoolExecutor(max_workers=3) as pool:
-        f_skills  = pool.submit(charts.create_top_skills_chart, dff_pos)
-        f_heatmap = pool.submit(charts.create_skills_heatmap, dff_global)
-        f_trend   = pool.submit(charts.create_tech_trend_chart, dff_global)
+        f_skills  = pool.submit(charts.create_top_skills_chart, dff_base)
+        f_heatmap = pool.submit(charts.create_skills_heatmap, dff)
+        f_trend   = pool.submit(charts.create_tech_trend_chart, dff)
     top_skills_fig = f_skills.result()
     heatmap_fig    = f_heatmap.result()
     tech_trend_fig = f_trend.result()

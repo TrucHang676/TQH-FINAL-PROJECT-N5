@@ -154,23 +154,48 @@ const Dashboard_page2 = () => {
     singleValue: (provided) => ({ ...provided, color: '#111827' }),
   };
 
-  const getFilteredTrendFigure = (figure, mode) => {
+  const getFilteredTrendFigure = (figure, mode, skill, pos) => {
     if (!figure || !figure.data) return figure;
+
+    let targetGroup = null;
+    const posVal = pos?.value || '';
+    if (posVal.includes('AI') || posVal.includes('ML')) targetGroup = 'AI / ML';
+    else if (posVal.includes('Cloud')) targetGroup = 'Cloud';
+    else if (posVal.includes('DevOps') || posVal.includes('Container') || posVal.includes('SRE')) targetGroup = 'DevOps / Container';
+    else if (posVal.includes('Data Engineering')) targetGroup = 'Data Engineering';
+
+    if (skill) {
+      const sLower = skill.toLowerCase();
+      if (['python', 'pytorch', 'tensorflow', 'keras', 'ai', 'machine learning', 'llm', 'nlp'].some(k => sLower.includes(k))) {
+        targetGroup = 'AI / ML';
+      } else if (['aws', 'azure', 'gcp', 'cloud', 'serverless', 'lambda'].some(k => sLower.includes(k))) {
+        targetGroup = 'Cloud';
+      } else if (['docker', 'kubernetes', 'k8s', 'devops', 'ci/cd', 'jenkins', 'terraform', 'ansible'].some(k => sLower.includes(k))) {
+        targetGroup = 'DevOps / Container';
+      } else if (['spark', 'kafka', 'airflow', 'snowflake', 'bigquery', 'etl', 'databricks', 'sql'].some(k => sLower.includes(k))) {
+        targetGroup = 'Data Engineering';
+      }
+    }
 
     const filteredData = figure.data.map((trace, index) => {
       const isSmoothed = index % 2 === 1;
       const isActive = mode === 'smoothed' ? isSmoothed : !isSmoothed;
+      const cleanName = trace.name.replace(' (TB trượt)', '').replace(' (Thực tế)', '').trim();
+
+      const isTargetGroup = targetGroup ? cleanName === targetGroup : true;
+      const lineOpacity = isActive ? (isTargetGroup ? 1.0 : 0.25) : 0;
+      const lineWidth = isActive ? (isTargetGroup ? (mode === 'smoothed' ? 3.5 : 3.0) : 1.5) : trace.line.width;
 
       return {
         ...trace,
         visible: isActive,
         showlegend: isActive,
-        name: trace.name.replace(' (TB trượt)', '').replace(' (Thực tế)', ''),
+        name: cleanName,
         line: {
           ...trace.line,
-          width: isActive ? (mode === 'smoothed' ? 3 : 2.5) : trace.line.width
+          width: lineWidth
         },
-        opacity: isActive ? 1.0 : trace.opacity
+        opacity: lineOpacity
       };
     });
 
@@ -472,7 +497,7 @@ const Dashboard_page2 = () => {
                 <div className="chart-content">
                   {data?.charts?.tech_trend && (
                     <PlotlyChart
-                      figure={getFilteredTrendFigure(data.charts.tech_trend, trendMode)}
+                      figure={getFilteredTrendFigure(data.charts.tech_trend, trendMode, selectedSkill, position)}
                       onChartClick={handleTrendClick}
                     />
                   )}
