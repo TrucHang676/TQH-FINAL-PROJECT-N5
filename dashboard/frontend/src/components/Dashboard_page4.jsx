@@ -307,19 +307,7 @@ const Dashboard_page4 = () => {
                 <div className="chart-header">
                   <span className="chart-title">
                     Nhóm vị trí nào cởi mở nhất với Fresher/Intern?
-                    {position?.value && position.value !== 'All' && (
-                      <span
-                        onClick={() => setPosition(positionOptions[0])}
-                        style={{
-                          fontSize: '11px', fontWeight: 600, color: '#059669',
-                          marginLeft: 8, cursor: 'pointer', background: '#ecfdf5',
-                          padding: '2px 8px', borderRadius: '12px', border: '1px solid #a7f3d0'
-                        }}
-                        title="Bấm để quay lại biểu đồ gốc"
-                      >
-                        📍 Đang lọc: {position.label} (Click lại ô để quay về ↩)
-                      </span>
-                    )}
+                  
                   </span>
                 </div>
                 <div className="chart-content plotly-clickable">

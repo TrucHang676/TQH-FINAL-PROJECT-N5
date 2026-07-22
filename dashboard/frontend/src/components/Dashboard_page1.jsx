@@ -19,6 +19,8 @@ const Dashboard_page1 = () => {
 
   // Trạng thái drill-down: null = đang xem 3 vùng, 'Nam'/'Bắc'/'Trung' = đang xem tỉnh của vùng đó
   const [drillRegion, setDrillRegion] = useState(null);
+  // State 2: Vùng đang được cross-filter / highlight (click lần 1) — chưa drill-down
+  const [selectedRegion, setSelectedRegion] = useState(null);
 
   // Trạng thái lọc chéo (Cross-filter): Hình thức làm việc -> Line chart xu hướng
   const [workType, setWorkType] = useState(null);
@@ -125,6 +127,8 @@ const Dashboard_page1 = () => {
     setRegion(regionOptions[0]);
     setWorkType(null);
     setMapToggle('region_chart');
+    setSelectedRegion(null);
+    setDrillRegion(null);
   };
 
   // Custom styles for react-select to match the palette
@@ -189,17 +193,49 @@ const Dashboard_page1 = () => {
     })
   };
 
-  // Drill-down: click vùng miền → hiện các tỉnh thuộc vùng đó
+  // Drill-down 2 bước:
+  // Click lần 1  → highlight cột, dim các cột khác (selectedRegion) & lọc API toàn trang!
+  // Click lần 2 trên cùng cột → drill-down vào tỉnh (drillRegion)
   const handleRegionClick = (e) => {
-    if (e.points && e.points.length > 0) {
-      let clickedLabel = e.points[0].x || e.points[0].y || e.points[0].label;
-      if (clickedLabel) {
-        // Nếu đang ở cấp vùng miền và click vào Bắc/Trung/Nam → drill-down
-        if (!drillRegion && ['Bắc', 'Trung', 'Nam'].includes(clickedLabel)) {
-          setDrillRegion(clickedLabel);
-        }
+    if (!e.points || e.points.length === 0) return;
+    const clickedLabel = e.points[0].x || e.points[0].y || e.points[0].label;
+    if (!clickedLabel) return;
+    const canDrill = ['Bắc', 'Trung', 'Nam'].includes(clickedLabel);
+
+    if (selectedRegion === clickedLabel) {
+      // Click lần 2 vào cùng cột
+      if (canDrill) {
+        setDrillRegion(clickedLabel); // → drill-down
+      } else {
+        setSelectedRegion(null); // → bỏ chọn
+        setRegion(regionOptions[0]); // Reset filter API về Tất cả
       }
+    } else {
+      // Click lần 1 (hoặc đổi sang cột khác) → chỉ highlight & lọc API toàn trang
+      setSelectedRegion(clickedLabel);
+      const matchedOpt = regionOptions.find(o => o.value === clickedLabel) || regionOptions[0];
+      setRegion(matchedOpt);
     }
+  };
+
+  // Helper: dim các cột không được chọn trong figure (hoặc trả lại opacity 1 cho tất cả khi reset)
+  const getHighlightedFigure = (figure, highlightLabel) => {
+    if (!figure || !figure.data) return figure;
+    const newData = figure.data.map(trace => {
+      const labels = Array.isArray(trace.x) ? trace.x
+        : Array.isArray(trace.y) ? trace.y : [];
+      if (!labels.length) return { ...trace, selectedpoints: null };
+      const opacities = labels.map(lbl => (!highlightLabel || lbl === highlightLabel) ? 1 : 0.28);
+      return {
+        ...trace,
+        selectedpoints: null,
+        marker: {
+          ...trace.marker,
+          opacity: opacities
+        }
+      };
+    });
+    return { ...figure, data: newData };
   };
 
   // Cross-filter: click thanh hình thức làm việc → lọc Line chart xu hướng
@@ -381,7 +417,9 @@ const Dashboard_page1 = () => {
                   )}
                   {mapToggle === 'region_chart' && !drillRegion && (
                     <span style={{ fontSize: '11px', fontWeight: 400, color: '#9CA3AF', marginLeft: 8 }}>
-                      (click cột để drill-down)
+                      {selectedRegion
+                        ? '(click lại để drill-down)'
+                        : '(click cột để lọc)'}
                     </span>
                   )}
                 </span>
@@ -404,10 +442,14 @@ const Dashboard_page1 = () => {
                   <PlotlyChart key="map-view" figure={data.charts.map} scrollZoom={true} />
                 )}
 
-                {/* Vertical Region Bar Chart — hỗ trợ Drill-down */}
+                {/* Vertical Region Bar Chart — hỗ trợ Drill-down 2 bước */}
                 {mapToggle === 'region_chart' && data?.charts?.region_chart && !drillRegion && (
                   <div className="plotly-clickable" style={{ width: '100%', height: '100%' }}>
-                    <PlotlyChart key="region-view" figure={data.charts.region_chart} onChartClick={handleRegionClick} />
+                    <PlotlyChart
+                      key={`region-view-${selectedRegion || 'reset'}`}
+                      figure={getHighlightedFigure(data.charts.region_chart, selectedRegion)}
+                      onChartClick={handleRegionClick}
+                    />
                   </div>
                 )}
 
@@ -423,7 +465,9 @@ const Dashboard_page1 = () => {
                   return drillFigure ? (
                     <div className="drill-chart-wrapper">
                       <button
-                        onClick={() => setDrillRegion(null)}
+                        onClick={() => {
+                          setDrillRegion(null); // Quay về State 2 (vẫn giữ selectedRegion)
+                        }}
                         style={{
                           position: 'absolute', top: 8, left: 8, zIndex: 10,
                           display: 'flex', alignItems: 'center', gap: 5,
