@@ -35,14 +35,11 @@ def get_page2_data(req: FilterRequest):
     df = get_df()
     dff = df.copy()
 
-    # ---- Áp dụng bộ lọc ----
+    # ---- Áp dụng bộ lọc chung (Sources, Experience, Region, Skill) ----
     if req.sources:
         dff = dff[dff['nguon'].isin(req.sources)]
     else:
         dff = dff.iloc[0:0]  # Không chọn nguồn nào thì trả về rỗng
-
-    if req.position and req.position != 'All':
-        dff = dff[dff['nhom_vi_tri'] == req.position]
 
     if req.experience and req.experience != 'All':
         dff = dff[dff['cap_do_kinh_nghiem'] == req.experience]
@@ -55,10 +52,18 @@ def get_page2_data(req: FilterRequest):
         pattern = rf'(?<![a-zA-Z]){req.skill.strip()}(?![a-zA-Z])'
         dff = dff[dff['ky_nang'].fillna('').str.contains(pattern, case=False, regex=True)]
 
-    # ---- Lấy danh sách kỹ năng kỹ thuật đã lọc (phục vụ KPI) ----
-    tech_skills_series = charts._get_tech_skills(dff)
+    # dff_global: Dữ liệu dùng cho Heatmap và Tech Trend (giữ các cột so sánh)
+    dff_global = dff.copy()
 
-    total_jobs = int(len(dff))
+    # dff_pos: Dữ liệu lọc sâu theo Nhóm vị trí cụ thể (dùng cho KPI và Top Skills)
+    dff_pos = dff.copy()
+    if req.position and req.position != 'All':
+        dff_pos = dff_pos[dff_pos['nhom_vi_tri'] == req.position]
+
+    # ---- Lấy danh sách kỹ năng kỹ thuật đã lọc (phục vụ KPI) ----
+    tech_skills_series = charts._get_tech_skills(dff_pos)
+
+    total_jobs = int(len(dff_pos))
     total_unique_skills = int(tech_skills_series.nunique()) if not tech_skills_series.empty else 0
 
     spark_color = "#FAE7CB"
@@ -170,11 +175,10 @@ def get_page2_data(req: FilterRequest):
 
     # ---- Tạo 3 biểu đồ chính song song ----
     from concurrent.futures import ThreadPoolExecutor
-    _dff = dff
     with ThreadPoolExecutor(max_workers=3) as pool:
-        f_skills  = pool.submit(charts.create_top_skills_chart, _dff)
-        f_heatmap = pool.submit(charts.create_skills_heatmap, _dff)
-        f_trend   = pool.submit(charts.create_tech_trend_chart, _dff)
+        f_skills  = pool.submit(charts.create_top_skills_chart, dff_pos)
+        f_heatmap = pool.submit(charts.create_skills_heatmap, dff_global)
+        f_trend   = pool.submit(charts.create_tech_trend_chart, dff_global)
     top_skills_fig = f_skills.result()
     heatmap_fig    = f_heatmap.result()
     tech_trend_fig = f_trend.result()
