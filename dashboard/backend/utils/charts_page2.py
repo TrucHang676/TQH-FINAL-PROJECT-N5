@@ -48,12 +48,12 @@ EMERGING_TECH_GROUPS = {
                          'Hadoop', 'Hive', 'Flink'],
 }
 
-# Màu sắc cho 4 nhóm công nghệ
+# Màu sắc cho 4 nhóm công nghệ (đảm bảo độ tương phản cao, dễ phân biệt)
 EMERGING_COLORS = {
-    'AI / ML': '#FA6781',           # Coral Red
-    'Cloud': '#59B292',             # Sage Green
-    'DevOps / Container': '#FFC94D', # Amber Gold
-    'Data Engineering': '#0d9488',  # Teal
+    'AI / ML': '#FA6781',           # Coral Red (Đỏ san hô)
+    'Cloud': '#2563EB',             # Royal Blue (Xanh dương nổi bật đại diện cho Cloud)
+    'DevOps / Container': '#FFC94D', # Amber Gold (Vàng hổ phách)
+    'Data Engineering': '#0D9488',  # Teal (Xanh mòng két)
 }
 
 
