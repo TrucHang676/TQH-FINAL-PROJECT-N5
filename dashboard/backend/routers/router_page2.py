@@ -7,12 +7,9 @@ import json
 
 import backend.utils.charts_page2 as charts
 
+from backend.utils.data_loader import get_df, make_cache_key, get_cached_response, set_cached_response
+
 router = APIRouter()
-
-# Đường dẫn đến file dữ liệu đã xử lý
-root_dir = Path(__file__).parent.parent.parent.parent.resolve()
-csv_path = root_dir / "data" / "processed" / "vietnam_it_jobs_processed.csv"
-
 
 class FilterRequest(BaseModel):
     sources: Optional[List[str]] = None
@@ -28,16 +25,13 @@ def get_page2_data(req: FilterRequest):
     Nhận thông số lọc từ Frontend, xử lý dữ liệu kỹ năng và trả về
     KPI + 3 biểu đồ (Top Skills, Heatmap, Tech Trend).
     """
-    # Đọc file CSV dữ liệu
-    if csv_path.exists():
-        df = pd.read_csv(csv_path)
-    else:
-        df = pd.DataFrame(columns=[
-            'ten_cong_viec', 'ten_cong_ty', 'nhom_vi_tri', 'cap_do_kinh_nghiem',
-            'tinh_thanh', 'vung_mien', 'luong_tb', 'hinh_thuc_lam_viec',
-            'ngay_dang', 'thang_dang', 'nguon', 'ky_nang'
-        ])
+    cache_key = make_cache_key("page2", req)
+    cached_val = get_cached_response(cache_key)
+    if cached_val is not None:
+        return cached_val
 
+    # Đọc dữ liệu CSV từ cache
+    df = get_df()
     dff = df.copy()
 
     # ---- Áp dụng bộ lọc ----
@@ -174,7 +168,7 @@ def get_page2_data(req: FilterRequest):
     tech_trend_fig = charts.create_tech_trend_chart(dff)
 
     # ---- Xây dựng response ----
-    return {
+    res = {
         "kpi": {
             "total_unique_skills": total_unique_skills,
             "total_jobs": total_jobs,
@@ -201,3 +195,5 @@ def get_page2_data(req: FilterRequest):
             "tech_trend": json.loads(tech_trend_fig.to_json()),
         }
     }
+    set_cached_response(cache_key, res)
+    return res

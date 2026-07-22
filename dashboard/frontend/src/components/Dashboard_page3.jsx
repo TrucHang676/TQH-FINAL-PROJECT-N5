@@ -58,10 +58,19 @@ const Dashboard_page3 = () => {
     setRegion(regionOptions[0]);
   }, []);
 
+const page3Cache = new Map();
+
   // Gọi API khi bộ lọc thay đổi
   useEffect(() => {
     if (!position || !experience || !region) return;
     let isActive = true;
+
+    const cacheKey = JSON.stringify({ sources: [...sources].sort(), position: position.value, experience: experience.value, region: region.value });
+    if (page3Cache.has(cacheKey)) {
+      setData(page3Cache.get(cacheKey));
+      setLoading(false);
+      return;
+    }
 
     const fetchData = async () => {
       setLoading(true);
@@ -72,7 +81,10 @@ const Dashboard_page3 = () => {
           experience: experience.value,
           region: region.value,
         });
-        if (isActive) setData(response.data);
+        if (isActive) {
+          page3Cache.set(cacheKey, response.data);
+          setData(response.data);
+        }
       } catch (error) {
         console.error('Error fetching page3 data:', error);
       } finally {

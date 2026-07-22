@@ -64,9 +64,18 @@ const Dashboard_page1 = () => {
     setRegion(regionOptions[0]);
   }, []);
 
+const page1Cache = new Map();
+
   useEffect(() => {
     if (!position || !experience || !region) return;
     let isActive = true;
+
+    const cacheKey = JSON.stringify({ sources: [...sources].sort(), position: position.value, experience: experience.value, region: region.value });
+    if (page1Cache.has(cacheKey)) {
+      setData(page1Cache.get(cacheKey));
+      setLoading(false);
+      return;
+    }
 
     const fetchData = async () => {
       setLoading(true);
@@ -78,6 +87,7 @@ const Dashboard_page1 = () => {
           region: region.value
         });
         if (isActive) {
+          page1Cache.set(cacheKey, response.data);
           setData(response.data);
         }
       } catch (error) {

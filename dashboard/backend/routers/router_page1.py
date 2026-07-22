@@ -6,11 +6,9 @@ from pathlib import Path
 import json
 import backend.utils.charts_page1 as charts
 
-router = APIRouter()
+from backend.utils.data_loader import get_df, make_cache_key, get_cached_response, set_cached_response
 
-# Lấy thư mục gốc chứa dữ liệu (Final/)
-root_dir = Path(__file__).parent.parent.parent.parent.resolve()
-csv_path = root_dir / "data" / "processed" / "vietnam_it_jobs_processed.csv"
+router = APIRouter()
 
 # Model dữ liệu nhận vào (Request Body)
 class FilterRequest(BaseModel):
@@ -26,17 +24,13 @@ def get_dashboard_data(req: FilterRequest):
     Hàm xử lý logic của Trang 1: Xu hướng & Địa lý.
     Nhận các thông số lọc từ Frontend, xử lý Data và trả về KPI + Biểu đồ.
     """
-    # Đọc dữ liệu CSV
-    if csv_path.exists():
-        df = pd.read_csv(csv_path)
-    else:
-        # Trả về lỗi hoặc dataframe rỗng nếu không có dữ liệu
-        df = pd.DataFrame(columns=[
-            'ten_cong_viec', 'ten_cong_ty', 'nhom_vi_tri', 'cap_do_kinh_nghiem', 
-            'tinh_thanh', 'vung_mien', 'luong_tb', 'hinh_thuc_lam_viec', 'ngay_dang', 
-            'thang_dang', 'nguon'
-        ])
+    cache_key = make_cache_key("page1", req)
+    cached_val = get_cached_response(cache_key)
+    if cached_val is not None:
+        return cached_val
 
+    # Đọc dữ liệu CSV từ cache
+    df = get_df()
     dff = df.copy()
 
     # Áp dụng bộ lọc
@@ -123,8 +117,7 @@ def get_dashboard_data(req: FilterRequest):
         "Khác": int(region_counts.get('Khác', 0))
     }
 
-    # Xây dựng kết quả trả về, lưu ý phải ép kiểu dữ liệu Numpy về Python chuẩn (int, float, str)
-    return {
+    res = {
         "kpi": {
             "total_jobs": total_jobs,
             "peak_month": {"month": peak_month, "count": peak_count},
@@ -144,3 +137,5 @@ def get_dashboard_data(req: FilterRequest):
             "region_chart": json.loads(region_chart_fig.to_json())
         }
     }
+    set_cached_response(cache_key, res)
+    return res

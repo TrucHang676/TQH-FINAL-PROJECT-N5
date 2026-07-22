@@ -7,12 +7,9 @@ import json
 
 import backend.utils.charts_page4 as charts
 
+from backend.utils.data_loader import get_df, make_cache_key, get_cached_response, set_cached_response
+
 router = APIRouter()
-
-# Đường dẫn đến file dữ liệu đã xử lý
-root_dir = Path(__file__).parent.parent.parent.parent.resolve()
-csv_path = root_dir / "data" / "processed" / "vietnam_it_jobs_processed.csv"
-
 
 class FilterRequest(BaseModel):
     sources: Optional[List[str]] = None
@@ -29,16 +26,13 @@ def get_page4_data(req: FilterRequest):
     trả lời câu hỏi: "Những nhóm vị trí công việc nào cởi mở nhất và có nhu cầu
     tuyển dụng đối tượng Fresher/Intern cao nhất?"
     """
-    # Đọc file CSV dữ liệu
-    if csv_path.exists():
-        df = pd.read_csv(csv_path)
-    else:
-        df = pd.DataFrame(columns=[
-            'ten_cong_viec', 'ten_cong_ty', 'nhom_vi_tri', 'cap_do_kinh_nghiem',
-            'tinh_thanh', 'vung_mien', 'luong_tb', 'hinh_thuc_lam_viec',
-            'ngay_dang', 'thang_dang', 'nguon', 'ky_nang'
-        ])
+    cache_key = make_cache_key("page4", req)
+    cached_val = get_cached_response(cache_key)
+    if cached_val is not None:
+        return cached_val
 
+    # Đọc dữ liệu CSV từ cache
+    df = get_df()
     dff = df.copy()
 
     # ---- Áp dụng bộ lọc ----
@@ -94,7 +88,7 @@ def get_page4_data(req: FilterRequest):
     exp_dist_fig = charts.create_experience_distribution_chart(dff)
     salary_box_fig = charts.create_youth_salary_boxplot(dff)
 
-    return {
+    res = {
         "kpi": {
             "total_jobs": total_jobs,
             "total_young_jobs": total_young,
@@ -112,3 +106,5 @@ def get_page4_data(req: FilterRequest):
             "youth_salary_boxplot": json.loads(salary_box_fig.to_json()),
         }
     }
+    set_cached_response(cache_key, res)
+    return res

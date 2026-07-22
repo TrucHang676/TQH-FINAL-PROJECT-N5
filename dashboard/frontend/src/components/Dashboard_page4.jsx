@@ -59,10 +59,19 @@ const Dashboard_page4 = () => {
     setWorkType(workTypeOptions[0]);
   }, []);
 
+const page4Cache = new Map();
+
   // Gọi API khi bộ lọc thay đổi
   useEffect(() => {
     if (!region || !position || !workType) return;
     let isActive = true;
+
+    const cacheKey = JSON.stringify({ sources: [...sources].sort(), region: region.value, position: position.value, work_type: workType.value });
+    if (page4Cache.has(cacheKey)) {
+      setData(page4Cache.get(cacheKey));
+      setLoading(false);
+      return;
+    }
 
     const fetchData = async () => {
       setLoading(true);
@@ -73,7 +82,10 @@ const Dashboard_page4 = () => {
           position: position.value,
           work_type: workType.value,
         });
-        if (isActive) setData(response.data);
+        if (isActive) {
+          page4Cache.set(cacheKey, response.data);
+          setData(response.data);
+        }
       } catch (error) {
         console.error('Error fetching page4 data:', error);
       } finally {
