@@ -83,9 +83,9 @@ def create_time_trend_chart(df):
         showgrid=False,
         linecolor='#e5e7eb',
         tickangle=-30,
-        tickfont=dict(size=9, color='#4b5563'),
-        title_text="Thời gian đăng tuyển",
-        title_font=dict(size=10, color='#4b5563', weight='bold'),
+        tickfont=dict(size=9, color='#111827', weight='bold'),
+        title_text="<b>Thời gian đăng tuyển</b>",
+        title_font=dict(size=10, color='#111827', weight='bold'),
         tickformat="T%-m/%Y",
         hoverformat="<span style='color:#59B292'>▍</span> T%-m/%Y"
     )
@@ -94,9 +94,9 @@ def create_time_trend_chart(df):
         showgrid=True,
         gridcolor='#f1f5f9',
         linecolor='#e5e7eb',
-        tickfont=dict(size=9, color='#4b5563'),
-        title_text="Số lượng tin tuyển dụng",
-        title_font=dict(size=10, color='#4b5563', weight='bold'),
+        tickfont=dict(size=9, color='#111827', weight='bold'),
+        title_text="<b>Số lượng tin tuyển dụng</b>",
+        title_font=dict(size=10, color='#111827', weight='bold'),
         range=[0, max(800, peak_count * 1.6)] if not trend_data.empty else None
     )
 
@@ -370,10 +370,10 @@ def create_work_type_chart(df, selected_work_type=None):
         showgrid=True,
         gridcolor='#f1f5f9',
         linecolor='#e5e7eb',
-        tickfont=dict(size=9, color='#4b5563'),
+        tickfont=dict(size=9, color='#111827', weight='bold'),
         range=[0, max_count * 1.12] if not pd.isna(max_count) else None,
-        title_text="Số lượng tin tuyển dụng",
-        title_font=dict(size=10, color='#4b5563', weight='bold')
+        title_text="<b>Số lượng tin tuyển dụng</b>",
+        title_font=dict(size=10, color='#111827', weight='bold')
     )
 
     fig.update_yaxes(
@@ -514,7 +514,7 @@ def create_region_vertical_chart(df):
     fig.update_xaxes(
         showgrid=False,
         linecolor='#e5e7eb',
-        tickfont=dict(size=11, color='#111827')
+        tickfont=dict(size=9.5, color='#111827', weight='bold')
     )
     import pandas as pd
     max_count = region_counts['count'].max()
@@ -523,9 +523,9 @@ def create_region_vertical_chart(df):
         showgrid=True,
         gridcolor='#f1f5f9',
         linecolor='#e5e7eb',
-        tickfont=dict(size=9, color='#4b5563'),
-        title_text="Số lượng tin",
-        title_font=dict(size=10, color='#6b7280'),
+        tickfont=dict(size=9, color='#111827', weight='bold'),
+        title_text="<b>Số lượng tin</b>",
+        title_font=dict(size=10, color='#111827', weight='bold'),
         range=[0, max_count * 1.15] if not pd.isna(max_count) else None
     )
 
@@ -569,7 +569,7 @@ def create_provincial_bar_chart(df):
         showgrid=True,
         gridcolor='#f1f5f9',
         linecolor='#e5e7eb',
-        tickfont=dict(size=9, color='#4b5563')
+        tickfont=dict(size=9, color='#111827', weight='bold')
     )
     fig.update_yaxes(
         showgrid=False,

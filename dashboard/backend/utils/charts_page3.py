@@ -259,28 +259,34 @@ def create_salary_by_position_experience_chart(dff):
         [1.0, "#1a5944"],
     ]
 
-    # Tính min, max để xác định ô nào xanh đậm thì dùng chữ trắng nổi bật (dùng HTML span trong text)
+    # Tính min, max
     valid_z = [v for row in z_values for v in row if v is not None]
     z_min = min(valid_z) if valid_z else 0
     z_max = max(valid_z) if valid_z else 1
     z_span = (z_max - z_min) or 1.0
 
+    # Thay thế None thành z_min để Plotly tô màu tile #f8f5f0 tự nhiên trùng tông dải màu nhạt nhất
+    filled_z_values = []
     formatted_text_matrix = []
     for z_row in z_values:
+        fz_row = []
         f_row = []
         for val in z_row:
             if val is None:
-                f_row.append("-")
+                fz_row.append(z_min)
+                f_row.append("<span style='color:#9ca3af; font-size:10px;'>-</span>")
             else:
+                fz_row.append(val)
                 c = "#ffffff" if (val - z_min) / z_span > 0.5 else "#111827"
                 f_row.append(f"<span style='color:{c}'>{val:.1f}</span>")
+        filled_z_values.append(fz_row)
         formatted_text_matrix.append(f_row)
 
     # Map lại pos_order sang tên ngắn gọn
     display_pos_order = [short_pos_map.get(pos, pos) for pos in pos_order]
 
     fig.add_trace(go.Heatmap(
-        z=z_values,
+        z=filled_z_values,
         x=exp_order,
         y=display_pos_order,
         text=formatted_text_matrix,
