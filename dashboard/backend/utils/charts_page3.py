@@ -407,7 +407,7 @@ def create_salary_by_location_chart(dff):
         ),
         text=text_vals,
         textposition='outside',
-        textfont=dict(size=9, color='#4b5563'),
+        textfont=dict(size=9.5, color='#1e293b'),
         hovertemplate=(
             '<b>%{y}</b><br>'
             'Lương TB: %{x:.1f} triệu VNĐ<extra></extra>'
@@ -415,10 +415,11 @@ def create_salary_by_location_chart(dff):
         cliponaxis=False,
     ))
 
-    # Thêm đường lương trung bình toàn ngành
+    # Thêm đường lương trung bình toàn ngành (nằm lớp dưới 'below' để không cắt đè vào chữ)
     fig.add_vline(
         x=global_avg,
-        line=dict(color='#ea580c', width=2.5, dash='dash')
+        line=dict(color='#ea580c', width=2, dash='dash'),
+        layer="below"
     )
     
     # Text annotation nổi hẳn lên trên biểu đồ để không bị đè vào cột
@@ -440,13 +441,19 @@ def create_salary_by_location_chart(dff):
         xaxis=dict(
             title=dict(text="Lương trung bình (triệu VNĐ)", font=dict(size=11, color='#1e293b', weight='bold')),
             tickfont=dict(size=10, color='#374151', weight='bold'),
-            gridcolor='rgba(0,0,0,0.05)',
+            showgrid=False,
+            showline=True,
+            linecolor='#cbd5e1',
+            linewidth=1,
+            zeroline=False,
+            ticks="",
             range=[0, float(city_salary['avg_salary'].max()) * 1.35],
         ),
         yaxis=dict(
             title="",
             tickfont=dict(size=11, color='#0f172a', weight='bold'),
             autorange="reversed", # Hiển thị từ trên xuống dưới
+            showgrid=False,
             showline=False,
             ticks="",
         ),

@@ -103,6 +103,21 @@ const page4Cache = new Map();
     );
   };
 
+  const handleTreemapClick = (event) => {
+    if (!event || !event.points || !event.points[0]) return;
+    const point = event.points[0];
+    const rawLabel = point.label || point.hovertext || point.customdata;
+    if (rawLabel) {
+      const cleanText = String(rawLabel).replace(/<[^>]*>/g, '').split('\n')[0].trim();
+      const matchedOption = positionOptions.find(
+        opt => opt.value !== 'All' && (opt.value === cleanText || opt.label === cleanText || cleanText.includes(opt.value))
+      );
+      if (matchedOption) {
+        setPosition(matchedOption);
+      }
+    }
+  };
+
   const resetFilters = () => {
     setSources([...sourceOptions]);
     setRegion(regionOptions[0]);
@@ -284,11 +299,19 @@ const page4Cache = new Map();
                 <div className="chart-header">
                   <span className="chart-title">
                     Nhóm vị trí nào cởi mở nhất với Fresher/Intern?
+                    {position?.value !== 'All' && (
+                      <span style={{ fontSize: '11px', fontWeight: 400, color: '#59B292', marginLeft: 8 }}>
+                        (Đang lọc: {position.label})
+                      </span>
+                    )}
                   </span>
                 </div>
-                <div className="chart-content">
+                <div className="chart-content plotly-clickable">
                   {data?.charts?.youth_opportunity_treemap && (
-                    <PlotlyChart figure={data.charts.youth_opportunity_treemap} />
+                    <PlotlyChart
+                      figure={data.charts.youth_opportunity_treemap}
+                      onChartClick={handleTreemapClick}
+                    />
                   )}
                 </div>
               </div>

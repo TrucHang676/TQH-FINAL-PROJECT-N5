@@ -36,7 +36,7 @@ REGION_COLORS = {
     'Khác': '#9ca3af'       # Xám trung tính
 }
 
-# Hàm cấu hình layout chung cho tất cả biểu đồ (font, màu nền, tooltip style, trục X/Y sắc nét)
+# Hàm cấu hình layout chung cho tất cả biểu đồ (font, màu nền, tooltip style)
 def apply_layout_styles(fig):
     fig.update_layout(
         font_family="Inter, system-ui, -apple-system, sans-serif",
@@ -56,26 +56,5 @@ def apply_layout_styles(fig):
             namelength=-1,
             align="left"
         )
-    )
-    # Tự động định dạng đường trục X & Y sắc nét, rõ ràng cho tất cả biểu đồ
-    fig.update_xaxes(
-        showline=True,
-        linecolor='#94a3b8',
-        linewidth=1.2,
-        ticks="outside",
-        ticklen=4,
-        tickcolor='#94a3b8',
-        tickfont=dict(size=10, color='#374151'),
-        title_font=dict(size=11, color='#1e293b', weight='bold')
-    )
-    fig.update_yaxes(
-        showline=True,
-        linecolor='#94a3b8',
-        linewidth=1.2,
-        ticks="outside",
-        ticklen=4,
-        tickcolor='#94a3b8',
-        tickfont=dict(size=10, color='#374151'),
-        title_font=dict(size=11, color='#1e293b', weight='bold')
     )
     return fig

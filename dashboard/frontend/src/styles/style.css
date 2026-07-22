@@ -616,12 +616,22 @@ html {
   line-height: 1.3;
 }
 
-/* Cursor bàn tay cho biểu đồ Plotly có thể click (drill-down) */
+/* Cursor bàn tay cho tất cả biểu đồ Plotly có thể tương tác click (Treemap, Drill-down, Heatmap, Bars) */
 .plotly-clickable,
 .plotly-clickable .nsewdrag,
 .plotly-clickable .bars path,
 .plotly-clickable .point path,
-.plotly-clickable svg {
+.plotly-clickable .slice path,
+.plotly-clickable .treemap path,
+.plotly-clickable .trace.treemap,
+.plotly-clickable g.slice,
+.plotly-clickable svg,
+.treemap-card .js-plotly-plot,
+.treemap-card .js-plotly-plot *,
+.treemap-card svg,
+.treemap-card g.slice,
+.treemap-card path,
+.treemap-card .surface {
   cursor: pointer !important;
 }
 
