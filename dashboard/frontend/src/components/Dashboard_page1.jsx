@@ -251,7 +251,7 @@ const Dashboard_page1 = () => {
 
   // Tạo Plotly figure cho drill-down từ city_breakdown data
   const buildDrillChart = (regionName) => {
-    const cities = data?.city_breakdown?.[regionName] || [];
+    const cities = (data?.city_breakdown?.[regionName] || []).slice(0, 5);
     if (cities.length === 0) return null;
     const labels = cities.map(c => c.city);
     const values = cities.map(c => c.count);
@@ -417,7 +417,7 @@ const Dashboard_page1 = () => {
                 <span className="chart-title">
                   {mapToggle === 'map' ? 'Bản đồ phân bố tuyển dụng' : (
                     drillRegion
-                      ? `📍 Miền ${drillRegion} — Top tỉnh/thành`
+                      ? `📍 Miền ${drillRegion} — Top 5 tỉnh/thành`
                       : 'Biểu đồ phân bố tuyển dụng'
                   )}
                   
