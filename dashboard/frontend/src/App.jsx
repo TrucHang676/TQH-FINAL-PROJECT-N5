@@ -53,7 +53,7 @@ function App() {
       {/* Cấu trúc Header toàn cục chuẩn xác từ app.py */}
       <div className="global-header">
         <div className="global-title-container">
-          <h1 className="global-title">Thị trường tuyển dụng IT Việt Nam (2024 - 2026)</h1>
+          <h1 className="global-title">Thị trường tuyển dụng IT Việt Nam (2023 - 2026)</h1>
           <div className="global-subtitle-container">
             {activeTab !== 5 && (
               <span className="goal-badge">
