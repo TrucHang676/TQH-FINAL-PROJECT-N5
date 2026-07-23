@@ -4,6 +4,8 @@ import PlotlyChart from './PlotlyChart';
 import Select from 'react-select';
 import KpiCard from './KpiCard';
 
+const page4Cache = new Map();
+
 const Dashboard_page4 = () => {
   // =========================================================================
   // State: Bộ lọc
@@ -64,6 +66,13 @@ const Dashboard_page4 = () => {
     if (!region || !position || !workType) return;
     let isActive = true;
 
+    const cacheKey = JSON.stringify({ sources: [...sources].sort(), region: region.value, position: position.value, work_type: workType.value });
+    if (page4Cache.has(cacheKey)) {
+      setData(page4Cache.get(cacheKey));
+      setLoading(false);
+      return;
+    }
+
     const fetchData = async () => {
       setLoading(true);
       try {
@@ -73,7 +82,10 @@ const Dashboard_page4 = () => {
           position: position.value,
           work_type: workType.value,
         });
-        if (isActive) setData(response.data);
+        if (isActive) {
+          page4Cache.set(cacheKey, response.data);
+          setData(response.data);
+        }
       } catch (error) {
         console.error('Error fetching page4 data:', error);
       } finally {
@@ -95,18 +107,22 @@ const Dashboard_page4 = () => {
   // set thẳng bộ lọc "Nhóm vị trí" — cả 2 biểu đồ này đều dùng đúng giá trị thật
   // của cột nhom_vi_tri làm nhãn/trục X nên khớp trực tiếp với positionOptions,
   // không cần bộ lọc mới. Đồng bộ với cơ chế click-để-lọc đã có ở trang 1
-  // (handleRegionClick): ưu tiên lấy label (Treemap) rồi tới x (Box plot).
-  // Toggle-off: bấm lại đúng nhóm vị trí ĐANG được lọc thì tự quay về "Tất cả vị
-  // trí" ngay tại chỗ — không cần rời sang sidebar hay bấm nút Đặt lại (vốn xóa
-  // luôn mọi bộ lọc khác chứ không riêng vị trí).
+  // (handleRegionClick): ưu tiên lấy label (Treemap) rồi tới hovertext/customdata/x/y.
+  // Dọn tag HTML/newline khỏi label trước khi so khớp (Treemap có thể trả về label
+  // kèm định dạng). Toggle-off: bấm lại đúng nhóm đang lọc, hoặc bấm ô tổng/ngoài ô
+  // (không khớp option nào) đều tự quay về "Tất cả vị trí" ngay tại chỗ.
   const handlePositionClick = (e) => {
-    if (!e.points || e.points.length === 0) return;
+    if (!e || !e.points || !e.points[0]) return;
     const point = e.points[0];
-    const clickedValue = point.label || point.x || point.y;
-    if (!clickedValue) return;
-    const matched = positionOptions.find(p => p.value === clickedValue || p.label === clickedValue);
-    if (!matched) return;
-    if (position && matched.value === position.value) {
+    const rawLabel = point.label || point.hovertext || point.customdata || point.x || point.y;
+    if (!rawLabel) return;
+    const cleanText = String(rawLabel).replace(/<[^>]*>/g, '').split('\n')[0].trim();
+    const matched = positionOptions.find(
+      opt => opt.value !== 'All' && (opt.value === cleanText || opt.label === cleanText || cleanText.includes(opt.value))
+    );
+    if (!matched) {
+      setPosition(positionOptions[0]); // bấm ô tổng/ngoài ô không khớp option nào -> bỏ lọc
+    } else if (position && matched.value === position.value) {
       setPosition(positionOptions[0]); // đang lọc đúng nhóm này -> bấm lại để bỏ lọc
     } else {
       setPosition(matched);
@@ -276,7 +292,7 @@ const Dashboard_page4 = () => {
             <div className="p4-left-panel">
 
               {/* Donut: Nhóm trẻ chiếm tỷ trọng bao nhiêu */}
-              <div className="chart-card donut-card">
+              <div className={`chart-card donut-card${loading ? ' is-loading' : ''}`}>
                 <div className="chart-header">
                   <span className="chart-title">
                     Phân bố cấp độ kinh nghiệm
@@ -290,15 +306,19 @@ const Dashboard_page4 = () => {
               </div>
 
               {/* Treemap: Quy mô & độ cởi mở với nhân sự trẻ theo nhóm vị trí */}
-              <div className="chart-card treemap-card">
+              <div className={`chart-card treemap-card${loading ? ' is-loading' : ''}`}>
                 <div className="chart-header">
                   <span className="chart-title">
                     Độ cởi mở với nhân sự trẻ theo nhóm vị trí
                   </span>
                 </div>
-                <div className="chart-content">
+                <div className="chart-content plotly-clickable">
                   {data?.charts?.youth_opportunity_treemap && (
-                    <PlotlyChart figure={data.charts.youth_opportunity_treemap} onChartClick={handlePositionClick} />
+                    <PlotlyChart
+                      key={`treemap-${position?.value || 'all'}`}
+                      figure={data.charts.youth_opportunity_treemap}
+                      onChartClick={handlePositionClick}
+                    />
                   )}
                 </div>
               </div>
@@ -308,7 +328,7 @@ const Dashboard_page4 = () => {
             {/* CỘT PHẢI: Câu 3 (Box plot) trải toàn bộ chiều cao */}
             <div className="p4-right-panel">
 
-              <div className="chart-card boxplot-card">
+              <div className={`chart-card boxplot-card${loading ? ' is-loading' : ''}`}>
                 <div className="chart-header">
                   <span className="chart-title">
                     Lương khởi điểm Intern/Fresher theo nhóm vị trí

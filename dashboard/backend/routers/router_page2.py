@@ -7,18 +7,16 @@ import json
 
 import backend.utils.charts_page2 as charts
 
+from backend.utils.data_loader import get_df, make_cache_key, get_cached_response, set_cached_response
+
 router = APIRouter()
-
-# Đường dẫn đến file dữ liệu đã xử lý
-root_dir = Path(__file__).parent.parent.parent.parent.resolve()
-csv_path = root_dir / "data" / "processed" / "vietnam_it_jobs_processed.csv"
-
 
 class FilterRequest(BaseModel):
     sources: Optional[List[str]] = None
     position: Optional[str] = None
     experience: Optional[str] = None
     region: Optional[str] = None
+    skill: Optional[str] = None
 
 
 @router.post("/api/dashboard/page2")
@@ -28,16 +26,13 @@ def get_page2_data(req: FilterRequest):
     Nhận thông số lọc từ Frontend, xử lý dữ liệu kỹ năng và trả về
     KPI + 3 biểu đồ (Top Skills, Heatmap, Tech Trend).
     """
-    # Đọc file CSV dữ liệu
-    if csv_path.exists():
-        df = pd.read_csv(csv_path)
-    else:
-        df = pd.DataFrame(columns=[
-            'ten_cong_viec', 'ten_cong_ty', 'nhom_vi_tri', 'cap_do_kinh_nghiem',
-            'tinh_thanh', 'vung_mien', 'luong_tb', 'hinh_thuc_lam_viec',
-            'ngay_dang', 'thang_dang', 'nguon', 'ky_nang'
-        ])
+    cache_key = make_cache_key("page2", req)
+    cached_val = get_cached_response(cache_key)
+    if cached_val is not None:
+        return cached_val
 
+    # Đọc dữ liệu CSV từ cache
+    df = get_df()
     dff = df.copy()
 
     # ---- Áp dụng bộ lọc ----
@@ -54,6 +49,13 @@ def get_page2_data(req: FilterRequest):
 
     if req.region and req.region != 'All':
         dff = dff[dff['vung_mien'] == req.region]
+
+    dff_base = dff.copy()
+
+    if req.skill:
+        # Lọc tương tác theo kỹ năng cụ thể
+        pattern = rf'(?<![a-zA-Z]){req.skill.strip()}(?![a-zA-Z])'
+        dff = dff[dff['ky_nang'].fillna('').str.contains(pattern, case=False, regex=True)]
 
     # ---- Lấy danh sách kỹ năng kỹ thuật đã lọc (phục vụ KPI) ----
     tech_skills_series = charts._get_tech_skills(dff)
@@ -74,13 +76,10 @@ def get_page2_data(req: FilterRequest):
     spark1_fig = charts.create_sparkline(skill_monthly_data, spark_color)
 
     # ---- KPI 2: Kỹ năng hot nhất ----
-    top_skill_name = "N/A"
-    top_skill_count = 0
+    top_skill_name = req.skill if req.skill else ("N/A" if tech_skills_series.empty else str(tech_skills_series.value_counts().index[0]))
+    top_skill_count = total_jobs if req.skill else (0 if tech_skills_series.empty else int(tech_skills_series.value_counts().iloc[0]))
     spark2_data = []
     if not tech_skills_series.empty:
-        top_skill_name = str(tech_skills_series.value_counts().index[0])
-        top_skill_count = int(tech_skills_series.value_counts().iloc[0])
-
         # Sparkline: tần suất của kỹ năng hot nhất theo tháng
         dff_time = dff.dropna(subset=['thang_dang', 'ky_nang'])
         spark2_data = []
@@ -168,13 +167,18 @@ def get_page2_data(req: FilterRequest):
 
     spark4_fig = charts.create_sparkline(spark4_data, spark_color)
 
-    # ---- Tạo 3 biểu đồ chính ----
-    top_skills_fig = charts.create_top_skills_chart(dff)
-    heatmap_fig = charts.create_skills_heatmap(dff)
-    tech_trend_fig = charts.create_tech_trend_chart(dff)
+    # ---- Tạo 3 biểu đồ chính song song ----
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        f_skills  = pool.submit(charts.create_top_skills_chart, dff_base)
+        f_heatmap = pool.submit(charts.create_skills_heatmap, dff)
+        f_trend   = pool.submit(charts.create_tech_trend_chart, dff)
+    top_skills_fig = f_skills.result()
+    heatmap_fig    = f_heatmap.result()
+    tech_trend_fig = f_trend.result()
 
     # ---- Xây dựng response ----
-    return {
+    res = {
         "kpi": {
             "total_unique_skills": total_unique_skills,
             "total_jobs": total_jobs,
@@ -201,3 +205,5 @@ def get_page2_data(req: FilterRequest):
             "tech_trend": json.loads(tech_trend_fig.to_json()),
         }
     }
+    set_cached_response(cache_key, res)
+    return res

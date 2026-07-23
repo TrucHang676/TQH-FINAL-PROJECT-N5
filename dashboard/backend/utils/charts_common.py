@@ -32,7 +32,7 @@ REGION_COLORS = {
     'Bắc': '#FA6781',       # Đỏ san hô (Bắc)
     'Nam': '#59B292',       # Xanh lá cây (Nam)
     'Trung': '#FFC94D',     # Vàng hổ phách (Trung)
-    'Từ xa / Remote': '#0d9488', # Xanh mòng két
+    'Từ xa / Remote': '#3B82F6', # Xanh dương (Remote)
     'Khác': '#9ca3af'       # Xám trung tính
 }
 
@@ -40,7 +40,7 @@ REGION_COLORS = {
 def apply_layout_styles(fig):
     fig.update_layout(
         font_family="Inter, system-ui, -apple-system, sans-serif",
-        font_color="#111827",
+        font_color="#1e293b",
         margin=dict(l=10, r=10, t=10, b=10),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',

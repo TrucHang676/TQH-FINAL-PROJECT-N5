@@ -105,6 +105,9 @@ def create_youth_opportunity_treemap(df):
     pct_span = (pct_max - pct_min) or 1.0
     tile_colors = [_interp_color((p - pct_min) / pct_span) for p in summary['ty_le_tre']]
 
+    # Ô màu xanh đậm (t_norm > 0.5) dùng chữ trắng cho nổi bật, ô màu nhạt dùng chữ tối màu
+    text_colors = ['#ffffff' if (p - pct_min) / pct_span > 0.5 else '#111827' for p in summary['ty_le_tre']]
+
     hover_texts = [
         f"<span style='font-size:4px'> </span><br>"
         f" &nbsp;<b><span style='color:#59B292'>▍</span> {row['nhom_vi_tri']}</b>&nbsp; <br>"
@@ -125,10 +128,10 @@ def create_youth_opportunity_treemap(df):
         customdata=summary['ty_le_tre'],
         texttemplate="<b>%{label}</b><br>%{value:,} tin<br>%{customdata:.1f}% trẻ",
         textposition='middle center',
-        textfont=dict(size=12, color='#111827'),
+        textfont=dict(size=12, color=text_colors),
         marker=dict(
             colors=tile_colors,
-            line=dict(width=2, color='#ffffff')
+            line=dict(width=1, color='#ffffff')
         ),
         hovertext=hover_texts,
         hovertemplate="%{hovertext}<extra></extra>",
@@ -202,8 +205,8 @@ def create_experience_distribution_chart(df):
     level_names = [lvl for lvl in LEVEL_ORDER if int(level_counts.get(lvl, 0)) > 0]
     values = [int(level_counts[lvl]) for lvl in level_names]
     colors = [LEVEL_COLORS[lvl] for lvl in level_names]
-    # Nhãn ngoài kèm % (kiểu callout) — mỗi lát 1 dòng gọn: "Senior · 41.4%"
-    slice_texts = [f"{lvl} · {cnt/total_known*100:.1f}%" for lvl, cnt in zip(level_names, values)]
+    # Nhãn ngoài chỉ hiện tên cấp bậc kinh nghiệm
+    slice_texts = level_names
 
     hover_texts = [
         f"<span style='font-size:4px'> </span><br>"

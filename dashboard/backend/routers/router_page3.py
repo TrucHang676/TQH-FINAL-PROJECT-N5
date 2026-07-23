@@ -13,12 +13,9 @@ import numpy as np
 
 import backend.utils.charts_page3 as charts
 
+from backend.utils.data_loader import get_df, make_cache_key, get_cached_response, set_cached_response
+
 router = APIRouter()
-
-# Đường dẫn đến file dữ liệu đã xử lý
-root_dir = Path(__file__).parent.parent.parent.parent.resolve()
-csv_path = root_dir / "data" / "processed" / "vietnam_it_jobs_processed.csv"
-
 
 class FilterRequest(BaseModel):
     sources: Optional[List[str]] = None
@@ -34,17 +31,13 @@ def get_page3_data(req: FilterRequest):
     Nhận thông số lọc từ Frontend, xử lý dữ liệu lương và trả về
     KPI + 3 biểu đồ phân tích lương.
     """
-    # Đọc file CSV dữ liệu
-    if csv_path.exists():
-        df = pd.read_csv(csv_path)
-    else:
-        df = pd.DataFrame(columns=[
-            'ten_cong_viec', 'ten_cong_ty', 'nhom_vi_tri', 'cap_do_kinh_nghiem',
-            'tinh_thanh', 'vung_mien', 'luong_tb', 'hinh_thuc_lam_viec',
-            'ngay_dang', 'thang_dang', 'nguon', 'luong_min', 'luong_max',
-            'loai_luong'
-        ])
+    cache_key = make_cache_key("page3", req)
+    cached_val = get_cached_response(cache_key)
+    if cached_val is not None:
+        return cached_val
 
+    # Đọc dữ liệu CSV từ cache
+    df = get_df()
     dff = df.copy()
 
     # ---- Áp dụng bộ lọc ----
@@ -170,7 +163,7 @@ def get_page3_data(req: FilterRequest):
     # =========================================================================
     # Xây dựng response
     # =========================================================================
-    return {
+    res = {
         "kpi": {
             "avg_salary": avg_salary,
             "total_with_salary": total_with_salary,
@@ -195,3 +188,5 @@ def get_page3_data(req: FilterRequest):
             "salary_by_location": json.loads(salary_location_fig.to_json()),
         }
     }
+    set_cached_response(cache_key, res)
+    return res

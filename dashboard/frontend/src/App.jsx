@@ -53,7 +53,7 @@ function App() {
       {/* Cấu trúc Header toàn cục chuẩn xác từ app.py */}
       <div className="global-header">
         <div className="global-title-container">
-          <h1 className="global-title">Thị trường tuyển dụng IT Việt Nam</h1>
+          <h1 className="global-title">Thị trường tuyển dụng IT Việt Nam (2024 - 2026)</h1>
           <div className="global-subtitle-container">
             {activeTab !== 5 && (
               <span className="goal-badge">
@@ -74,11 +74,11 @@ function App() {
       {/* Thanh điều hướng Navigation Tabs */}
       <div className="nav-container">
         <div className="nav-tabs-wrapper">
-          <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab(1); }} className={`nav-tab ${activeTab === 1 ? 'active' : ''}`}>01 Xu hướng & Địa lý</a>
-          <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab(2); }} className={`nav-tab ${activeTab === 2 ? 'active' : ''}`}>02 Kỹ năng & Công nghệ</a>
-          <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab(3); }} className={`nav-tab ${activeTab === 3 ? 'active' : ''}`}>03 Lương thị trường</a>
-          <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab(4); }} className={`nav-tab ${activeTab === 4 ? 'active' : ''}`}>04 Nhân sự trẻ</a>
-          <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab(5); }} className={`nav-tab ${activeTab === 5 ? 'active' : ''}`}>05 AI phân tích</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab(1); }} className={`nav-tab ${activeTab === 1 ? 'active' : ''}`}>Xu hướng & Địa lý</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab(2); }} className={`nav-tab ${activeTab === 2 ? 'active' : ''}`}>Kỹ năng & Công nghệ</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab(3); }} className={`nav-tab ${activeTab === 3 ? 'active' : ''}`}>Lương thị trường</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab(4); }} className={`nav-tab ${activeTab === 4 ? 'active' : ''}`}>Nhân sự trẻ</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab(5); }} className={`nav-tab ${activeTab === 5 ? 'active' : ''}`}>AI phân tích</a>
         </div>
       </div>
 

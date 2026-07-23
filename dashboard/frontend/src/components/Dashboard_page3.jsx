@@ -4,11 +4,13 @@ import PlotlyChart from './PlotlyChart';
 import Select from 'react-select';
 import KpiCard from './KpiCard';
 
+const page3Cache = new Map();
+
 const Dashboard_page3 = () => {
   // =========================================================================
   // State: Bộ lọc (giống hệt Page 1 & 2)
   // =========================================================================
-  const sourceOptions = ['ITviec', 'JobsGO', 'TopCV', 'TopDev', 'VietnamWorks'];
+  const sourceOptions = ['ITviec', 'TopDev', 'VietJobs', 'Vieclam24h', 'TopCV', 'JobsGO'];
 
   const [sources, setSources] = useState([...sourceOptions]);
   const [position, setPosition] = useState(null);
@@ -63,6 +65,13 @@ const Dashboard_page3 = () => {
     if (!position || !experience || !region) return;
     let isActive = true;
 
+    const cacheKey = JSON.stringify({ sources: [...sources].sort(), position: position.value, experience: experience.value, region: region.value });
+    if (page3Cache.has(cacheKey)) {
+      setData(page3Cache.get(cacheKey));
+      setLoading(false);
+      return;
+    }
+
     const fetchData = async () => {
       setLoading(true);
       try {
@@ -72,7 +81,10 @@ const Dashboard_page3 = () => {
           experience: experience.value,
           region: region.value,
         });
-        if (isActive) setData(response.data);
+        if (isActive) {
+          page3Cache.set(cacheKey, response.data);
+          setData(response.data);
+        }
       } catch (error) {
         console.error('Error fetching page3 data:', error);
       } finally {
@@ -249,7 +261,7 @@ const Dashboard_page3 = () => {
           <div className="charts-container">
 
             {/* LEFT: Biểu đồ 1 - Phân bố lương (Histogram) */}
-            <div className="chart-card salary-dist-card">
+            <div className={`chart-card salary-dist-card${loading ? ' is-loading' : ''}`}>
               <div className="chart-header">
                 <span className="chart-title">
                   Phân bố mức lương trung bình
@@ -266,7 +278,7 @@ const Dashboard_page3 = () => {
             <div className="salary-right-panel">
 
               {/* RIGHT TOP: Biểu đồ 2 - Lương theo Vị trí & Kinh nghiệm */}
-              <div className="chart-card salary-pos-exp-card">
+              <div className={`chart-card salary-pos-exp-card${loading ? ' is-loading' : ''}`}>
                 <div className="chart-header">
                   <span className="chart-title">
                     Lương theo Vị trí & Kinh nghiệm
@@ -280,7 +292,7 @@ const Dashboard_page3 = () => {
               </div>
 
               {/* RIGHT BOTTOM: Biểu đồ 3 - Lương theo Khu vực & Remote */}
-              <div className="chart-card salary-location-card">
+              <div className={`chart-card salary-location-card${loading ? ' is-loading' : ''}`}>
                 <div className="chart-header">
                   <span className="chart-title">
                     Lương theo Khu vực & Remote

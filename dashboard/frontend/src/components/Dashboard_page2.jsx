@@ -4,6 +4,8 @@ import PlotlyChart from './PlotlyChart';
 import Select from 'react-select';
 import KpiCard from './KpiCard';
 
+const page2Cache = new Map();
+
 const Dashboard_page2 = () => {
   // =========================================================================
   // State: Bộ lọc
@@ -15,9 +17,10 @@ const Dashboard_page2 = () => {
   const [position, setPosition] = useState(null);
   const [experience, setExperience] = useState(null);
   const [region, setRegion] = useState(null);
+  const [selectedSkill, setSelectedSkill] = useState(null);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [trendMode, setTrendMode] = useState('smoothed'); // 'actual' hoặc 'smoothed'
+  const [trendMode, setTrendMode] = useState('actual'); // 'actual' hoặc 'smoothed'
 
   // ---- Dropdown options (giống Page 1 nhưng với nhóm vị trí cập nhật) ----
   const positionOptions = [
@@ -64,6 +67,19 @@ const Dashboard_page2 = () => {
     if (!position || !experience || !region) return;
     let isActive = true;
 
+    const cacheKey = JSON.stringify({
+      sources: [...sources].sort(),
+      position: position.value,
+      experience: experience.value,
+      region: region.value,
+      skill: selectedSkill
+    });
+    if (page2Cache.has(cacheKey)) {
+      setData(page2Cache.get(cacheKey));
+      setLoading(false);
+      return;
+    }
+
     const fetchData = async () => {
       setLoading(true);
       try {
@@ -72,8 +88,12 @@ const Dashboard_page2 = () => {
           position: position.value,
           experience: experience.value,
           region: region.value,
+          skill: selectedSkill || null,
         });
-        if (isActive) setData(response.data);
+        if (isActive) {
+          page2Cache.set(cacheKey, response.data);
+          setData(response.data);
+        }
       } catch (error) {
         console.error('Error fetching page2 data:', error);
       } finally {
@@ -83,7 +103,7 @@ const Dashboard_page2 = () => {
 
     fetchData();
     return () => { isActive = false; };
-  }, [sources, position, experience, region]);
+  }, [sources, position, experience, region, selectedSkill]);
 
   const handleSourceChange = (val) => {
     setSources(prev =>
@@ -96,6 +116,7 @@ const Dashboard_page2 = () => {
     setPosition(positionOptions[0]);
     setExperience(experienceOptions[0]);
     setRegion(regionOptions[0]);
+    setSelectedSkill(null);
   };
 
   // Custom styles cho react-select (giống hệt Page 1)
@@ -133,23 +154,48 @@ const Dashboard_page2 = () => {
     singleValue: (provided) => ({ ...provided, color: '#111827' }),
   };
 
-  const getFilteredTrendFigure = (figure, mode) => {
+  const getFilteredTrendFigure = (figure, mode, skill, pos) => {
     if (!figure || !figure.data) return figure;
+
+    let targetGroup = null;
+    const posVal = pos?.value || '';
+    if (posVal.includes('AI') || posVal.includes('ML')) targetGroup = 'AI / ML';
+    else if (posVal.includes('Cloud')) targetGroup = 'Cloud';
+    else if (posVal.includes('DevOps') || posVal.includes('Container') || posVal.includes('SRE')) targetGroup = 'DevOps / Container';
+    else if (posVal.includes('Data Engineering')) targetGroup = 'Data Engineering';
+
+    if (skill) {
+      const sLower = skill.toLowerCase();
+      if (['python', 'pytorch', 'tensorflow', 'keras', 'ai', 'machine learning', 'llm', 'nlp'].some(k => sLower.includes(k))) {
+        targetGroup = 'AI / ML';
+      } else if (['aws', 'azure', 'gcp', 'cloud', 'serverless', 'lambda'].some(k => sLower.includes(k))) {
+        targetGroup = 'Cloud';
+      } else if (['docker', 'kubernetes', 'k8s', 'devops', 'ci/cd', 'jenkins', 'terraform', 'ansible'].some(k => sLower.includes(k))) {
+        targetGroup = 'DevOps / Container';
+      } else if (['spark', 'kafka', 'airflow', 'snowflake', 'bigquery', 'etl', 'databricks', 'sql'].some(k => sLower.includes(k))) {
+        targetGroup = 'Data Engineering';
+      }
+    }
 
     const filteredData = figure.data.map((trace, index) => {
       const isSmoothed = index % 2 === 1;
       const isActive = mode === 'smoothed' ? isSmoothed : !isSmoothed;
+      const cleanName = trace.name.replace(' (TB trượt)', '').replace(' (Thực tế)', '').trim();
+
+      const isTargetGroup = targetGroup ? cleanName === targetGroup : true;
+      const lineOpacity = isActive ? (isTargetGroup ? 1.0 : 0.25) : 0;
+      const lineWidth = isActive ? (isTargetGroup ? (mode === 'smoothed' ? 3.5 : 3.0) : 1.5) : trace.line.width;
 
       return {
         ...trace,
         visible: isActive,
         showlegend: isActive,
-        name: trace.name.replace(' (TB trượt)', '').replace(' (Thực tế)', ''),
+        name: cleanName,
         line: {
           ...trace.line,
-          width: isActive ? (mode === 'smoothed' ? 3 : 2.5) : trace.line.width
+          width: lineWidth
         },
-        opacity: isActive ? 1.0 : trace.opacity
+        opacity: lineOpacity
       };
     });
 
@@ -157,6 +203,105 @@ const Dashboard_page2 = () => {
       ...figure,
       data: filteredData
     };
+  };
+
+  // 1. Click Handler cho Top 15 Skills Bar Chart
+  const handleSkillClick = (e) => {
+    if (!e.points || e.points.length === 0) return;
+    const pt = e.points[0];
+    const rawSkill = pt.y || pt.label;
+    if (!rawSkill) return;
+
+    const cleanedSkill = String(rawSkill).trim().replace(/\.\.\.$/, '').trim();
+
+    if (selectedSkill && selectedSkill.toLowerCase() === cleanedSkill.toLowerCase()) {
+      setSelectedSkill(null); // Click lại để bỏ chọn
+    } else {
+      setSelectedSkill(cleanedSkill); // Click chọn kỹ năng → lọc toàn trang
+    }
+  };
+
+  // 2. Click Handler cho Heatmap
+  const posGroupMap = [
+    'Software Development',
+    'AI / ML / Data Science',
+    'Mobile / Game / Embedded',
+    'Cloud / DevOps / SRE',
+    'QA / Testing',
+    'Data Engineering / Database'
+  ];
+
+  const handleHeatmapClick = (e) => {
+    if (!e.points || e.points.length === 0) return;
+    const pt = e.points[0];
+
+    let clickedPosVal = null;
+    if (typeof pt.pointIndex === 'number' && Array.isArray(pt.pointIndex) && pt.pointIndex.length >= 2) {
+      const colIdx = pt.pointIndex[1];
+      if (colIdx >= 0 && colIdx < posGroupMap.length) {
+        clickedPosVal = posGroupMap[colIdx];
+      }
+    } else if (typeof pt.x === 'string') {
+      const cleanX = pt.x.replace('\n', ' ');
+      if (cleanX.includes('Software')) clickedPosVal = 'Software Development';
+      else if (cleanX.includes('AI') || cleanX.includes('ML')) clickedPosVal = 'AI / ML / Data Science';
+      else if (cleanX.includes('Mobile') || cleanX.includes('Game')) clickedPosVal = 'Mobile / Game / Embedded';
+      else if (cleanX.includes('Cloud') || cleanX.includes('DevOps')) clickedPosVal = 'Cloud / DevOps / SRE';
+      else if (cleanX.includes('QA') || cleanX.includes('Testing')) clickedPosVal = 'QA / Testing';
+      else if (cleanX.includes('Data') || cleanX.includes('Engineering')) clickedPosVal = 'Data Engineering / Database';
+    }
+
+    if (clickedPosVal) {
+      if (position && position.value === clickedPosVal) {
+        setPosition(positionOptions[0]); // Reset về Tất cả
+      } else {
+        const matchOpt = positionOptions.find(o => o.value === clickedPosVal);
+        if (matchOpt) setPosition(matchOpt);
+      }
+    }
+  };
+
+  // 3. Click Handler cho Tech Trend Chart
+  const handleTrendClick = (e) => {
+    if (!e.points || e.points.length === 0) return;
+    const pt = e.points[0];
+    const traceName = pt.data?.name || '';
+    let targetPos = null;
+
+    if (traceName.includes('AI') || traceName.includes('ML')) targetPos = 'AI / ML / Data Science';
+    else if (traceName.includes('Cloud')) targetPos = 'Cloud / DevOps / SRE';
+    else if (traceName.includes('DevOps') || traceName.includes('Container')) targetPos = 'Cloud / DevOps / SRE';
+    else if (traceName.includes('Data Engineering')) targetPos = 'Data Engineering / Database';
+
+    if (targetPos) {
+      if (position && position.value === targetPos) {
+        setPosition(positionOptions[0]);
+      } else {
+        const matchOpt = positionOptions.find(o => o.value === targetPos);
+        if (matchOpt) setPosition(matchOpt);
+      }
+    }
+  };
+
+  // Highlight Helper cho Top Skills Bar Chart
+  const getHighlightedSkillsFigure = (figure, skill) => {
+    if (!figure || !figure.data || !skill) return figure;
+    const newData = figure.data.map(trace => {
+      const yVals = Array.isArray(trace.y) ? trace.y : [];
+      if (!yVals.length) return trace;
+      const opacities = yVals.map(y => {
+        const cleanY = String(y).trim().replace(/\.\.\.$/, '').trim();
+        return cleanY.toLowerCase() === skill.toLowerCase() ? 1.0 : 0.35;
+      });
+      return {
+        ...trace,
+        marker: {
+          ...trace.marker,
+          opacity: opacities
+        }
+      };
+    });
+    return { ...figure, data: newData };
   };
 
   return (
@@ -248,7 +393,6 @@ const Dashboard_page2 = () => {
               badge="Đa năng"
               value={(() => {
                 const name = data?.kpi?.most_diverse_position?.name || 'N/A';
-                // Rút gọn tên dài
                 const shortMap = {
                   'Software Development': 'Software Dev',
                   'AI / ML / Data Science': 'AI / ML',
@@ -277,7 +421,7 @@ const Dashboard_page2 = () => {
           <div className="charts-container">
 
             {/* LEFT: Top 15 Skills (Bar ngang) */}
-            <div className="chart-card skills-bar-card">
+            <div className={`chart-card skills-bar-card${loading ? ' is-loading' : ''}`}>
               <div className="chart-header">
                 <span className="chart-title">
                   Top 15 kỹ năng công nghệ được săn đón nhất
@@ -285,7 +429,10 @@ const Dashboard_page2 = () => {
               </div>
               <div className="chart-content">
                 {data?.charts?.top_skills && (
-                  <PlotlyChart figure={data.charts.top_skills} />
+                  <PlotlyChart
+                    figure={getHighlightedSkillsFigure(data.charts.top_skills, selectedSkill)}
+                    onChartClick={handleSkillClick}
+                  />
                 )}
               </div>
             </div>
@@ -294,7 +441,7 @@ const Dashboard_page2 = () => {
             <div className="skills-right-panel">
 
               {/* RIGHT TOP: Heatmap kỹ năng × vị trí */}
-              <div className="chart-card heatmap-card">
+              <div className={`chart-card heatmap-card${loading ? ' is-loading' : ''}`}>
                 <div className="chart-header">
                   <span className="chart-title">
                     Kỹ năng theo nhóm vị trí công việc
@@ -303,13 +450,16 @@ const Dashboard_page2 = () => {
                 </div>
                 <div className="chart-content">
                   {data?.charts?.heatmap && (
-                    <PlotlyChart figure={data.charts.heatmap} />
+                    <PlotlyChart
+                      figure={data.charts.heatmap}
+                      onChartClick={handleHeatmapClick}
+                    />
                   )}
                 </div>
               </div>
 
               {/* RIGHT BOTTOM: Xu hướng công nghệ theo thời gian */}
-              <div className="chart-card trend-tech-card">
+              <div className={`chart-card trend-tech-card${loading ? ' is-loading' : ''}`}>
                 <div className="chart-header map-header" style={{ flexWrap: 'wrap', gap: '8px' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', flex: '1', minWidth: '280px' }}>
                     <span className="chart-title">
@@ -346,7 +496,10 @@ const Dashboard_page2 = () => {
                 </div>
                 <div className="chart-content">
                   {data?.charts?.tech_trend && (
-                    <PlotlyChart figure={getFilteredTrendFigure(data.charts.tech_trend, trendMode)} />
+                    <PlotlyChart
+                      figure={getFilteredTrendFigure(data.charts.tech_trend, trendMode, selectedSkill, position)}
+                      onChartClick={handleTrendClick}
+                    />
                   )}
                 </div>
               </div>

@@ -83,9 +83,9 @@ def create_time_trend_chart(df):
         showgrid=False,
         linecolor='#e5e7eb',
         tickangle=-30,
-        tickfont=dict(size=9, color='#4b5563'),
-        title_text="Thời gian đăng tuyển",
-        title_font=dict(size=10, color='#4b5563', weight='bold'),
+        tickfont=dict(size=9, color='#111827', weight='bold'),
+        title_text="<b>Thời gian đăng tuyển</b>",
+        title_font=dict(size=10, color='#111827', weight='bold'),
         tickformat="T%-m/%Y",
         hoverformat="<span style='color:#59B292'>▍</span> T%-m/%Y"
     )
@@ -94,9 +94,9 @@ def create_time_trend_chart(df):
         showgrid=True,
         gridcolor='#f1f5f9',
         linecolor='#e5e7eb',
-        tickfont=dict(size=9, color='#4b5563'),
-        title_text="Số lượng tin tuyển dụng",
-        title_font=dict(size=10, color='#4b5563', weight='bold'),
+        tickfont=dict(size=9, color='#111827', weight='bold'),
+        title_text="<b>Số lượng tin tuyển dụng</b>",
+        title_font=dict(size=10, color='#111827', weight='bold'),
         range=[0, max(800, peak_count * 1.6)] if not trend_data.empty else None
     )
 
@@ -175,15 +175,17 @@ def create_vietnam_map(df):
         })
         city_counts = pd.concat([city_counts, missing_df], ignore_index=True)
 
-    # Bảng màu custom: 0 = Xám/Be, sau đó chuyển từ xanh nhạt sang xanh lục đậm
+    # Bảng màu custom: 0 = Xám nhạt thanh lịch nhã nhặn (#e5e7eb), trùng tông Light Dashboard, sau đó chuyển từ xanh ngọc nhạt sang xanh lục bảo đậm
     custom_colorscale = [
-        [0.0, "#eae5db"],   # 0 jobs (Beige/Gray)
-        [0.01, "#a7f3d0"],  # Rất ít jobs
-        [0.5, "#59B292"],   # Trung bình
-        [1.0, "#064e3b"]    # Rất nhiều jobs
+        [0.0, "#e5e7eb"],   # 0 jobs (Xám nhạt thanh lịch nhã nhặn trùng tông Light Theme)
+        [0.005, "#a7f3d0"], # Rất ít (Xanh mint nhạt)
+        [0.2, "#34d399"],   # Ít
+        [0.5, "#10b981"],   # Trung bình
+        [0.8, "#059669"],   # Cao
+        [1.0, "#064e3b"]    # Rất cao (Hà Nội, TP.HCM)
     ]
 
-    # Vẽ bản đồ phân bố bằng Plotly choropleth_map
+    # Vẽ bản đồ phân bố bằng Plotly choropleth_map với theme carto-positron sáng thanh lịch
     fig = px.choropleth_map(
         city_counts,
         geojson=vn_geojson,
@@ -200,10 +202,81 @@ def create_vietnam_map(df):
     )
 
     fig.update_traces(
-        marker_line_width=0.5,
-        marker_line_color="white",
+        marker_line_width=0.8,
+        marker_line_color="#ffffff",
         hovertemplate=" &nbsp;<b><span style='color:#59B292'>▍</span> %{hovertext}</b>&nbsp; <br><span style='font-size:4px'> </span><br><span style='color:#5a4000'> &nbsp;Nhu cầu tuyển dụng: <b>%{z:,} tin</b>&nbsp; </span><extra></extra>"
     )
+
+    # 🚀 Bổ sung lớp bong bóng phát sáng (Scatter Bubbles) trên các trung tâm công nghệ chính
+    city_coords = {
+        'TP.HCM': (10.8231, 106.6297),
+        'Hà Nội': (21.0285, 105.8542),
+        'Đà Nẵng': (16.0544, 108.2022),
+        'Bình Dương': (11.1604, 106.6508),
+        'Bắc Ninh': (21.1861, 106.0763),
+        'Hải Phòng': (20.8449, 106.6881),
+        'Cần Thơ': (10.0452, 105.7469),
+        'Thừa Thiên Huế': (16.4637, 107.5905),
+        'Đồng Nai': (10.9574, 106.8427),
+        'Long An': (10.5333, 106.4000),
+        'Hải Dương': (20.9333, 106.3167),
+        'Thái Nguyên': (21.5928, 105.8442),
+        'Khánh Hòa': (12.2388, 109.1967),
+        'Bà Rịa - Vũng Tàu': (10.4114, 107.1362),
+        'Quảng Ninh': (21.0069, 107.2925),
+        'Lâm Đồng': (11.9404, 108.4583),
+        'Nghệ An': (19.2342, 104.8398),
+        'Đắk Lắk': (12.6667, 108.0500),
+        'Quảng Nam': (15.5684, 108.4800),
+        'Bắc Giang': (21.2731, 106.1946),
+        'Vĩnh Phúc': (21.3089, 105.6049),
+        'Nam Định': (20.4389, 106.1783),
+        'Thái Bình': (20.4464, 106.3364),
+        'Phú Thọ': (21.3228, 105.2025),
+        'Hà Nam': (20.5453, 105.9126),
+        'Ninh Bình': (20.2506, 105.9745),
+        'Quảng Ngãi': (15.1205, 108.7923),
+        'Bình Định': (13.7820, 109.2194),
+        'Tây Ninh': (11.3653, 106.0984),
+        'Bến Tre': (10.2432, 106.3751),
+        'Vĩnh Long': (10.2537, 105.9722),
+        'An Giang': (10.5216, 105.1259),
+        'Kiên Giang': (10.0125, 105.0809),
+        'Bình Phước': (11.7507, 106.9184)
+    }
+
+    active_cities = city_counts[city_counts['job_count'] > 0].copy()
+    lats, lons, bubble_sizes, hover_texts = [], [], [], []
+    for _, row in active_cities.iterrows():
+        c_name = row['tinh_thanh']
+        cnt = int(row['job_count'])
+        if c_name in city_coords:
+            lat, lon = city_coords[c_name]
+            lats.append(lat)
+            lons.append(lon)
+            # Tỷ lệ bán kính bong bóng
+            size = max(8, min(36, int((cnt ** 0.5) * 0.52)))
+            bubble_sizes.append(size)
+            hover_texts.append(
+                f" &nbsp;<b><span style='color:#FA6781'>●</span> {c_name}</b>&nbsp; <br>"
+                f"<span style='font-size:4px'> </span><br>"
+                f"<span style='color:#5a4000'> &nbsp;Nhu cầu tuyển dụng: <b>{cnt:,} tin</b>&nbsp; </span>"
+            )
+
+    if lats:
+        fig.add_trace(go.Scattermap(
+            lat=lats,
+            lon=lons,
+            mode='markers',
+            marker=dict(
+                size=bubble_sizes,
+                color='rgba(250, 103, 129, 0.85)', # Hồng san hô nổi bật trên nền xanh
+                opacity=0.9
+            ),
+            hovertext=hover_texts,
+            hovertemplate="%{hovertext}<extra></extra>",
+            showlegend=False
+        ))
 
     apply_layout_styles(fig)
     fig.update_layout(
@@ -326,7 +399,7 @@ def create_regional_vietnam_map(df):
 
 
 # Vẽ biểu đồ cột ngang thể hiện tỷ trọng và số lượng tin của từng hình thức làm việc
-def create_work_type_chart(df):
+def create_work_type_chart(df, selected_work_type=None):
     work_counts = df['hinh_thuc_lam_viec'].value_counts().reset_index(name='count')
 
     if work_counts.empty:
@@ -341,6 +414,15 @@ def create_work_type_chart(df):
 
     y_labels = [row['hinh_thuc_lam_viec'] for _, row in work_counts.iterrows()]
 
+    # Highlight cột được chọn (cross-filter), làm mờ các cột còn lại
+    if selected_work_type:
+        bar_colors = [
+            '#59B292' if row['hinh_thuc_lam_viec'] == selected_work_type else 'rgba(89,178,146,0.3)'
+            for _, row in work_counts.iterrows()
+        ]
+    else:
+        bar_colors = '#59B292'
+
     fig = go.Figure(data=[go.Bar(
         x=work_counts['count'],
         y=y_labels,
@@ -349,7 +431,7 @@ def create_work_type_chart(df):
         textposition='outside',
         cliponaxis=False,
         marker=dict(
-            color='#59B292',
+            color=bar_colors,
             line=dict(width=0)
         ),
         hovertext=[f"<span style='font-size:4px'> </span><br> &nbsp;<b><span style='color:#59B292'>▍</span> {row['hinh_thuc_lam_viec']}</b>&nbsp; <br><span style='font-size:4px'> </span><br><span style='color:#5a4000'> &nbsp;Số lượng: <b>{row['count']:,} tin</b>&nbsp; <br> &nbsp;Tỉ lệ: <b>{row['pct']:.1f}%</b>&nbsp; </span><br><span style='font-size:4px'> </span>" for _, row in work_counts.iterrows()],
@@ -361,10 +443,10 @@ def create_work_type_chart(df):
         showgrid=True,
         gridcolor='#f1f5f9',
         linecolor='#e5e7eb',
-        tickfont=dict(size=9, color='#4b5563'),
+        tickfont=dict(size=9, color='#111827', weight='bold'),
         range=[0, max_count * 1.12] if not pd.isna(max_count) else None,
-        title_text="Số lượng tin tuyển dụng",
-        title_font=dict(size=10, color='#4b5563', weight='bold')
+        title_text="<b>Số lượng tin tuyển dụng</b>",
+        title_font=dict(size=10, color='#111827', weight='bold')
     )
 
     fig.update_yaxes(
@@ -469,7 +551,7 @@ def create_region_vertical_chart(df):
         'Bắc': '#881337',
         'Nam': '#064e3b',
         'Trung': '#78350f',
-        'Từ xa / Remote': '#115e59',
+        'Từ xa / Remote': '#1e40af',
         'Khác': '#374151'
     }
     colors = [REGION_COLORS.get(r, '#9ca3af') for r in region_counts['vung_mien']]
@@ -505,7 +587,7 @@ def create_region_vertical_chart(df):
     fig.update_xaxes(
         showgrid=False,
         linecolor='#e5e7eb',
-        tickfont=dict(size=11, color='#111827')
+        tickfont=dict(size=9.5, color='#111827', weight='bold')
     )
     import pandas as pd
     max_count = region_counts['count'].max()
@@ -514,14 +596,15 @@ def create_region_vertical_chart(df):
         showgrid=True,
         gridcolor='#f1f5f9',
         linecolor='#e5e7eb',
-        tickfont=dict(size=9, color='#4b5563'),
-        title_text="Số lượng tin",
-        title_font=dict(size=10, color='#6b7280'),
+        tickfont=dict(size=9, color='#111827', weight='bold'),
+        title_text="<b>Số lượng tin</b>",
+        title_font=dict(size=10, color='#111827', weight='bold'),
+        title_standoff=15,
         range=[0, max_count * 1.15] if not pd.isna(max_count) else None
     )
 
     apply_layout_styles(fig)
-    fig.update_layout(margin=dict(l=40, r=20, t=40, b=10), bargap=0.3)
+    fig.update_layout(margin=dict(l=55, r=20, t=40, b=10), bargap=0.3)
 
     return fig
 
@@ -560,7 +643,7 @@ def create_provincial_bar_chart(df):
         showgrid=True,
         gridcolor='#f1f5f9',
         linecolor='#e5e7eb',
-        tickfont=dict(size=9, color='#4b5563')
+        tickfont=dict(size=9, color='#111827', weight='bold')
     )
     fig.update_yaxes(
         showgrid=False,

@@ -6,11 +6,9 @@ from pathlib import Path
 import json
 import backend.utils.charts_page1 as charts
 
-router = APIRouter()
+from backend.utils.data_loader import get_df, make_cache_key, get_cached_response, set_cached_response
 
-# Lấy thư mục gốc chứa dữ liệu (Final/)
-root_dir = Path(__file__).parent.parent.parent.parent.resolve()
-csv_path = root_dir / "data" / "processed" / "vietnam_it_jobs_processed.csv"
+router = APIRouter()
 
 # Model dữ liệu nhận vào (Request Body)
 class FilterRequest(BaseModel):
@@ -18,6 +16,7 @@ class FilterRequest(BaseModel):
     position: Optional[str] = None
     experience: Optional[str] = None
     region: Optional[str] = None
+    work_type: Optional[str] = None
     map_toggle: Optional[str] = 'map'
 
 @router.post("/api/dashboard/page1")
@@ -26,17 +25,13 @@ def get_dashboard_data(req: FilterRequest):
     Hàm xử lý logic của Trang 1: Xu hướng & Địa lý.
     Nhận các thông số lọc từ Frontend, xử lý Data và trả về KPI + Biểu đồ.
     """
-    # Đọc dữ liệu CSV
-    if csv_path.exists():
-        df = pd.read_csv(csv_path)
-    else:
-        # Trả về lỗi hoặc dataframe rỗng nếu không có dữ liệu
-        df = pd.DataFrame(columns=[
-            'ten_cong_viec', 'ten_cong_ty', 'nhom_vi_tri', 'cap_do_kinh_nghiem', 
-            'tinh_thanh', 'vung_mien', 'luong_tb', 'hinh_thuc_lam_viec', 'ngay_dang', 
-            'thang_dang', 'nguon'
-        ])
+    cache_key = make_cache_key("page1", req)
+    cached_val = get_cached_response(cache_key)
+    if cached_val is not None:
+        return cached_val
 
+    # Đọc dữ liệu CSV từ cache
+    df = get_df()
     dff = df.copy()
 
     # Áp dụng bộ lọc
@@ -53,6 +48,9 @@ def get_dashboard_data(req: FilterRequest):
 
     if req.region and req.region != 'All':
         dff = dff[dff['vung_mien'] == req.region]
+
+    if req.work_type:
+        dff = dff[dff['hinh_thuc_lam_viec'] == req.work_type]
 
     # Tính toán tổng tin
     total_jobs = int(len(dff))
@@ -108,11 +106,22 @@ def get_dashboard_data(req: FilterRequest):
             spark4_data = [int(x) for x in work_dff.groupby('thang_dang').size().tolist()]
             spark4_fig = charts.create_sparkline(spark4_data, spark_color)
 
-    # Tạo biểu đồ xu hướng và hình thức
-    trend_fig = charts.create_time_trend_chart(dff)
-    work_fig = charts.create_work_type_chart(dff)
-    map_fig = charts.create_vietnam_map(dff)
-    region_chart_fig = charts.create_region_vertical_chart(dff)
+    trend_dff = dff
+
+    # Vẽ tất cả biểu đồ song song để tăng tốc độ
+    from concurrent.futures import ThreadPoolExecutor
+
+    _dff = dff  # capture cho closure
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        f_trend       = pool.submit(charts.create_time_trend_chart, trend_dff)
+        f_work        = pool.submit(charts.create_work_type_chart, _dff, selected_work_type=req.work_type)
+        f_map         = pool.submit(charts.create_vietnam_map, _dff)
+        f_region      = pool.submit(charts.create_region_vertical_chart, _dff)
+
+    trend_fig        = f_trend.result()
+    work_fig         = f_work.result()
+    map_fig          = f_map.result()
+    region_chart_fig = f_region.result()
 
     region_counts = dff['vung_mien'].value_counts().to_dict()
     regions_data = {
@@ -123,8 +132,20 @@ def get_dashboard_data(req: FilterRequest):
         "Khác": int(region_counts.get('Khác', 0))
     }
 
-    # Xây dựng kết quả trả về, lưu ý phải ép kiểu dữ liệu Numpy về Python chuẩn (int, float, str)
-    return {
+    # Drill-down data: top 15 tỉnh/thành cho mỗi vùng miền
+    city_breakdown = {}
+    for vung in ['Bắc', 'Trung', 'Nam']:
+        vung_df = dff[dff['vung_mien'] == vung]
+        if not vung_df.empty:
+            city_counts = vung_df['tinh_thanh'].value_counts().head(15)
+            city_breakdown[vung] = [
+                {"city": str(k), "count": int(v)}
+                for k, v in city_counts.items()
+            ]
+        else:
+            city_breakdown[vung] = []
+
+    res = {
         "kpi": {
             "total_jobs": total_jobs,
             "peak_month": {"month": peak_month, "count": peak_count},
@@ -132,6 +153,7 @@ def get_dashboard_data(req: FilterRequest):
             "top_work": {"work": top_work, "pct": top_work_pct},
         },
         "regions": regions_data,
+        "city_breakdown": city_breakdown,
         "caption": "Không hiển thị nhóm Khác và Từ xa/Remote trên bản đồ do không có tọa độ địa lý cụ thể.",
         "charts": {
             "spark1": json.loads(spark1_fig.to_json()),
@@ -144,3 +166,5 @@ def get_dashboard_data(req: FilterRequest):
             "region_chart": json.loads(region_chart_fig.to_json())
         }
     }
+    set_cached_response(cache_key, res)
+    return res

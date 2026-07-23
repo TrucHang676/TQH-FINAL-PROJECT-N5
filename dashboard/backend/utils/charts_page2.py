@@ -48,12 +48,12 @@ EMERGING_TECH_GROUPS = {
                          'Hadoop', 'Hive', 'Flink'],
 }
 
-# Màu sắc cho 4 nhóm công nghệ
+# Màu sắc cho 4 nhóm công nghệ (đảm bảo độ tương phản cao, dễ phân biệt)
 EMERGING_COLORS = {
-    'AI / ML': '#FA6781',           # Coral Red
-    'Cloud': '#59B292',             # Sage Green
-    'DevOps / Container': '#FFC94D', # Amber Gold
-    'Data Engineering': '#0d9488',  # Teal
+    'AI / ML': '#FA6781',           # Coral Red (Đỏ san hô)
+    'Cloud': '#4A89F3',             # Soft Sky Blue (Xanh dương sáng dịu nhẹ đại diện cho Cloud)
+    'DevOps / Container': '#FFC94D', # Amber Gold (Vàng hổ phách)
+    'Data Engineering': '#0D9488',  # Teal (Xanh mòng két)
 }
 
 
@@ -153,17 +153,21 @@ def create_top_skills_chart(df):
         tickfont=dict(size=9, color='#4b5563'),
         title_text="Số lượng tin tuyển dụng",
         title_font=dict(size=10, color='#4b5563', weight='bold'),
-        range=[0, max_count * 1.18] if not pd.isna(max_count) else None
+        range=[0, max_count * 1.12] if not pd.isna(max_count) else None
     )
 
     fig.update_yaxes(
         showgrid=False,
         linecolor='#e5e7eb',
-        tickfont=dict(size=10, color='#111827', weight='bold')
+        tickfont=dict(size=10, color='#111827', weight='bold'),
+        automargin=True
     )
 
     apply_layout_styles(fig)
-    fig.update_layout(margin=dict(l=120, r=60, t=10, b=20))
+    # Tự động tính margin trái dựa trên nhãn dài nhất để tránh bị cắt chữ khi lọc
+    max_label_len = max(len(name) for name in display_names) if display_names else 10
+    left_margin = max(80, min(max_label_len * 7 + 10, 140))
+    fig.update_layout(margin=dict(l=left_margin, r=35, t=10, b=20))
 
     return fig
 
@@ -271,13 +275,30 @@ def create_skills_heatmap(df):
         [1.0, "#1a5944"],
     ]
 
+    # Tính min, max để xác định ô nào xanh đậm thì dùng chữ trắng (dùng HTML span trong text)
+    flat_z = [val for row in z for val in row if val is not None]
+    z_min = min(flat_z) if flat_z else 0
+    z_max = max(flat_z) if flat_z else 1
+    z_span = (z_max - z_min) or 1.0
+
+    formatted_text_matrix = []
+    for row in z:
+        f_row = []
+        for val in row:
+            if val is None or val == 0:
+                f_row.append("-")
+            else:
+                c = "#ffffff" if (val - z_min) / z_span > 0.5 else "#111827"
+                f_row.append(f"<span style='color:{c}'>{val:.1f}</span>")
+        formatted_text_matrix.append(f_row)
+
     fig = go.Figure(data=go.Heatmap(
         z=z,
         x=pos_labels,
         y=top_skills,
-        text=text_matrix,
+        text=formatted_text_matrix,
         texttemplate="%{text}",
-        textfont=dict(size=9, color='#111827'),
+        textfont=dict(size=9),
         colorscale=custom_colorscale,
         showscale=True,
         hovertext=hover_matrix,
@@ -296,13 +317,15 @@ def create_skills_heatmap(df):
         side='bottom',
         tickfont=dict(size=9, color='#374151', weight='bold'),
         showgrid=False,
-        linecolor='#e5e7eb'
+        showline=False,
+        ticks=""
     )
 
     fig.update_yaxes(
         tickfont=dict(size=9, color='#111827', weight='bold'),
         showgrid=False,
-        linecolor='#e5e7eb',
+        showline=False,
+        ticks="",
         dtick=1
     )
 
