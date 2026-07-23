@@ -44,3 +44,9 @@
   height: 55%;
   min-height: 0;
 }
+
+/* Đảm bảo con trỏ chuột mặc định (không thành bàn tay) trên biểu đồ xu hướng linechart */
+.trend-tech-card .chart-content,
+.trend-tech-card .chart-content * {
+  cursor: default !important;
+}
