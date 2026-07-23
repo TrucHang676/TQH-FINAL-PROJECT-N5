@@ -498,7 +498,6 @@ const Dashboard_page2 = () => {
                   {data?.charts?.tech_trend && (
                     <PlotlyChart
                       figure={getFilteredTrendFigure(data.charts.tech_trend, trendMode, selectedSkill, position)}
-                      onChartClick={handleTrendClick}
                     />
                   )}
                 </div>
