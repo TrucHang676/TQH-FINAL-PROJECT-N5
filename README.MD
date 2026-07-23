@@ -125,9 +125,9 @@ Final/
 ## 📊 4. Cấu trúc 5 Trang Phân tích của Dashboard
 
 - **Trang 1 — Xu hướng & Địa lý**: Tổng quan số lượng tin tuyển dụng, xu hướng theo thời gian, bản đồ địa lý các tỉnh/thành Việt Nam (hỗ trợ **Drill-down theo Vùng miền** và **Cross-filter Brushing & Linking** từ Hình thức làm việc ➔ Line Chart xu hướng).
-- **Trang 2 — Kỹ năng Công nghệ**: Top 15 kỹ năng công nghệ được săn đón nhất, Heatmap ma trận Kỹ năng x Nhóm vị trí, và xu hướng công nghệ mới (AI/ML, Cloud, DevOps, Data).
-- **Trang 3 — Mức lương & Phúc lợi**: Phân bố mức lương toàn ngành (Median vs Mean), chênh lệch lương giữa các địa phương/Remote, Heatmap lương theo Vị trí & Kinh nghiệm.
-- **Trang 4 — Cấp bậc Kinh nghiệm**: Treemap phân tích độ cởi mở của các nhóm vị trí đối với nhân sự trẻ (Intern/Fresher/Junior) và biểu đồ phân bố cấp bậc kinh nghiệm.
+- **Trang 2 — Kỹ năng Công nghệ**: Top 15 kỹ năng công nghệ được săn đón nhất, Heatmap ma trận Kỹ năng x Nhóm vị trí, và xu hướng công nghệ mới (hỗ trợ **Brushing & Linking cross-filtering** giữa Kỹ năng và Vị trí).
+- **Trang 3 — Mức lương & Phúc lợi**: Phân bố mức lương toàn ngành, chênh lệch lương địa phương/Remote, và Heatmap lương theo Vị trí & Kinh nghiệm (hỗ trợ **Brushing & Linking** đồng bộ biểu đồ theo 4 nhóm đối tượng).
+- **Trang 4 — Cấp bậc Kinh nghiệm (Nhân sự trẻ)**: Biểu đồ Donut phân bố cấp bậc, Treemap phân tích cơ hội cho Intern/Fresher/Junior, và Box plot lương khởi điểm.
 - **Trang 5 — Trợ lý Phân tích AI (AI Analyst)**: Khung tương tác AI hỗ trợ hỏi đáp, tự động sinh mã nguồn Python phân tích, cho phép người dùng **xem, gõ sửa code trực tiếp trên Monaco Editor** và **Duyệt & Thực thi an toàn tại máy local**.
 
 ---
