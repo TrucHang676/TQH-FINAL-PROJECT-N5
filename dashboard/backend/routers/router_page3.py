@@ -22,6 +22,7 @@ class FilterRequest(BaseModel):
     position: Optional[str] = None
     experience: Optional[str] = None
     region: Optional[str] = None
+    salary_range: Optional[List[float]] = None
 
 
 @router.post("/api/dashboard/page3")
@@ -54,6 +55,9 @@ def get_page3_data(req: FilterRequest):
 
     if req.region and req.region != 'All':
         dff = dff[dff['vung_mien'] == req.region]
+
+    if req.salary_range and len(req.salary_range) == 2:
+        dff = dff[(dff['luong_tb'] >= req.salary_range[0]) & (dff['luong_tb'] <= req.salary_range[1])]
 
     total_jobs = int(len(dff))
 

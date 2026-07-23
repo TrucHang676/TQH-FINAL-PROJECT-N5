@@ -82,7 +82,6 @@ def create_salary_distribution_chart(dff):
             showarrow=False, font=dict(size=14, color="#9ca3af")
         )
         apply_layout_styles(fig)
-        fig.update_layout(height=350)
         return fig
 
     median_val = float(salary_df['luong_tb'].median())
@@ -151,7 +150,6 @@ def create_salary_distribution_chart(dff):
 
     apply_layout_styles(fig)
     fig.update_layout(
-        height=350,
         showlegend=True,
         legend=dict(
             orientation="h",
@@ -195,7 +193,6 @@ def create_salary_by_position_experience_chart(dff):
             showarrow=False, font=dict(size=14, color="#9ca3af")
         )
         apply_layout_styles(fig)
-        fig.update_layout(height=400)
         return fig
 
     # Lọc ra 8 vị trí có số lượng tin nhiều nhất để tránh quá dài
@@ -310,7 +307,6 @@ def create_salary_by_position_experience_chart(dff):
     fig.update_xaxes(showline=False, ticks="")
     fig.update_yaxes(showline=False, ticks="")
     fig.update_layout(
-        height=400,
         xaxis=dict(
             title=dict(text="Cấp độ kinh nghiệm", font=dict(size=10, color='#4b5563', weight='bold')),
             side="bottom",
@@ -342,7 +338,6 @@ def create_salary_by_location_chart(dff):
             showarrow=False, font=dict(size=14, color="#9ca3af")
         )
         apply_layout_styles(fig)
-        fig.update_layout(height=400)
         return fig
 
     # Định nghĩa các thành phố và Remote cần lấy
@@ -378,33 +373,47 @@ def create_salary_by_location_chart(dff):
     )
     city_salary.columns = ['location', 'avg_salary', 'count']
 
+    # Đảm bảo có đủ 4 nhóm
+    all_locations = ['TP.HCM', 'Hà Nội', 'Đà Nẵng', 'Từ xa / Remote']
+    for loc in all_locations:
+        if loc not in city_salary['location'].values:
+            city_salary = pd.concat([city_salary, pd.DataFrame({'location': [loc], 'avg_salary': [np.nan], 'count': [0]})], ignore_index=True)
+
     # Sắp xếp từ cao xuống thấp. Plotly vẽ từ trên xuống nếu yaxis autorange="reversed"
     city_salary['avg_salary'] = city_salary['avg_salary'].round(1)
-    city_salary = city_salary.sort_values('avg_salary', ascending=False)
+    city_salary = city_salary.sort_values('avg_salary', ascending=False, na_position='last')
 
-    # Tính lương trung bình toàn ngành
-    global_avg = salary_df['luong_tb'].mean()
+    # Tính lương trung bình của 4 khu vực
+    regional_avg = combined_df['luong_tb'].mean() if not combined_df.empty else 0
 
     # Map vùng miền cho từng thành phố để tô màu
     city_region_map = salary_df.groupby('tinh_thanh')['vung_mien'].first().to_dict()
 
+    known_regions = {'Hà Nội': 'Bắc', 'TP.HCM': 'Nam', 'Đà Nẵng': 'Trung'}
     colors = []
     for loc in city_salary['location']:
         if 'Remote' in str(loc):
             colors.append(REGION_COLORS.get('Từ xa / Remote', '#3B82F6'))
         else:
-            region = city_region_map.get(loc, 'Khác')
+            region = city_region_map.get(loc, known_regions.get(loc, 'Khác'))
             colors.append(REGION_COLORS.get(region, '#9ca3af'))
 
-    # Không bôi đậm text trên cột
-    text_vals = [f"{v:.1f}tr ({c} tin)" for v, c in zip(city_salary['avg_salary'], city_salary['count'])]
+    # Text hiển thị trên cột (thêm Chưa có dữ liệu nếu NaN)
+    text_vals = []
+    for v, c in zip(city_salary['avg_salary'], city_salary['count']):
+        if pd.isna(v) or c == 0:
+            text_vals.append("Chưa có dữ liệu")
+        else:
+            text_vals.append(f"{v:.1f}tr ({c} tin)")
+            
+    plot_x = city_salary['avg_salary'].fillna(0)
     
     # Không bôi đậm nhãn trục y
     y_labels = city_salary['location']
 
     fig.add_trace(go.Bar(
         y=y_labels,
-        x=city_salary['avg_salary'],
+        x=plot_x,
         orientation='h',
         marker=dict(
             color=colors,
@@ -416,34 +425,38 @@ def create_salary_by_location_chart(dff):
         textfont=dict(size=9.5, color='#1e293b'),
         hovertemplate=(
             '<b>%{y}</b><br>'
-            'Lương TB: %{x:.1f} triệu VNĐ<extra></extra>'
+            'Lương TB: %{customdata[0]}<extra></extra>'
         ),
-        cliponaxis=False,
+        customdata=[["Chưa có dữ liệu" if pd.isna(v) else f"{v:.1f} triệu VNĐ"] for v in city_salary['avg_salary']],
+        cliponaxis=True,
     ))
 
     # Thêm đường lương trung bình toàn ngành (nằm lớp dưới 'below' để không cắt đè vào chữ)
     fig.add_vline(
-        x=global_avg,
+        x=regional_avg,
         line=dict(color='#ea580c', width=2, dash='dash'),
         layer="below"
     )
     
     # Text annotation nổi hẳn lên trên biểu đồ để không bị đè vào cột
     fig.add_annotation(
-        x=global_avg,
+        x=regional_avg,
         y=1.05,
         xref="x",
         yref="paper",
-        text=f"TB toàn ngành: {global_avg:.1f}tr",
+        text=f"TB 4 nhóm: {regional_avg:.1f}tr",
         showarrow=False,
         xanchor="left",
         yanchor="bottom",
         font=dict(color='#ea580c', size=12, family="Inter")
     )
 
+    valid_salaries = city_salary['avg_salary'].dropna()
+    max_bar_val = float(valid_salaries.max()) if not valid_salaries.empty else 0
+    safe_max = max(max_bar_val, regional_avg)
+
     apply_layout_styles(fig)
     fig.update_layout(
-        height=400,
         xaxis=dict(
             title=dict(text="Lương trung bình (triệu VNĐ)", font=dict(size=11, color='#1e293b', weight='bold')),
             tickfont=dict(size=10, color='#374151', weight='bold'),
@@ -453,7 +466,7 @@ def create_salary_by_location_chart(dff):
             linewidth=1,
             zeroline=False,
             ticks="",
-            range=[0, float(city_salary['avg_salary'].max()) * 1.35],
+            range=[0, safe_max * 1.35],
         ),
         yaxis=dict(
             title="",
@@ -484,7 +497,6 @@ def create_salary_box_chart(dff):
             showarrow=False, font=dict(size=14, color="#9ca3af")
         )
         apply_layout_styles(fig)
-        fig.update_layout(height=350)
         return fig
 
     # Vẽ box plot theo từng cấp kinh nghiệm
@@ -509,7 +521,6 @@ def create_salary_box_chart(dff):
 
     apply_layout_styles(fig)
     fig.update_layout(
-        height=350,
         showlegend=False,
         xaxis=dict(
             title=dict(text="Cấp độ kinh nghiệm", font=dict(size=10, color='#4b5563', weight='bold')),

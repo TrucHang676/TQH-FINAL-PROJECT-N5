@@ -16,6 +16,7 @@ const Dashboard_page3 = () => {
   const [position, setPosition] = useState(null);
   const [experience, setExperience] = useState(null);
   const [region, setRegion] = useState(null);
+  const [salaryRange, setSalaryRange] = useState(null);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -65,7 +66,7 @@ const Dashboard_page3 = () => {
     if (!position || !experience || !region) return;
     let isActive = true;
 
-    const cacheKey = JSON.stringify({ sources: [...sources].sort(), position: position.value, experience: experience.value, region: region.value });
+    const cacheKey = JSON.stringify({ sources: [...sources].sort(), position: position.value, experience: experience.value, region: region.value, salaryRange });
     if (page3Cache.has(cacheKey)) {
       setData(page3Cache.get(cacheKey));
       setLoading(false);
@@ -80,6 +81,7 @@ const Dashboard_page3 = () => {
           position: position.value,
           experience: experience.value,
           region: region.value,
+          salary_range: salaryRange,
         });
         if (isActive) {
           page3Cache.set(cacheKey, response.data);
@@ -94,7 +96,7 @@ const Dashboard_page3 = () => {
 
     fetchData();
     return () => { isActive = false; };
-  }, [sources, position, experience, region]);
+  }, [sources, position, experience, region, salaryRange]);
 
   const handleSourceChange = (val) => {
     setSources(prev =>
@@ -107,6 +109,7 @@ const Dashboard_page3 = () => {
     setPosition(positionOptions[0]);
     setExperience(experienceOptions[0]);
     setRegion(regionOptions[0]);
+    setSalaryRange(null);
   };
 
   // Custom styles cho react-select (giống hệt Page 1 & 2)
@@ -142,6 +145,67 @@ const Dashboard_page3 = () => {
       scrollbarColor: '#59B292 #f0faf6',
     }),
     singleValue: (provided) => ({ ...provided, color: '#111827' }),
+  };
+
+  // =========================================================================
+  // Xử lý sự kiện Brushing & Linking (Click biểu đồ -> Lọc)
+  // =========================================================================
+
+  // Map ngược vị trí ngắn gọn từ biểu đồ thành vị trí đầy đủ cho dropdown
+  const reversePosMap = {
+    'Software Dev': 'Software Development',
+    'AI / ML': 'AI / ML / Data Science',
+    'Mobile / Game': 'Mobile / Game / Embedded',
+    'Cloud / DevOps': 'Cloud / DevOps / SRE',
+    'QA / Testing': 'QA / Testing',
+    'Data Engineering': 'Data Engineering / Database',
+    'Product / UX': 'Product / Business / UX',
+    'Management': 'Management / Architecture'
+  };
+
+  const handleHeatmapClick = (e) => {
+    if (!e || !e.points || !e.points[0]) return;
+    const clickedExp = e.points[0].x;
+    const clickedShortPos = e.points[0].y;
+
+    const fullPos = reversePosMap[clickedShortPos] || clickedShortPos;
+
+    // Cập nhật bộ lọc vị trí
+    const posOption = positionOptions.find(opt => opt.value === fullPos);
+    if (posOption) setPosition(posOption);
+
+    // Cập nhật bộ lọc kinh nghiệm
+    const expOption = experienceOptions.find(opt => opt.value === clickedExp);
+    if (expOption) setExperience(expOption);
+  };
+
+  const handleLocationClick = (e) => {
+    if (!e || !e.points || !e.points[0]) return;
+    const clickedLoc = e.points[0].y;
+    
+    let targetRegion = 'All';
+    if (clickedLoc.includes('Hà Nội')) targetRegion = 'Bắc';
+    else if (clickedLoc.includes('TP.HCM')) targetRegion = 'Nam';
+    else if (clickedLoc.includes('Đà Nẵng')) targetRegion = 'Trung';
+    else if (clickedLoc.includes('Remote') || clickedLoc.includes('Từ xa')) targetRegion = 'Từ xa / Remote';
+
+    // Cập nhật bộ lọc vùng miền
+    const regOption = regionOptions.find(opt => opt.value === targetRegion);
+    if (regOption) setRegion(regOption);
+  };
+
+  const handleDistClick = (e) => {
+    if (!e || !e.points || !e.points[0]) return;
+    const clickedX = e.points[0].x;
+    // Bins have size 5, so range is clickedX - 2.5 to clickedX + 2.5
+    const range = [clickedX - 2.5, clickedX + 2.5];
+    
+    // Toggle filter
+    if (salaryRange && salaryRange[0] === range[0] && salaryRange[1] === range[1]) {
+      setSalaryRange(null);
+    } else {
+      setSalaryRange(range);
+    }
   };
 
   return (
@@ -265,11 +329,24 @@ const Dashboard_page3 = () => {
               <div className="chart-header">
                 <span className="chart-title">
                   Phân bố mức lương trung bình
+                  {salaryRange && (
+                    <span style={{
+                      marginLeft: 8, fontSize: '11px', padding: '2px 8px', borderRadius: '12px',
+                      background: 'rgba(89, 178, 146, 0.15)', color: '#469d7e', fontWeight: 600,
+                      display: 'inline-flex', alignItems: 'center', gap: '4px'
+                    }}>
+                      📍 Đã lọc: {salaryRange[0]} - {salaryRange[1]} triệu
+                      <button 
+                        onClick={() => setSalaryRange(null)} 
+                        style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#469d7e', fontSize: '11px', fontWeight: 'bold', padding: 0, marginLeft: '2px' }}
+                      >✕</button>
+                    </span>
+                  )}
                 </span>
               </div>
               <div className="chart-content">
                 {data?.charts?.salary_distribution && (
-                  <PlotlyChart key="dist-histogram" figure={data.charts.salary_distribution} />
+                  <PlotlyChart key={`dist-histogram-${salaryRange ? 'filtered' : 'all'}`} figure={data.charts.salary_distribution} onChartClick={handleDistClick} />
                 )}
               </div>
             </div>
@@ -286,7 +363,10 @@ const Dashboard_page3 = () => {
                 </div>
                 <div className="chart-content">
                   {data?.charts?.salary_by_position_experience && (
-                    <PlotlyChart figure={data.charts.salary_by_position_experience} />
+                    <PlotlyChart 
+                      figure={data.charts.salary_by_position_experience} 
+                      onChartClick={handleHeatmapClick}
+                    />
                   )}
                 </div>
               </div>
@@ -301,7 +381,10 @@ const Dashboard_page3 = () => {
                 </div>
                 <div className="chart-content">
                   {data?.charts?.salary_by_location && (
-                    <PlotlyChart figure={data.charts.salary_by_location} />
+                    <PlotlyChart 
+                      figure={data.charts.salary_by_location} 
+                      onChartClick={handleLocationClick}
+                    />
                   )}
                 </div>
               </div>
