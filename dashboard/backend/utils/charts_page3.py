@@ -87,19 +87,35 @@ def create_salary_distribution_chart(dff):
     median_val = float(salary_df['luong_tb'].median())
     mean_val = float(salary_df['luong_tb'].mean())
 
-    # Tạo histogram
-    fig.add_trace(go.Histogram(
-        x=salary_df['luong_tb'],
-        xbins=dict(start=0, end=salary_df['luong_tb'].quantile(0.98) + 5, size=5),
+    # Tạo histogram với dữ liệu thô để Plotly tự tính bin, sau đó dùng customdata để hiển thị tooltip đẹp
+    bin_size = 5
+    bin_start = 0
+    bin_end = float(salary_df['luong_tb'].quantile(0.98)) + bin_size
+    bins = np.arange(bin_start, bin_end + bin_size, bin_size)
+    counts, edges = np.histogram(salary_df['luong_tb'], bins=bins)
+
+    hover_texts = [
+        f"<span style='font-size:4px'> </span><br>"
+        f" &nbsp;<b><span style='color:#59B292'>▍</span> Khoảng lương</b>&nbsp; <br>"
+        f"<span style='font-size:4px'> </span><br>"
+        f"<span style='color:#5a4000'>"
+        f" &nbsp;Từ <b>{int(edges[i])} – {int(edges[i+1])} triệu VNĐ</b>&nbsp; <br>"
+        f" &nbsp;Số tin: <b>{counts[i]:,} tin</b>&nbsp; "
+        f"</span><br><span style='font-size:4px'> </span>"
+        for i in range(len(counts))
+    ]
+
+    fig.add_trace(go.Bar(
+        x=[(edges[i] + edges[i+1]) / 2 for i in range(len(counts))],
+        y=counts.tolist(),
+        width=[bin_size * 0.92] * len(counts),
         marker=dict(
             color=SALARY_COLORS['primary'],
             line=dict(color='white', width=1),
             opacity=0.85,
         ),
-        hovertemplate=(
-            '<b>Khoảng lương:</b> %{x} triệu<br>'
-            '<b>Số tin tuyển dụng:</b> %{y}<extra></extra>'
-        ),
+        hovertemplate="%{customdata}<extra></extra>",
+        customdata=hover_texts,
         showlegend=False,
     ))
 
@@ -112,11 +128,20 @@ def create_salary_distribution_chart(dff):
         fig.add_trace(go.Pie(
             labels=['Công khai lương', 'Không công khai'],
             values=[with_salary, without_salary],
-            domain=dict(x=[0.75, 0.95], y=[0.65, 0.95]),  # Thu nhỏ hơn nữa, đẩy lên góc
+            domain=dict(x=[0.75, 0.95], y=[0.65, 0.95]),
             hole=0.7,
-            marker=dict(colors=[SALARY_COLORS['primary'], '#e5e7eb']), # Màu đồng bộ với dashboard, phần còn lại xám nhạt
+            marker=dict(colors=[SALARY_COLORS['primary'], '#e5e7eb']),
             textinfo='none',
-            hovertemplate='<b>%{label}</b><br>Số lượng: %{value} tin<br>Tỷ lệ: %{percent}<extra></extra>',
+            hovertemplate=(
+                "<span style='font-size:4px'> </span><br>"
+                " &nbsp;<b><span style='color:#59B292'>▍</span> %{label}</b>&nbsp; <br>"
+                "<span style='font-size:4px'> </span><br>"
+                "<span style='color:#5a4000'>"
+                " &nbsp;Số lượng: <b>%{value:,} tin</b>&nbsp; <br>"
+                " &nbsp;Tỷ lệ: <b>%{percent}</b>&nbsp; "
+                "</span><br><span style='font-size:4px'> </span>"
+                "<extra></extra>"
+            ),
             showlegend=False,
         ))
         
@@ -226,11 +251,28 @@ def create_salary_by_position_experience_chart(dff):
                 cnt = int(row_data['count'].iloc[0])
                 z_row.append(val)
                 text_row.append(f"{val:.1f}")
-                hover_row.append(f"<b>{pos}</b><br>Kinh nghiệm: {exp}<br>Lương TB: {val:.1f}tr<br>Số tin: {cnt}")
+                hover_row.append(
+                    f"<span style='font-size:4px'> </span><br>"
+                    f" &nbsp;<b><span style='color:#59B292'>▍</span> {pos}</b>&nbsp; <br>"
+                    f"<span style='font-size:4px'> </span><br>"
+                    f"<span style='color:#5a4000'>"
+                    f" &nbsp;Kinh nghiệm: <b>{exp}</b>&nbsp; <br>"
+                    f" &nbsp;Lương TB: <b>{val:.1f} triệu VNĐ</b>&nbsp; <br>"
+                    f" &nbsp;Số tin: <b>{cnt:,} tin</b>&nbsp; "
+                    f"</span><br><span style='font-size:4px'> </span>"
+                )
             else:
                 z_row.append(None)
                 text_row.append("-")
-                hover_row.append(f"<b>{pos}</b><br>Kinh nghiệm: {exp}<br>Chưa có dữ liệu")
+                hover_row.append(
+                    f"<span style='font-size:4px'> </span><br>"
+                    f" &nbsp;<b><span style='color:#9ca3af'>▍</span> {pos}</b>&nbsp; <br>"
+                    f"<span style='font-size:4px'> </span><br>"
+                    f"<span style='color:#9ca3af'>"
+                    f" &nbsp;Kinh nghiệm: <b>{exp}</b>&nbsp; <br>"
+                    f" &nbsp;Chưa có dữ liệu "
+                    f"</span><br><span style='font-size:4px'> </span>"
+                )
         z_values.append(z_row)
         text_values.append(text_row)
         hover_text.append(hover_row)
@@ -290,6 +332,7 @@ def create_salary_by_position_experience_chart(dff):
         texttemplate="%{text}",
         textfont=dict(size=9.5),
         hoverinfo="text",
+        hovertemplate="%{hovertext}<extra></extra>",
         hovertext=hover_text,
         colorscale=custom_colorscale,
         showscale=True,
@@ -423,11 +466,24 @@ def create_salary_by_location_chart(dff):
         text=text_vals,
         textposition='outside',
         textfont=dict(size=9.5, color='#1e293b'),
-        hovertemplate=(
-            '<b>%{y}</b><br>'
-            'Lương TB: %{customdata[0]}<extra></extra>'
-        ),
-        customdata=[["Chưa có dữ liệu" if pd.isna(v) else f"{v:.1f} triệu VNĐ"] for v in city_salary['avg_salary']],
+        hovertemplate="%{customdata}<extra></extra>",
+        customdata=[
+            f"<span style='font-size:4px'> </span><br>"
+            f" &nbsp;<b><span style='color:#59B292'>▍</span> {loc}</b>&nbsp; <br>"
+            f"<span style='font-size:4px'> </span><br>"
+            f"<span style='color:#5a4000'>"
+            f" &nbsp;Lương TB: <b>Chưa có dữ liệu</b>&nbsp; "
+            f"</span><br><span style='font-size:4px'> </span>"
+            if pd.isna(v) else
+            f"<span style='font-size:4px'> </span><br>"
+            f" &nbsp;<b><span style='color:#59B292'>▍</span> {loc}</b>&nbsp; <br>"
+            f"<span style='font-size:4px'> </span><br>"
+            f"<span style='color:#5a4000'>"
+            f" &nbsp;Lương TB: <b>{v:.1f} triệu VNĐ</b>&nbsp; <br>"
+            f" &nbsp;Số tin: <b>{c:,} tin</b>&nbsp; "
+            f"</span><br><span style='font-size:4px'> </span>"
+            for loc, v, c in zip(city_salary['location'], city_salary['avg_salary'], city_salary['count'])
+        ],
         cliponaxis=True,
     ))
 
