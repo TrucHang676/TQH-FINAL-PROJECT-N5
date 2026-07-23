@@ -91,6 +91,28 @@ const Dashboard_page4 = () => {
     );
   };
 
+  // Brushing & Linking: click vào 1 ô Treemap hoặc 1 điểm/hộp trong Box plot đều
+  // set thẳng bộ lọc "Nhóm vị trí" — cả 2 biểu đồ này đều dùng đúng giá trị thật
+  // của cột nhom_vi_tri làm nhãn/trục X nên khớp trực tiếp với positionOptions,
+  // không cần bộ lọc mới. Đồng bộ với cơ chế click-để-lọc đã có ở trang 1
+  // (handleRegionClick): ưu tiên lấy label (Treemap) rồi tới x (Box plot).
+  // Toggle-off: bấm lại đúng nhóm vị trí ĐANG được lọc thì tự quay về "Tất cả vị
+  // trí" ngay tại chỗ — không cần rời sang sidebar hay bấm nút Đặt lại (vốn xóa
+  // luôn mọi bộ lọc khác chứ không riêng vị trí).
+  const handlePositionClick = (e) => {
+    if (!e.points || e.points.length === 0) return;
+    const point = e.points[0];
+    const clickedValue = point.label || point.x || point.y;
+    if (!clickedValue) return;
+    const matched = positionOptions.find(p => p.value === clickedValue || p.label === clickedValue);
+    if (!matched) return;
+    if (position && matched.value === position.value) {
+      setPosition(positionOptions[0]); // đang lọc đúng nhóm này -> bấm lại để bỏ lọc
+    } else {
+      setPosition(matched);
+    }
+  };
+
   const resetFilters = () => {
     setSources([...sourceOptions]);
     setRegion(regionOptions[0]);
@@ -257,7 +279,7 @@ const Dashboard_page4 = () => {
               <div className="chart-card donut-card">
                 <div className="chart-header">
                   <span className="chart-title">
-                    Nhóm ít kinh nghiệm chiếm tỷ trọng bao nhiêu?
+                    Phân bố cấp độ kinh nghiệm
                   </span>
                 </div>
                 <div className="chart-content">
@@ -271,12 +293,12 @@ const Dashboard_page4 = () => {
               <div className="chart-card treemap-card">
                 <div className="chart-header">
                   <span className="chart-title">
-                    Nhóm vị trí nào cởi mở nhất với Fresher/Intern?
+                    Độ cởi mở với nhân sự trẻ theo nhóm vị trí
                   </span>
                 </div>
                 <div className="chart-content">
                   {data?.charts?.youth_opportunity_treemap && (
-                    <PlotlyChart figure={data.charts.youth_opportunity_treemap} />
+                    <PlotlyChart figure={data.charts.youth_opportunity_treemap} onChartClick={handlePositionClick} />
                   )}
                 </div>
               </div>
@@ -289,12 +311,12 @@ const Dashboard_page4 = () => {
               <div className="chart-card boxplot-card">
                 <div className="chart-header">
                   <span className="chart-title">
-                    Lương khởi điểm Intern/Fresher chênh lệch thế nào giữa các nhóm vị trí?
+                    Lương khởi điểm Intern/Fresher theo nhóm vị trí
                   </span>
                 </div>
                 <div className="chart-content">
                   {data?.charts?.youth_salary_boxplot && (
-                    <PlotlyChart figure={data.charts.youth_salary_boxplot} />
+                    <PlotlyChart figure={data.charts.youth_salary_boxplot} onChartClick={handlePositionClick} />
                   )}
                 </div>
               </div>

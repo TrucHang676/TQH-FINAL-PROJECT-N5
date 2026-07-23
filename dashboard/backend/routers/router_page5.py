@@ -17,6 +17,7 @@ from backend.ai_config import (
     GEMINI_MODEL_NAME, TITLE_MODEL_NAME, ROUTING_MODEL_NAME,
     SYSTEM_PROMPT, VISION_PROMPT, ROUTING_PROMPT_TEMPLATE, COMMENT_PROMPT_TEMPLATE,
     ASK_FORCED_PROMPT, CODE_FORCED_SUFFIX, EXPLAIN_FORCED_PROMPT,
+    SUGGESTION_PROMPT_TEMPLATE,
     GEMINI_API_KEYS,
 )
 from backend.chart_catalog import CHART_CATALOG, get_catalog_prompt_listing, get_catalog_item, get_suggestions
@@ -100,12 +101,30 @@ def generate_title(prompt: str):
     except Exception:
         return None
 
+# A3: cache kết quả định tuyến theo đúng chuỗi câu hỏi (in-process, sống theo vòng
+# đời server) — route_question_to_catalog() chỉ phụ thuộc mỗi `question` (không đọc
+# lịch sử hội thoại), nên cùng 1 câu hỏi luôn cho cùng 1 kết quả HỢP LỆ; tiết kiệm
+# hẳn 1 lượt gọi Gemini Flash cho các câu hay được hỏi lại (19 câu mục tiêu chuẩn bị
+# vấn đáp rất dễ rơi vào trường hợp này).
+#
+# QUAN TRỌNG: CHỈ cache khi khớp được 1 mã catalog thật (result là 1 id cụ thể).
+# TUYỆT ĐỐI KHÔNG cache khi result là None — vì None có thể đến từ (a) lỗi tạm thời
+# (quota/mạng), hoặc (b) chính Gemini Flash phân loại TRƯỢT ở lần gọi đó (routing
+# không tất định 100%, đặc biệt với câu diễn đạt không hệt catalog). Nếu cache cả
+# None, một lần trượt duy nhất sẽ "khóa cứng" câu hỏi đó khỏi catalog cho SUỐT PHIÊN
+# SERVER — biến 1 lần sai hiếm gặp thành sai vĩnh viễn, cực kỳ hại cho đúng nhóm câu
+# quan trọng nhất (19 câu mục tiêu bị hỏi lặp lại nhiều lần để luyện vấn đáp).
+_ROUTING_CACHE: dict = {}
+
 def route_question_to_catalog(question: str):
     """Đối chiếu câu hỏi với danh mục biểu đồ có sẵn (chart_catalog.py). Trả về mã
     (VD 'P2-02') nếu khớp Ý NGHĨA với 1 biểu đồ đã có, hoặc None nếu không khớp/lỗi
     (khi đó gọi nơi khác sẽ tự quay về luồng sinh code như bình thường)."""
     if not gemini_api_key:
         return None
+    cache_key = question.strip()
+    if cache_key in _ROUTING_CACHE:
+        return _ROUTING_CACHE[cache_key]
     try:
         prompt = ROUTING_PROMPT_TEMPLATE.format(
             catalog_listing=get_catalog_prompt_listing(),
@@ -115,11 +134,14 @@ def route_question_to_catalog(question: str):
         raw = (resp.text or "").strip()
         first_line = raw.splitlines()[0].strip().strip('"').strip("'") if raw else ""
         if not first_line or first_line.upper() == "NONE":
-            return None
+            return None  # không cache — để lần hỏi sau vẫn được thử lại
         item = get_catalog_item(first_line)
-        return item["id"] if item else None
+        result = item["id"] if item else None
     except Exception:
-        return None
+        return None  # lỗi tạm thời — không cache
+    if result:
+        _ROUTING_CACHE[cache_key] = result
+    return result
 
 def get_catalog_chart_data(catalog_id: str):
     """Gọi đúng hàm vẽ biểu đồ thật (build_fn) trên TOÀN BỘ dữ liệu (không lọc),
@@ -188,35 +210,175 @@ class AiExecuteParams(BaseModel):
     requestId: str
     editedCode: str
 
+# --- Grounding dữ liệu thật (RAG đơn giản) ---
+# Nhồi vào prompt sinh code các SỰ THẬT rút trực tiếp từ dataset: giá trị hợp lệ của
+# cột phân loại, min/max/trung vị cột lương, top kỹ năng đúng chính tả, vài dòng mẫu.
+# Mục tiêu: chặn model chọn nhầm cột / bịa giá trị ngay từ đầu (lỗi đã đo được ở câu
+# so sánh Senior vs Junior/Fresher). Tính 1 lần rồi cache — không đọc lại CSV mỗi request.
+_DATA_GROUNDING_CACHE = None
+
+def build_data_grounding():
+    """Trả về đoạn văn bản mô tả dữ liệu THẬT (giá trị hợp lệ + thống kê + mẫu) để
+    ghép vào prompt sinh code. Cache module-level; lỗi/thiếu file thì trả chuỗi rỗng
+    (không làm hỏng luồng — chỉ mất phần grounding)."""
+    global _DATA_GROUNDING_CACHE
+    if _DATA_GROUNDING_CACHE is not None:
+        return _DATA_GROUNDING_CACHE
+    if not data_path.exists():
+        _DATA_GROUNDING_CACHE = ""
+        return _DATA_GROUNDING_CACHE
+    try:
+        df = pd.read_csv(data_path)
+    except Exception:
+        _DATA_GROUNDING_CACHE = ""
+        return _DATA_GROUNDING_CACHE
+
+    lines = [
+        "\n\n--- NGỮ CẢNH DỮ LIỆU THẬT (rút trực tiếp từ `dff`; CHỈ được dùng đúng "
+        "các tên cột và giá trị liệt kê ở đây, TUYỆT ĐỐI KHÔNG bịa cột/giá trị khác) ---",
+        f"Tổng số dòng: {len(df)}.",
+    ]
+
+    cat_cols = ["nhom_vi_tri", "cap_do_kinh_nghiem", "vung_mien", "loai_luong",
+                "hinh_thuc_lam_viec", "nguon", "tinh_thanh"]
+    for c in cat_cols:
+        if c in df.columns:
+            vals = [str(v) for v in df[c].dropna().unique().tolist()]
+            shown = vals[:25]
+            more = "" if len(vals) <= 25 else f" ...(+{len(vals) - 25} giá trị khác)"
+            lines.append(f"- `{c}` — giá trị hợp lệ: " + ", ".join(repr(v) for v in shown) + more)
+
+    for c in ["luong_min", "luong_max", "luong_tb"]:
+        if c in df.columns:
+            s = pd.to_numeric(df[c], errors="coerce").dropna()
+            if len(s):
+                lines.append(
+                    f"- `{c}` (triệu VNĐ): {len(s)} dòng có số, min={s.min():.1f}, "
+                    f"trung vị={s.median():.1f}, trung bình={s.mean():.1f}, max={s.max():.1f} "
+                    f"— còn lại là NaN, PHẢI dropna() trước khi tính/vẽ"
+                )
+
+    if "ky_nang" in df.columns:
+        from collections import Counter
+        cnt = Counter()
+        for v in df["ky_nang"].dropna():
+            for sk in str(v).split(","):
+                sk = sk.strip()
+                if sk:
+                    cnt[sk] += 1
+        top = cnt.most_common(20)
+        if top:
+            lines.append(
+                "- `ky_nang` là chuỗi kỹ năng cách nhau bởi dấu phẩy; muốn đếm từng kỹ "
+                "năng phải split(',') rồi strip() từng phần tử. 20 kỹ năng phổ biến nhất "
+                "(đúng chính tả trong dữ liệu): " + ", ".join(f"{k} ({n})" for k, n in top)
+            )
+
+    sample_cols = [c for c in ["ten_cong_viec", "nhom_vi_tri", "cap_do_kinh_nghiem",
+                               "tinh_thanh", "luong_tb", "ky_nang"] if c in df.columns]
+    if sample_cols:
+        lines.append("Ví dụ vài dòng thật (một số cột, để thấy định dạng giá trị):")
+        for _, r in df[sample_cols].head(2).iterrows():
+            lines.append("  " + " | ".join(f"{c}={r[c]!r}" for c in sample_cols))
+
+    lines.append("--- HẾT NGỮ CẢNH DỮ LIỆU ---")
+    _DATA_GROUNDING_CACHE = "\n".join(lines)
+    return _DATA_GROUNDING_CACHE
+
 def get_system_prompt():
-    return SYSTEM_PROMPT
+    # Ghép grounding dữ liệu thật vào system prompt để dùng cho nhánh SINH CODE
+    # (Chế độ B / Mẫu 6). Các nhánh không sinh code (vision, nhận xét catalog, routing,
+    # /hoi, /giaithich) không gọi hàm này nên không bị phình prompt vô ích.
+    return SYSTEM_PROMPT + build_data_grounding()
 
 # Số lượt hội thoại gần nhất tối đa đưa vào ngữ cảnh (giới hạn để prompt không quá dài).
 MAX_CONTEXT_TURNS = 8
 
+# --- A1b: nhồi SỐ LIỆU THẬT của biểu đồ đã chạy vào ngữ cảnh ---
+# Trước đây ngữ cảnh chỉ có prompt + answer + code, nên hỏi nối tiếp về biểu đồ vừa
+# hiện ("nhóm nào cao nhất?") thì AI không thực sự thấy con số, dễ trả lời né số hoặc
+# bắt người dùng gõ /nhanxet. Bảng result.csv này do code NGƯỜI DÙNG ĐÃ DUYỆT chạy ra
+# (không phải server tự chạy) nên không đụng nguyên tắc "không exec ngầm".
+MAX_CONTEXT_RESULT_TABLES = 2   # chỉ lấy bảng của 1-2 biểu đồ gần nhất
+MAX_CONTEXT_CSV_ROWS = 40       # cắt bớt bảng dài để prompt không phình
+
+def _shrink_csv_for_context(csv_text, max_rows=MAX_CONTEXT_CSV_ROWS):
+    """Rút gọn bảng CSV kết quả trước khi nhồi vào ngữ cảnh: giữ dòng tiêu đề +
+    max_rows dòng đầu, ghi chú rõ phần đã lược. Trả '' nếu không có gì."""
+    if not csv_text:
+        return ""
+    lines = csv_text.strip().splitlines()
+    if len(lines) <= max_rows + 1:
+        return "\n".join(lines)
+    kept = lines[: max_rows + 1]
+    kept.append(f"... (còn {len(lines) - 1 - max_rows} dòng nữa, đã lược bớt)")
+    return "\n".join(kept)
+
 def build_conversation_context(history, conversation_id, max_turns=MAX_CONTEXT_TURNS):
     """Dựng lại các lượt hỏi–đáp TRƯỚC ĐÓ của cùng một cuộc hội thoại thành đoạn
     văn bản ngữ cảnh, để model hiểu câu hỏi tiếp theo (VD "còn vùng miền thì sao?",
-    "đổi thành top 10"). Trả về chuỗi rỗng nếu là câu hỏi đầu tiên của cuộc."""
+    "đổi thành top 10"). Trả về chuỗi rỗng nếu là câu hỏi đầu tiên của cuộc.
+
+    Bao gồm 3 phần (giải quyết nhóm nhược điểm A1):
+    - A1a: các lượt CŨ hơn max_turns không bị bỏ hẳn — tóm tắt lại thành danh sách
+      câu đã hỏi (thuần code, không tốn thêm lượt gọi model) để cuộc dài không "quên"
+      hoàn toàn phần đầu.
+    - A1b: nhồi BẢNG SỐ LIỆU THẬT (result.csv) của 1-2 biểu đồ gần nhất, để hỏi nối
+      tiếp về biểu đồ vừa hiện thì AI trả lời được bằng số thật.
+    - A1c: đánh dấu lượt nào có kèm ẢNH, để AI biết cuộc hội thoại từng bàn về ảnh đó.
+    """
     if not conversation_id:
         return ""
     turns = [x for x in history if (x.get("conversationId") or x.get("id")) == conversation_id]
     if not turns:
         return ""
     turns.sort(key=lambda x: x.get("timestamp", ""))
-    turns = turns[-max_turns:]
+
+    older, recent = turns[:-max_turns], turns[-max_turns:]
+
+    # A1b: chỉ nhồi bảng số liệu của tối đa MAX_CONTEXT_RESULT_TABLES lượt GẦN NHẤT
+    # có kết quả thật — tránh prompt phình khi cuộc có nhiều biểu đồ.
+    turns_with_result = [t for t in recent if (t.get("result") or {}).get("csv")]
+    ids_with_table = {t.get("id") for t in turns_with_result[-MAX_CONTEXT_RESULT_TABLES:]}
 
     lines = [
         "\n\n--- LỊCH SỬ HỘI THOẠI TRƯỚC ĐÓ (chỉ để hiểu ngữ cảnh câu hỏi mới bên dưới; "
         "nếu câu mới có ý nối tiếp như \"còn ...\", \"tương tự\", \"đổi thành ...\", "
         "\"vẫn biểu đồ đó nhưng ...\" thì hãy dựa vào các lượt này) ---"
     ]
-    for t in turns:
+
+    # A1a: tóm tắt gọn các lượt đã bị cắt khỏi cửa sổ ngữ cảnh.
+    if older:
+        asked = [(t.get("prompt") or "").strip().replace("\n", " ") for t in older]
+        asked = [q[:80] + ("..." if len(q) > 80 else "") for q in asked if q]
+        if asked:
+            lines.append(
+                "\n[Tóm tắt các câu đã hỏi TRƯỚC ĐÓ trong cuộc này (đã lược nội dung "
+                "chi tiết, chỉ giữ để biết cuộc đã bàn qua những gì)]: "
+                + "; ".join(asked)
+            )
+
+    for t in recent:
         lines.append(f"\n[Người dùng]: {t.get('prompt', '')}")
+        # A1c: cho model biết lượt này có kèm ảnh (nội dung ảnh đã được mô tả trong
+        # câu trả lời ngay bên dưới, nên không cần gửi lại ảnh gốc).
+        if t.get("image"):
+            lines.append("[Lượt này người dùng có GỬI KÈM MỘT ẢNH — phần nhận xét bên dưới là kết quả đọc ảnh đó]")
         if t.get("type") == "text" and t.get("answer"):
             lines.append(f"[Trợ lý — đã trả lời bằng văn bản]: {t['answer']}")
         elif t.get("code"):
             lines.append("[Trợ lý — đã sinh code phân tích]:\n```python\n" + t["code"] + "\n```")
+        # A1b: bảng số liệu thật do code ĐÃ ĐƯỢC NGƯỜI DÙNG DUYỆT chạy ra.
+        if t.get("id") in ids_with_table:
+            csv_short = _shrink_csv_for_context((t.get("result") or {}).get("csv"))
+            if csv_short:
+                lines.append(
+                    "[SỐ LIỆU THẬT của biểu đồ đã chạy ở lượt này — khi câu hỏi mới "
+                    "hỏi về biểu đồ/kết quả này (VD \"nhóm nào cao nhất\", \"chênh nhau "
+                    "bao nhiêu\"), PHẢI trả lời bằng đúng các con số dưới đây, không bịa "
+                    "thêm số và không cần viết code lại]:\n" + csv_short
+                )
+
     lines.append("\n--- HẾT LỊCH SỬ ---")
     return "\n".join(lines)
 
@@ -365,6 +527,13 @@ class AiStreamParams(BaseModel):
     # None/"auto" = để hệ thống tự quyết định như trước (định tuyến danh mục rồi
     # mới quyết Chế độ A/B).
     mode: str | None = None
+    # A3: mã danh mục ĐÃ BIẾT TRƯỚC (frontend gửi kèm khi người dùng bấm 1 chip gợi
+    # ý — chip đó vốn được sinh ra từ chính CHART_CATALOG nên chắc chắn hợp lệ).
+    # Cho phép BỎ HẲN lượt gọi Gemini Flash định tuyến (route_question_to_catalog),
+    # vì hệ thống đã biết chắc câu hỏi này ứng với mã nào — giảm 1 trong 3 bước tuần
+    # tự gây "khoảng lặng" trước chữ đầu tiên. Vẫn được xác thực lại bằng
+    # get_catalog_item() trước khi dùng — không tin mù nội dung client gửi lên.
+    catalogHint: str | None = None
 
 def find_last_chart_result(history, conversation_id):
     """Tìm item GẦN NHẤT trong 1 cuộc hội thoại có kết quả biểu đồ đã chạy thành
@@ -377,6 +546,58 @@ def find_last_chart_result(history, conversation_id):
         if csv_text:
             return t
     return None
+
+def get_context_aware_suggestions(question: str, answer_text: str, catalog_id, exclude_ids=None, limit: int = 2):
+    """A4: gợi ý câu hỏi tiếp theo BÁM ĐÚNG NGỮ CẢNH vừa trả lời, thay vì lấy đại các
+    mục danh mục không liên quan (hành vi cũ của get_suggestions(None,...)). Dùng
+    Gemini Flash (rẻ, 1 lượt) để CHỌN — không phải SINH — trong chính danh sách
+    catalog còn lại, theo đúng cơ chế GOAL EXPLORER của LIDA (Dibia, 2023): bắt
+    model nêu lý do trước khi chọn giúp bám chủ đề tốt hơn. Vì chỉ được chọn mã có
+    sẵn (không tự bịa câu hỏi), đảm bảo "mọi chip bấm vào chắc chắn ra biểu đồ thật"
+    vẫn giữ nguyên như thiết kế cũ.
+
+    Trả về None nếu gọi AI lỗi/không có ứng viên hợp lệ nào — để nơi gọi tự rơi về
+    get_suggestions() (fallback thuần code, luôn có kết quả)."""
+    if not gemini_api_key:
+        return None
+    exclude = set(exclude_ids or [])
+    if catalog_id:
+        exclude.add(catalog_id)
+    candidates = [item for item in CHART_CATALOG if item["id"] not in exclude]
+    if not candidates:
+        return None
+    # Giới hạn ~30 ứng viên để prompt không phình khi danh mục lớn dần về sau.
+    candidates = candidates[:30]
+    candidates_listing = "\n".join(f"{c['id']}: {c['cau_hoi']}" for c in candidates)
+    valid_ids = {c["id"] for c in candidates}
+
+    try:
+        prompt = SUGGESTION_PROMPT_TEMPLATE.format(
+            question=question,
+            answer_summary=(answer_text or "")[:1500],
+            candidates_listing=candidates_listing,
+            limit=limit,
+        )
+        resp = generate_with_key_fallback(prompt, model_name=ROUTING_MODEL_NAME)
+        raw = (resp.text or "").strip()
+        picked_ids = []
+        for line in raw.splitlines():
+            line = line.strip().lstrip("-").strip()
+            if not line:
+                continue
+            candidate_id = line.split(":")[0].strip().strip('"').strip("'")
+            if candidate_id in valid_ids and candidate_id not in picked_ids:
+                picked_ids.append(candidate_id)
+        if not picked_ids:
+            return None
+        result = []
+        for cid in picked_ids[:limit]:
+            item = get_catalog_item(cid)
+            if item:
+                result.append({"id": item["id"], "cau_hoi": item["cau_hoi"]})
+        return result or None
+    except Exception:
+        return None
 
 @router.post("/api/ai/request/stream")
 def ai_request_stream(req: AiStreamParams):
@@ -476,10 +697,17 @@ def ai_request_stream(req: AiStreamParams):
             else:
                 # AUTO (mặc định): thử định tuyến danh mục biểu đồ trước — xem
                 # /api/ai/request để biết lý do thiết kế 2 bước này.
-                try:
-                    catalog_id = route_question_to_catalog(req.prompt)
-                except Exception:
-                    catalog_id = None
+                # A3: nếu frontend đã gửi kèm catalogHint hợp lệ (người dùng bấm 1
+                # chip gợi ý — biết chắc câu hỏi ứng với mã nào), DÙNG THẲNG, bỏ hẳn
+                # lượt gọi Gemini Flash định tuyến — giảm 1 bước trong chuỗi tuần tự
+                # gây độ trễ trước chữ đầu tiên (A3).
+                if req.catalogHint and get_catalog_item(req.catalogHint):
+                    catalog_id = req.catalogHint
+                else:
+                    try:
+                        catalog_id = route_question_to_catalog(req.prompt)
+                    except Exception:
+                        catalog_id = None
 
                 chart_data = None
                 if catalog_id:
@@ -544,21 +772,26 @@ def ai_request_stream(req: AiStreamParams):
         else:
             title = None
 
-        # Gợi ý câu hỏi tiếp theo (Mẫu 5/6) — thuần code (0 token AI). Áp dụng khi:
-        # Áp dụng cho MỌI câu trả lời bằng văn bản mang tính "phân tích/tư vấn"
-        # (route trúng catalog, /nhanxet, /hoi, hay Chế độ A tự nhiên ở chế độ auto)
-        # — trừ /giaithich (đang giải thích lại code cũ, không phải gợi ý hướng mới),
-        # ảnh (vision, khác chủ đề) và trường hợp chưa có API key. Khi không có
-        # catalog_id neo (VD Chế độ A), get_suggestions(None, ...) tự lấy các mục
-        # danh mục chưa hỏi làm gợi ý chung. Loại các mã đã hỏi trong CHÍNH cuộc
-        # hội thoại này để không gợi ý lặp lại.
+        # Gợi ý câu hỏi tiếp theo (A4) — bám ĐÚNG ngữ cảnh vừa trả lời thay vì lấy đại
+        # mục danh mục không liên quan. Áp dụng cho MỌI câu trả lời bằng văn bản mang
+        # tính "phân tích/tư vấn" (route trúng catalog, /nhanxet, /hoi, hay Chế độ A
+        # tự nhiên ở chế độ auto) — trừ /giaithich (đang giải thích lại code cũ, không
+        # phải gợi ý hướng mới), ảnh (vision, khác chủ đề) và trường hợp chưa có API
+        # key. Loại các mã đã hỏi trong CHÍNH cuộc hội thoại này để không gợi ý lặp lại.
+        # Thử get_context_aware_suggestions() (1 lượt Gemini Flash, chọn bám chủ đề)
+        # trước; nếu lỗi/không có ứng viên hợp lệ thì rơi về get_suggestions() thuần
+        # code (0 token, luôn có kết quả) — không bao giờ để trống hoàn toàn.
         suggestions = []
         if resp_type == "text" and req.mode != "explain" and not req.image and gemini_api_key:
             asked_ids = [
                 x.get("catalogId") for x in history
                 if (x.get("conversationId") or x.get("id")) == conversation_id and x.get("catalogId")
             ]
-            suggestions = get_suggestions(catalog_id, exclude_ids=asked_ids)
+            suggestions = get_context_aware_suggestions(
+                req.prompt, full_text, catalog_id, exclude_ids=asked_ids
+            )
+            if not suggestions:
+                suggestions = get_suggestions(catalog_id, exclude_ids=asked_ids)
 
         item = {
             "id": req_id,

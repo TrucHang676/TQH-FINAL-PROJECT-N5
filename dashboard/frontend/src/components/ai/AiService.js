@@ -24,18 +24,27 @@ const AiService = {
    * Gửi yêu cầu và nhận câu trả lời theo thời gian thực (streaming, SSE) qua
    * /api/ai/request/stream. Dùng fetch + ReadableStream vì axios không hỗ trợ đọc
    * dần response body trên trình duyệt.
-   * @param {object} params {prompt, conversationId, image, mode}
+   * @param {object} params {prompt, conversationId, image, mode, catalogHint}
+   *   catalogHint (A3): mã danh mục ĐÃ BIẾT TRƯỚC khi người dùng bấm 1 chip gợi ý
+   *   (chip đó vốn sinh ra từ danh mục nên chắc chắn hợp lệ) — cho phép backend bỏ
+   *   hẳn 1 lượt gọi định tuyến, giảm độ trễ trước chữ đầu tiên.
    * @param {(text: string) => void} onDelta gọi mỗi khi có thêm 1 đoạn văn bản mới
    * @param {(meta: object) => void} onStart gọi ngay khi biết loại kết quả (text/code)
    * @param {(meta: object) => void} onDone gọi khi hoàn tất, kèm requestId/type/code
    * @param {(message: string) => void} onError gọi khi có lỗi
+   * @param {() => void} onAbort gọi khi người dùng chủ động bấm Dừng (A2a) — tách
+   *   khỏi onError để không hiện bong bóng lỗi cho một hành động cố ý
+   * @param {AbortSignal} [signal] A2a: signal từ AbortController để hủy stream giữa
+   *   chừng; hủy fetch cũng khiến backend (StreamingResponse) ngừng generator, nên
+   *   không tốn thêm quota cho phần chưa sinh
    */
-  streamRequest: async ({ prompt, conversationId, image, mode }, { onStart, onDelta, onDone, onError }) => {
+  streamRequest: async ({ prompt, conversationId, image, mode, catalogHint, signal }, { onStart, onDelta, onDone, onError, onAbort }) => {
     try {
       const response = await fetch(`${BASE_URL}/request/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, conversationId, image, mode })
+        body: JSON.stringify({ prompt, conversationId, image, mode, catalogHint }),
+        signal
       });
       if (!response.ok || !response.body) {
         throw new Error(`HTTP ${response.status}`);
@@ -71,6 +80,11 @@ const AiService = {
         }
       }
     } catch (error) {
+      // A2a: người dùng bấm Dừng — không phải lỗi, không hiện bong bóng lỗi.
+      if (error.name === 'AbortError') {
+        onAbort && onAbort();
+        return;
+      }
       console.error('Error in AiService.streamRequest:', error);
       onError && onError(error.message || 'Lỗi kết nối');
     }

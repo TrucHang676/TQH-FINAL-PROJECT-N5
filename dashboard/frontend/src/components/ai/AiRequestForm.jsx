@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, ImagePlus, X, Terminal } from 'lucide-react';
+import { Send, Square, ImagePlus, X, Terminal } from 'lucide-react';
 
 const suggestPrompts = [
   "Biểu đồ cột: lương TB theo cấp độ kinh nghiệm",
@@ -27,7 +27,9 @@ export const parseCommand = (rawText) => {
   return { mode: null, text: rawText.trim() };
 };
 
-const AiRequestForm = ({ onSubmit, isSubmitting }) => {
+// onStop (A2a): gọi khi người dùng bấm nút Dừng lúc AI đang trả lời — nút Gửi biến
+// thành nút Dừng trong suốt thời gian isSubmitting.
+const AiRequestForm = ({ onSubmit, isSubmitting, onStop }) => {
   const [prompt, setPrompt] = useState('');
   const [image, setImage] = useState(null); // data URL của ảnh đã chọn
   const textareaRef = useRef(null);
@@ -195,17 +197,25 @@ const AiRequestForm = ({ onSubmit, isSubmitting }) => {
             disabled={isSubmitting}
             rows={1}
           />
-          <button
-            type="submit"
-            className="ai-chat-send-btn"
-            disabled={(!prompt.trim() && !image) || isSubmitting}
-          >
-            {isSubmitting ? (
-              <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
-            ) : (
+          {isSubmitting ? (
+            // A2a: đang stream — nút Gửi nhường chỗ cho nút Dừng (luôn bấm được)
+            <button
+              type="button"
+              className="ai-chat-send-btn ai-chat-stop-btn"
+              onClick={() => onStop && onStop()}
+              title="Dừng tạo câu trả lời"
+            >
+              <Square size={16} fill="currentColor" />
+            </button>
+          ) : (
+            <button
+              type="submit"
+              className="ai-chat-send-btn"
+              disabled={!prompt.trim() && !image}
+            >
               <Send size={18} />
-            )}
-          </button>
+            </button>
+          )}
         </form>
       </div>
     </div>
