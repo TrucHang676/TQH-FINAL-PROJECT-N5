@@ -41,9 +41,11 @@ const PlotlyChart = ({ figure, style, onChartClick, onGraphReady, scrollZoom = f
     }
   }
 
-  // Nếu biểu đồ có thể click, dùng event mode để React tự quản lý highlight
+  // Nếu biểu đồ có thể click, dùng event mode; ngược lại khóa clickmode = 'none'
   if (onChartClick) {
     modifiedLayout.clickmode = 'event';
+  } else {
+    modifiedLayout.clickmode = 'none';
   }
 
   // Bar chart: e.event.target là overlay .nsewdrag (rect), không phải bar path

@@ -261,27 +261,7 @@ const Dashboard_page2 = () => {
     }
   };
 
-  // 3. Click Handler cho Tech Trend Chart
-  const handleTrendClick = (e) => {
-    if (!e.points || e.points.length === 0) return;
-    const pt = e.points[0];
-    const traceName = pt.data?.name || '';
-    let targetPos = null;
 
-    if (traceName.includes('AI') || traceName.includes('ML')) targetPos = 'AI / ML / Data Science';
-    else if (traceName.includes('Cloud')) targetPos = 'Cloud / DevOps / SRE';
-    else if (traceName.includes('DevOps') || traceName.includes('Container')) targetPos = 'Cloud / DevOps / SRE';
-    else if (traceName.includes('Data Engineering')) targetPos = 'Data Engineering / Database';
-
-    if (targetPos) {
-      if (position && position.value === targetPos) {
-        setPosition(positionOptions[0]);
-      } else {
-        const matchOpt = positionOptions.find(o => o.value === targetPos);
-        if (matchOpt) setPosition(matchOpt);
-      }
-    }
-  };
 
   // Highlight Helper cho Top Skills Bar Chart
   const getHighlightedSkillsFigure = (figure, skill) => {
