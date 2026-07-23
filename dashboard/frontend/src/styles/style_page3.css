@@ -44,3 +44,9 @@
   height: 50%;
   min-height: 0;
 }
+
+/* Đảm bảo tất cả biểu đồ ở Page 3 không có cursor bàn tay */
+#page3-container .chart-content,
+#page3-container .chart-content * {
+  cursor: default !important;
+}

@@ -346,7 +346,7 @@ const Dashboard_page3 = () => {
               </div>
               <div className="chart-content">
                 {data?.charts?.salary_distribution && (
-                  <PlotlyChart key={`dist-histogram-${salaryRange ? 'filtered' : 'all'}`} figure={data.charts.salary_distribution} onChartClick={handleDistClick} />
+                  <PlotlyChart key={`dist-histogram-${salaryRange ? 'filtered' : 'all'}`} figure={data.charts.salary_distribution} />
                 )}
               </div>
             </div>
@@ -365,7 +365,6 @@ const Dashboard_page3 = () => {
                   {data?.charts?.salary_by_position_experience && (
                     <PlotlyChart 
                       figure={data.charts.salary_by_position_experience} 
-                      onChartClick={handleHeatmapClick}
                     />
                   )}
                 </div>
@@ -383,7 +382,6 @@ const Dashboard_page3 = () => {
                   {data?.charts?.salary_by_location && (
                     <PlotlyChart 
                       figure={data.charts.salary_by_location} 
-                      onChartClick={handleLocationClick}
                     />
                   )}
                 </div>
