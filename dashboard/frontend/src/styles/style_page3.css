@@ -45,8 +45,12 @@
   min-height: 0;
 }
 
-/* Đảm bảo tất cả biểu đồ ở Page 3 không có cursor bàn tay */
-#page3-container .chart-content,
-#page3-container .chart-content * {
-  cursor: default !important;
+/* Thêm cursor bàn tay cho các biểu đồ click được (sử dụng class plotly-clickable từ wrapper PlotlyChart) */
+#page3-container .plotly-clickable .point,
+#page3-container .plotly-clickable path.surface, 
+#page3-container .plotly-clickable .trace, 
+#page3-container .plotly-clickable .nsewdrag, 
+#page3-container .plotly-clickable .shapelayer path,
+#page3-container .plotly-clickable .hovered-bar {
+  cursor: pointer !important;
 }

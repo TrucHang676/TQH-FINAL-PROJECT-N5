@@ -167,6 +167,8 @@ const Dashboard_page3 = () => {
     if (!e || !e.points || !e.points[0]) return;
     const clickedExp = e.points[0].x;
     const clickedShortPos = e.points[0].y;
+    
+    if (!clickedExp || !clickedShortPos) return;
 
     const fullPos = reversePosMap[clickedShortPos] || clickedShortPos;
 
@@ -183,6 +185,8 @@ const Dashboard_page3 = () => {
     if (!e || !e.points || !e.points[0]) return;
     const clickedLoc = e.points[0].y;
     
+    if (typeof clickedLoc !== 'string') return;
+    
     let targetRegion = 'All';
     if (clickedLoc.includes('Hà Nội')) targetRegion = 'Bắc';
     else if (clickedLoc.includes('TP.HCM')) targetRegion = 'Nam';
@@ -196,7 +200,13 @@ const Dashboard_page3 = () => {
 
   const handleDistClick = (e) => {
     if (!e || !e.points || !e.points[0]) return;
+    
+    // Đảm bảo click vào đúng Bar chart (không phải Donut hay Line)
+    if (e.points[0].curveNumber !== 0) return;
+    
     const clickedX = e.points[0].x;
+    if (clickedX === undefined || clickedX === null) return;
+    
     // Bins have size 5, so range is clickedX - 2.5 to clickedX + 2.5
     const range = [clickedX - 2.5, clickedX + 2.5];
     
@@ -346,7 +356,11 @@ const Dashboard_page3 = () => {
               </div>
               <div className="chart-content">
                 {data?.charts?.salary_distribution && (
-                  <PlotlyChart key={`dist-histogram-${salaryRange ? 'filtered' : 'all'}`} figure={data.charts.salary_distribution} />
+                  <PlotlyChart 
+                    key={`dist-histogram-${salaryRange ? 'filtered' : 'all'}`} 
+                    figure={data.charts.salary_distribution} 
+                    onChartClick={handleDistClick} 
+                  />
                 )}
               </div>
             </div>
@@ -365,6 +379,7 @@ const Dashboard_page3 = () => {
                   {data?.charts?.salary_by_position_experience && (
                     <PlotlyChart 
                       figure={data.charts.salary_by_position_experience} 
+                      onChartClick={handleHeatmapClick}
                     />
                   )}
                 </div>
@@ -382,6 +397,7 @@ const Dashboard_page3 = () => {
                   {data?.charts?.salary_by_location && (
                     <PlotlyChart 
                       figure={data.charts.salary_by_location} 
+                      onChartClick={handleLocationClick}
                     />
                   )}
                 </div>
