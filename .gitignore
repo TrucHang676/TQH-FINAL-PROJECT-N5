@@ -20,6 +20,9 @@ env/
 *.json
 *.parquet
 
+# Bỏ qua luật ignore cho toàn bộ file trong thư mục data (cho phép up lên git)
+!data/**
+
 # Nhưng vẫn giữ folder data bằng .gitkeep
 !data/raw/.gitkeep
 !data/processed/.gitkeep
