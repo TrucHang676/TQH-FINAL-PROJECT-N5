@@ -3,6 +3,8 @@ import json
 import uuid
 import datetime
 import traceback
+import psycopg2
+import psycopg2.extras
 from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
@@ -175,16 +177,73 @@ def generate_catalog_comment(question: str, csv_text: str):
     except Exception:
         return None
 
-# Lịch sử dạng local JSON file
+# Kết nối Cloud PostgreSQL (fallback local JSON file nếu lỗi mạng/offline)
+def get_db_connection():
+    db_url = os.environ.get("DATABASE_URL")
+    if not db_url:
+        return None
+    try:
+        conn = psycopg2.connect(db_url, connect_timeout=4)
+        with conn.cursor() as cur:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS ai_history_store (
+                    id SERIAL PRIMARY KEY,
+                    data JSONB NOT NULL,
+                    updated_at TIMESTAMPTZ DEFAULT NOW()
+                );
+            """)
+        conn.commit()
+        return conn
+    except Exception as e:
+        print(f"[WARN] Cloud PostgreSQL connection error: {e}")
+        return None
+
 def load_history():
+    conn = get_db_connection()
+    if conn:
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT data FROM ai_history_store ORDER BY id DESC LIMIT 1;")
+                row = cur.fetchone()
+            conn.close()
+            return row[0] if row else []
+        except Exception as e:
+            print(f"[WARN] Error reading Cloud PostgreSQL: {e}")
+            if conn:
+                conn.close()
+    # Fallback to local file
     if history_file.exists():
-        with open(history_file, 'r', encoding='utf-8') as f:
-            return json.load(f)
+        try:
+            with open(history_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            return []
     return []
 
 def save_history(history):
-    with open(history_file, 'w', encoding='utf-8') as f:
-        json.dump(history, f, ensure_ascii=False, indent=2)
+    # Luôn lưu vào local file trước làm backup offline
+    try:
+        with open(history_file, 'w', encoding='utf-8') as f:
+            json.dump(history, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"[WARN] Error saving local history: {e}")
+
+    # Đồng bộ lên Cloud PostgreSQL
+    conn = get_db_connection()
+    if conn:
+        try:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM ai_history_store;")
+                cur.execute(
+                    "INSERT INTO ai_history_store (data) VALUES (%s);",
+                    [psycopg2.extras.Json(history)]
+                )
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            print(f"[WARN] Error saving Cloud PostgreSQL: {e}")
+            if conn:
+                conn.close()
 
 class AiRequestParams(BaseModel):
     prompt: str
