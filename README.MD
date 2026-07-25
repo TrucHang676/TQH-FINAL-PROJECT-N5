@@ -24,7 +24,7 @@ Dự án được xây dựng theo kiến trúc **Monorepo**, bao gồm toàn b�
 1. **Crawl & Thu thập Dữ liệu**: Thu thập dữ liệu việc làm IT tự động từ các nền tảng tuyển dụng lớn tại Việt Nam (ITviec, TopCV, TopDev, VietJobs, Vieclam24h, JobsGO).
 2. **Tiền xử lý Dữ liệu (Data Processing & Cleaning)**: Làm sạch, chuẩn hóa kỹ năng, mức lương, cấp bậc kinh nghiệm, hình thức làm việc và vị trí địa lý.
 3. **Web Dashboard Trực quan hóa (FastAPI + ReactJS + Plotly)**: Hệ thống 5 trang phân tích chuyên sâu với giao diện hiện đại, tương tác mượt mà (Drill-down & Cross-filtering).
-4. **Trợ lý AI Phê duyệt Mã nguồn (Human-in-the-Loop AI Analyst)**: Tích hợp AI (Gemini 1.5/2.0) giúp đề xuất ý tưởng, tự động sinh code Python phân tích và thực thi an toàn tại máy cục bộ dưới sự kiểm tra, phê duyệt của con người.
+4. **Trợ lý AI Phê duyệt Mã nguồn (Human-in-the-Loop AI Analyst)**: Tích hợp AI (Gemini 1.5/2.0) giúp đề xuất ý tưởng, tự động sinh code Python phân tích và thực thi an toàn tại máy cục bộ dưới sự kiểm tra, phê duyệt của con người. Hệ thống tích hợp lưu trữ đám mây **Cloud PostgreSQL (Supabase)** kết hợp cơ chế **Dual-Write Offline Fallback** giúp duy trì phiên làm việc liên tục ngay cả khi mất kết nối mạng.
 
 ---
 
@@ -93,10 +93,12 @@ Final/
    ```bash
    pip install -r backend/requirements.txt
    ```
-3. Cấu hình Gemini API Key cho AI (Tùy chọn):
+3. Cấu hình Gemini API Key và Cloud DB cho AI (Tùy chọn):
    Tạo file `.env` trong thư mục `dashboard/backend/.env` với nội dung:
    ```env
    GEMINI_API_KEY=your_gemini_api_key_here
+   # Cấu hình Cloud PostgreSQL (Supabase) để lưu lịch sử đám mây:
+   DATABASE_URL="postgresql://postgres:[PASSWORD]@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres"
    ```
 4. Khởi chạy FastAPI Server tại cổng `8000`:
    ```bash
@@ -128,7 +130,7 @@ Final/
 - **Trang 2 — Kỹ năng Công nghệ**: Top 15 kỹ năng công nghệ được săn đón nhất, Heatmap ma trận Kỹ năng x Nhóm vị trí, và xu hướng công nghệ mới (hỗ trợ **Brushing & Linking cross-filtering** giữa Kỹ năng và Vị trí).
 - **Trang 3 — Mức lương & Phúc lợi**: Phân bố mức lương toàn ngành, chênh lệch lương địa phương/Remote, và Heatmap lương theo Vị trí & Kinh nghiệm (hỗ trợ **Brushing & Linking** đồng bộ biểu đồ theo 4 nhóm đối tượng).
 - **Trang 4 — Cấp bậc Kinh nghiệm (Nhân sự trẻ)**: Biểu đồ Donut phân bố cấp bậc, Treemap phân tích cơ hội cho Intern/Fresher/Junior, và Box plot lương khởi điểm.
-- **Trang 5 — Trợ lý Phân tích AI (AI Analyst)**: Khung tương tác AI hỗ trợ hỏi đáp, tự động sinh mã nguồn Python phân tích, cho phép người dùng **xem, gõ sửa code trực tiếp trên Monaco Editor** và **Duyệt & Thực thi an toàn tại máy local**.
+- **Trang 5 — Trợ lý Phân tích AI (AI Analyst)**: Khung tương tác AI hỗ trợ hỏi đáp, tự động sinh mã nguồn Python phân tích, cho phép người dùng **xem, gõ sửa code trực tiếp trên Monaco Editor** và **Duyệt & Thực thi an toàn tại máy local**. Hỗ trợ quản lý phiên thoại trên **Cloud PostgreSQL (Supabase)** với cơ chế **Dual-Write Offline Fallback**, **Đổi tên hội thoại theo thời gian thực (Inline Editing)**, Ghim 📌 và Xóa 🗑️.
 
 ---
 
@@ -138,7 +140,7 @@ Dự án đáp ứng 100% các tiêu chuẩn trong hướng dẫn tích hợp AI
 - **Phê duyệt mã nguồn (Human-in-the-Loop)**: Code do AI sinh ra ở trạng thái **⚠️ Chờ duyệt** ➔ Người dùng gõ sửa tham số ➔ Bấm **Duyệt & Chạy** mới thực thi.
 - **Thực thi Local**: Code Python chạy trực tiếp trên Pandas DataFrame local qua `exec()`, không thực thi ngầm.
 - **Tích hợp SSE Streaming & Vision AI**: AI trả lời theo thời gian thực và đọc hiểu phân tích ảnh biểu đồ/bảng số liệu.
-- **Lưu trữ nhật ký lịch sử**: Truy xuất toàn bộ prompt, code, kết quả Plotly và cho phép **tải file CSV số liệu thô**.
+- **Lưu trữ đám mây & Dual-Write Fallback**: Đồng bộ lịch sử lên **Cloud PostgreSQL (Supabase DB)** kết hợp lưu dự phòng local file `ai_history.json` (0% gián đoạn khi rớt mạng), hỗ trợ tải file CSV số liệu thô và đổi tên phiên thoại (Inline Editing).
 
 📖 **Xem tài liệu chi tiết về Hệ thống AI tại file: [`README_AI.md`](file:///d:/BaiTapKi2Nam3/TQHDL/Final/README_AI.md)**
 

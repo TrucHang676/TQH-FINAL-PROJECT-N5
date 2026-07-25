@@ -35,8 +35,7 @@
 - [📡 4. Danh mục API Endpoints của AI](#-4-danh-mục-api-endpoints-của-ai)
   - [4.1 POST /api/ai/request/stream](#41-post-apiairequest-stream-sse-real-time-streaming)
   - [4.2 POST /api/ai/execute](#42-post-apiaiexecute-thực-thi-mã-nguồn-đã-phê-duyệt)
-  - [4.3 GET & DELETE /api/ai/history](#43-get-apiaihistory--delete-apiaihistoryid)
-  - [4.4 POST /api/ai/history/{id}/pin](#44-post-apiaihistoryidpin)
+  - [4.3 GET, DELETE, PIN, RENAME /api/ai/history...](#43-get-delete-pin-rename-apiaihistory)
 - [🛠️ 5. Hướng dẫn Thiết lập & Khởi chạy Module AI](#️-5-hướng-dẫn-thiết-lập--khởi-chạy-module-ai)
 - [🌟 6. Các Tính năng Độc đáo Nổi bật](#-6-các-tính-năng-độc-đáo-nổi-bật)
 - [📋 7. Quy trình Kiểm thử & Bảo vệ (Demo với Giảng viên)](#-7-quy-trình-kiểm-thử--bảo-vệ-demo-với-giảng-viên)
@@ -131,9 +130,11 @@ Bên **cột trái** của trang AI có panel **Lịch sử**:
 
 - Xem lại toàn bộ các câu hỏi và kết quả trước đó trong phiên làm việc.
 - Bấm vào một mục để xem lại biểu đồ/phân tích đó.
+- **Đổi tên hội thoại trực tiếp (Inline Editing):** Bấm biểu tượng cây bút ✏️ bên cạnh tên phiên thoại, gõ tên mới rồi bấm lưu ✔️ hoặc hủy ❌.
 - Bấm nút 📌 để **ghim** một cuộc hội thoại quan trọng lên đầu danh sách.
 - Phân nhóm hiển thị: **Ghim 📌** / **Hôm nay** / **7 ngày qua** / **Cũ hơn**.
 - Bấm nút 🗑️ để xóa một cuộc hội thoại không cần thiết.
+- **Đồng bộ Đám mây & Dual-Write Fallback:** Toàn bộ lịch sử được lưu trên **Cloud PostgreSQL (Supabase DB)** kết hợp tự động ghi bản sao local vào `ai_history.json`. Nếu mất mạng hoặc máy chủ DB từ chối, hệ thống tự động Fallback về local file, đảm bảo 0% rủi ro mất dữ liệu hay gián đoạn dịch vụ!
 
 ---
 
@@ -656,29 +657,25 @@ sequenceDiagram
   }
   ```
 
-### 4.3 `GET /api/ai/history` & `DELETE /api/ai/history/{id}`
-- **Mục đích**: Tải danh sách nhật ký lịch sử các phiên phân tích hoặc xóa toàn bộ các câu hỏi thuộc 1 cuộc hội thoại (match theo `conversationId`; item cũ chưa có `conversationId` thì coi `id` chính là `conversationId`).
-
-### 4.4 `POST /api/ai/history/{id}/pin`
-- **Mục đích**: Bật/tắt ghim cho một cuộc hội thoại. Đánh dấu trường `pinned` lên mọi item của cuộc. Cuộc được ghim sẽ hiển thị riêng ở đầu danh sách lịch sử.
-- **Response**:
-  ```json
-  {
-    "conversationId": "conv_uuid",
-    "pinned": true
-  }
-  ```
+### 4.3 `GET`, `DELETE`, `PIN`, `RENAME` `/api/ai/history...`
+- **`GET /api/ai/history`**: Tải toàn bộ danh sách lịch sử hội thoại từ Cloud PostgreSQL (Supabase) về Frontend với chỉ 1 lần truy vấn SQL siêu tốc.
+- **`DELETE /api/ai/history/{id}`**: Xóa vĩnh viễn một cuộc hội thoại khỏi Cơ sở dữ liệu và file sao lưu cục bộ.
+- **`POST /api/ai/history/{id}/pin`**: Bật/tắt ghim (Toggle Pin) cho một cuộc hội thoại. Cuộc được ghim sẽ hiển thị riêng ở đầu danh sách lịch sử.
+- **`PUT /api/ai/history/{id}/title`** *(Nâng cấp mới)*: Đổi tên cuộc trò chuyện theo thời gian thực. Tích hợp trực tiếp với giao diện Inline Editing trên Frontend (biểu tượng cây bút ✏️), cho phép người dùng đổi tên mượt mà.
 
 ---
 
 ## 🛠️ 5. Hướng dẫn Thiết lập & Khởi chạy Module AI
 
-1. **Cấu hình Gemini API Key**:
+1. **Cấu hình Gemini API Key và Cloud DB**:
    Tạo hoặc chỉnh sửa file `.env` tại thư mục `dashboard/backend/.env`:
    ```env
    GEMINI_API_KEY=AIzaSy...your_gemini_key_1
    # Bạn có thể thêm nhiều key cách nhau bởi dấu phẩy để hệ thống tự động Fallback:
    # GEMINI_API_KEYS=key1,key2,key3
+
+   # Cấu hình Cloud PostgreSQL (Supabase) để lưu lịch sử hội thoại:
+   DATABASE_URL="postgresql://postgres:[PASSWORD]@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres"
    ```
 2. **Chạy Backend**:
    ```bash
@@ -697,18 +694,21 @@ sequenceDiagram
 ## 🌟 6. Các Tính năng Độc đáo Nổi bật
 
 1. **Monaco Code Editor tích hợp**: Trải nghiệm chỉnh sửa code chuyên nghiệp như trên VS Code với syntax highlighting, line numbers và auto-wrap.
-2. **Cơ chế API Key Fallback tự động**: Khi một Gemini API Key chạm ngưỡng giới hạn 429 (ResourceExhausted), hệ thống tự động chuyển sang API Key dự phòng mà không ngắt đoạn trải nghiệm của người dùng. Frontend nhận diện lỗi quota và hiện thông báo thân thiện kèm nút **Thử lại**.
-3. **Data Grounding (RAG đơn giản)**: Nhồi SỰ THẬT rút trực tiếp từ dataset vào prompt sinh code — giá trị hợp lệ của cột phân loại, min/max/trung vị lương, top 20 kỹ năng đúng chính tả, vài dòng mẫu — chặn model chọn nhầm cột hoặc bịa giá trị ngay từ đầu.
-4. **Trích xuất CSV tự động từ Biểu đồ (`extract_csv_from_figure`)**: Tự động chuyển đổi các Plotly Figures (Pie, Bar, Boxplot, Treemap, Heatmap, Choropleth) thành dạng bảng số liệu CSV chuẩn long-format cho người dùng tải về.
-5. **Phân tích hình ảnh (Vision AI)**: Đọc hiểu và đưa ra nhận xét chuyên sâu từ các ảnh biểu đồ/bảng số liệu do người dùng tải lên hoặc dán từ clipboard (Ctrl+V).
-6. **Catalog Matching + Routing Cache**: Tự động nhận biết các câu hỏi khớp với 19 biểu đồ sẵn có (13 trang dashboard + 6 mở rộng) để dùng ngay số liệu chuẩn 100%, chống hallucination. Kết quả routing được cache trong bộ nhớ, tiết kiệm 1 lượt gọi Gemini Flash cho câu hỏi lặp lại.
-7. **Gợi ý câu hỏi bám ngữ cảnh (GOAL EXPLORER)**: Sau mỗi câu trả lời, hệ thống dùng Gemini Flash CHỌN (không SINH) các câu hỏi tiếp theo từ chính danh mục catalog, bám đúng chủ đề vừa bàn — theo cơ chế GOAL EXPLORER của LIDA (Dibia, 2023). Fallback về thuần code (0 token) nếu lỗi.
-8. **Streaming thời gian thực (Mẫu 6)**: Mọi nhánh đều stream văn bản ngay từ đầu — Chế độ B luôn viết dẫn nhập + "Hướng phân tích" TRƯỚC code, frontend hiển thị dần như chat, tự nhận ra khi gặp ``` để chuyển sang xem trước code. Tách code khỏi preamble chỉ làm SAU KHI nhận đủ toàn văn.
-9. **Biểu đồ nhúng giữa bài (Mẫu 5)**: Khi câu hỏi trúng catalog, backend gửi kèm figure THẬT ngay từ sự kiện `start` — AI viết nhận xét 5 khối với marker `[[BIEU_DO]]` ở giữa, frontend chèn biểu đồ thật vào đúng vị trí đó.
-10. **Ngữ cảnh hội thoại nâng cao**: Tối đa 8 lượt gần nhất chi tiết, các lượt cũ hơn được tóm tắt thành danh sách câu đã hỏi (không mất hoàn toàn). Nhồi bảng số liệu thật của 1-2 biểu đồ gần nhất và đánh dấu lượt có ảnh.
-11. **Dừng stream giữa chừng**: Nút Dừng (⬛) abort fetch → backend ngừng generator → không tốn thêm quota cho phần chưa sinh.
-12. **Tự động nhận xét sau biểu đồ**: Khi bật (mặc định), sau khi code chạy thành công và có dữ liệu, hệ thống tự gọi `/nhanxet` để AI phân tích — tách 2 pha: biểu đồ hiện ngay, nhận xét stream dần bên dưới.
-13. **4 lệnh nâng cao** (`/hoi`, `/code`, `/giaithich`, `/nhanxet`): Cho phép người dùng ép AI đi đúng hướng mong muốn, bỏ qua bước AI tự đoán chế độ.
+2. **Kiến trúc NoSQL Document Store trên Cloud PostgreSQL (Supabase)**: Lịch sử hội thoại được lưu trữ tập trung trên máy chủ đám mây dưới cấu trúc trường JSONB duy nhất (`ai_history_store`), mang lại tốc độ truy vấn gần như tức thì.
+3. **Cơ chế Dual-Write & Offline Fallback (High Availability)**: Mỗi khi có thao tác mới, hệ thống ưu tiên đồng bộ lên Cloud PostgreSQL, đồng thời ghi âm thầm một bản sao lưu vào file `ai_history.json`. Nếu rớt mạng hoặc mất kết nối DB, Backend tự động chuyển hướng sang file local giúp hệ thống tiếp tục vận hành mượt mà 100% không bao giờ bị gián đoạn hay mất dữ liệu!
+4. **Đổi tên hội thoại theo thời gian thực (Inline Editing)**: Tích hợp trực tiếp trên giao diện Lịch sử bên trái, cho phép người dùng bấm biểu tượng cây bút ✏️ để đổi tên cuộc trò chuyện, lưu ✔️ hoặc hủy ❌ tiện lợi như ChatGPT / Claude.
+5. **Cơ chế API Key Fallback tự động**: Khi một Gemini API Key chạm ngưỡng giới hạn 429 (ResourceExhausted), hệ thống tự động chuyển sang API Key dự phòng mà không ngắt đoạn trải nghiệm của người dùng. Frontend nhận diện lỗi quota và hiện thông báo thân thiện kèm nút **Thử lại**.
+6. **Data Grounding (RAG đơn giản)**: Nhồi SỰ THẬT rút trực tiếp từ dataset vào prompt sinh code — giá trị hợp lệ của cột phân loại, min/max/trung vị lương, top 20 kỹ năng đúng chính tả, vài dòng mẫu — chặn model chọn nhầm cột hoặc bịa giá trị ngay từ đầu.
+7. **Trích xuất CSV tự động từ Biểu đồ (`extract_csv_from_figure`)**: Tự động chuyển đổi các Plotly Figures (Pie, Bar, Boxplot, Treemap, Heatmap, Choropleth) thành dạng bảng số liệu CSV chuẩn long-format cho người dùng tải về.
+8. **Phân tích hình ảnh (Vision AI)**: Đọc hiểu và đưa ra nhận xét chuyên sâu từ các ảnh biểu đồ/bảng số liệu do người dùng tải lên hoặc dán từ clipboard (Ctrl+V).
+9. **Catalog Matching + Routing Cache**: Tự động nhận biết các câu hỏi khớp với 19 biểu đồ sẵn có (13 trang dashboard + 6 mở rộng) để dùng ngay số liệu chuẩn 100%, chống hallucination. Kết quả routing được cache trong bộ nhớ, tiết kiệm 1 lượt gọi Gemini Flash cho câu hỏi lặp lại.
+10. **Gợi ý câu hỏi bám ngữ cảnh (GOAL EXPLORER)**: Sau mỗi câu trả lời, hệ thống dùng Gemini Flash CHỌN (không SINH) các câu hỏi tiếp theo từ chính danh mục catalog, bám đúng chủ đề vừa bàn — theo cơ chế GOAL EXPLORER của LIDA (Dibia, 2023). Fallback về thuần code (0 token) nếu lỗi.
+11. **Streaming thời gian thực (Mẫu 6)**: Mọi nhánh đều stream văn bản ngay từ đầu — Chế độ B luôn viết dẫn nhập + "Hướng phân tích" TRƯỚC code, frontend hiển thị dần như chat, tự nhận ra khi gặp ``` để chuyển sang xem trước code. Tách code khỏi preamble chỉ làm SAU KHI nhận đủ toàn văn.
+12. **Biểu đồ nhúng giữa bài (Mẫu 5)**: Khi câu hỏi trúng catalog, backend gửi kèm figure THẬT ngay từ sự kiện `start` — AI viết nhận xét 5 khối với marker `[[BIEU_DO]]` ở giữa, frontend chèn biểu đồ thật vào đúng vị trí đó.
+13. **Ngữ cảnh hội thoại nâng cao**: Tối đa 8 lượt gần nhất chi tiết, các lượt cũ hơn được tóm tắt thành danh sách câu đã hỏi (không mất hoàn toàn). Nhồi bảng số liệu thật của 1-2 biểu đồ gần nhất và đánh dấu lượt có ảnh.
+14. **Dừng stream giữa chừng**: Nút Dừng (⬛) abort fetch → backend ngừng generator → không tốn thêm quota cho phần chưa sinh.
+15. **Tự động nhận xét sau biểu đồ**: Khi bật (mặc định), sau khi code chạy thành công và có dữ liệu, hệ thống tự gọi `/nhanxet` để AI phân tích — tách 2 pha: biểu đồ hiện ngay, nhận xét stream dần bên dưới.
+16. **4 lệnh nâng cao** (`/hoi`, `/code`, `/giaithich`, `/nhanxet`): Cho phép người dùng ép AI đi đúng hướng mong muốn, bỏ qua bước AI tự đoán chế độ.
 
 ---
 
