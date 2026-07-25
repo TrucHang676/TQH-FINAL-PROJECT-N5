@@ -386,6 +386,15 @@ export default function Dashboard_page5() {
     }
   };
 
+  const handleRenameConversation = async (conversationId, newTitle) => {
+    try {
+      await AiService.renameConversation(conversationId, newTitle);
+      fetchHistory();
+    } catch (error) {
+      console.error('Failed to rename conversation', error);
+    }
+  };
+
   // Tạo lại / Sửa & gửi lại: đều gửi 1 câu hỏi mới trong cùng cuộc hội thoại hiện tại
   // (nhờ ngữ cảnh, AI vẫn hiểu mạch hội thoại). Dùng chung handleSendRequest.
   // catalogHint (A3): khi gọi từ 1 chip gợi ý (AiChatMessage truyền kèm s.id), biết
@@ -661,6 +670,7 @@ export default function Dashboard_page5() {
         onSelectConversation={handleSelectConversation}
         onDeleteConversation={handleDeleteConversation}
         onTogglePin={handleTogglePin}
+        onRenameConversation={handleRenameConversation}
         currentConversationId={currentConversationId}
         onNewChat={handleNewChat}
       />

@@ -1075,3 +1075,21 @@ def toggle_pin(conversation_id: str):
         x["pinned"] = new_state
     save_history(history)
     return {"conversationId": conversation_id, "pinned": new_state}
+
+class RenameParams(BaseModel):
+    title: str
+
+@router.put("/api/ai/history/{conversation_id}/title")
+def rename_conversation(conversation_id: str, params: RenameParams):
+    """Đổi tên (title) cho một cuộc hội thoại."""
+    history = load_history()
+    items = [x for x in history if (x.get("conversationId") or x["id"]) == conversation_id]
+    if not items:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    new_title = params.title.strip()
+    if not new_title:
+        raise HTTPException(status_code=400, detail="Title cannot be empty")
+    for x in items:
+        x["title"] = new_title
+    save_history(history)
+    return {"conversationId": conversation_id, "title": new_title}

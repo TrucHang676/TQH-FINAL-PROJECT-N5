@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Clock, Search, Plus, Trash2, MessageSquare, Pin, AlertTriangle } from 'lucide-react';
+import { Clock, Search, Plus, Trash2, MessageSquare, Pin, AlertTriangle, Edit2, Check, X } from 'lucide-react';
 
 // Xác định nhóm thời gian của một mốc timestamp
 const timeBucket = (ts) => {
@@ -21,11 +21,14 @@ const AiHistoryPanel = ({
   onSelectConversation,
   onDeleteConversation,
   onTogglePin,
+  onRenameConversation,
   currentConversationId,
   onNewChat
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(null); // conversation đang chờ xác nhận xóa
+  const [editingId, setEditingId] = useState(null);
+  const [editTitle, setEditTitle] = useState('');
 
   // Gom các câu hỏi rời rạc thành từng cuộc hội thoại theo conversationId.
   const conversations = useMemo(() => {
@@ -70,48 +73,117 @@ const AiHistoryPanel = ({
 
   const renderConversation = (conv) => {
     const isSelected = conv.conversationId === currentConversationId;
+    const isEditing = editingId === conv.conversationId;
+
+    const handleSaveEdit = (e) => {
+      if (e) e.stopPropagation();
+      if (editTitle.trim()) {
+        onRenameConversation(conv.conversationId, editTitle.trim());
+      }
+      setEditingId(null);
+    };
+
     return (
       <div
         key={conv.conversationId}
         className="ai-history-item"
-        onClick={() => onSelectConversation(conv)}
+        onClick={() => { if (!isEditing) onSelectConversation(conv); }}
         style={{
           padding: '10px 12px',
           borderRadius: '10px',
-          cursor: 'pointer',
+          cursor: isEditing ? 'default' : 'pointer',
           marginBottom: '4px',
           backgroundColor: isSelected ? 'rgba(89, 178, 146, 0.08)' : 'transparent',
           border: `1.5px solid ${isSelected ? 'rgba(89, 178, 146, 0.3)' : 'transparent'}`,
           transition: 'all 0.2s ease'
         }}
-        onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = '#f9fafb'; }}
-        onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = isSelected ? 'rgba(89, 178, 146, 0.08)' : 'transparent'; }}
+        onMouseEnter={(e) => { if (!isSelected && !isEditing) e.currentTarget.style.backgroundColor = '#f9fafb'; }}
+        onMouseLeave={(e) => { if (!isSelected && !isEditing) e.currentTarget.style.backgroundColor = isSelected ? 'rgba(89, 178, 146, 0.08)' : 'transparent'; }}
       >
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
           <MessageSquare size={14} color="var(--primary)" style={{ flexShrink: 0, marginTop: '2px' }} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: '12px', fontWeight: isSelected ? '600' : '500', color: 'var(--text-primary)', marginBottom: '4px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.4 }}>
-              {conv.title}
-            </div>
+            {isEditing ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }} onClick={(e) => e.stopPropagation()}>
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSaveEdit(e);
+                    else if (e.key === 'Escape') setEditingId(null);
+                  }}
+                  autoFocus
+                  style={{
+                    width: '100%',
+                    fontSize: '12px',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    border: '1px solid var(--primary)',
+                    outline: 'none',
+                    backgroundColor: '#fff',
+                    color: '#111'
+                  }}
+                />
+              </div>
+            ) : (
+              <div style={{ fontSize: '12px', fontWeight: isSelected ? '600' : '500', color: 'var(--text-primary)', marginBottom: '4px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.4 }}>
+                {conv.title}
+              </div>
+            )}
             <div style={{ fontSize: '10px', color: '#9CA3AF' }}>
               {formatDate(conv.lastTimestamp)}
             </div>
           </div>
           <div className="ai-history-actions">
-            <button
-              className={`ai-history-action-btn ${conv.pinned ? 'pinned' : ''}`}
-              title={conv.pinned ? 'Bỏ ghim' : 'Ghim cuộc hội thoại'}
-              onClick={(e) => { e.stopPropagation(); onTogglePin(conv.conversationId); }}
-            >
-              <Pin size={13} fill={conv.pinned ? 'currentColor' : 'none'} />
-            </button>
-            <button
-              className="ai-history-action-btn danger"
-              title="Xóa cuộc hội thoại"
-              onClick={(e) => { e.stopPropagation(); setConfirmDelete(conv); }}
-            >
-              <Trash2 size={13} />
-            </button>
+            {isEditing ? (
+              <>
+                <button
+                  className="ai-history-action-btn"
+                  title="Lưu đổi tên"
+                  style={{ color: '#10B981' }}
+                  onClick={handleSaveEdit}
+                >
+                  <Check size={13} />
+                </button>
+                <button
+                  className="ai-history-action-btn"
+                  title="Hủy"
+                  style={{ color: '#EF4444' }}
+                  onClick={(e) => { e.stopPropagation(); setEditingId(null); }}
+                >
+                  <X size={13} />
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  className="ai-history-action-btn"
+                  title="Đổi tên cuộc hội thoại"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditingId(conv.conversationId);
+                    setEditTitle(conv.title);
+                  }}
+                >
+                  <Edit2 size={13} />
+                </button>
+                <button
+                  className={`ai-history-action-btn ${conv.pinned ? 'pinned' : ''}`}
+                  title={conv.pinned ? 'Bỏ ghim' : 'Ghim cuộc hội thoại'}
+                  onClick={(e) => { e.stopPropagation(); onTogglePin(conv.conversationId); }}
+                >
+                  <Pin size={13} fill={conv.pinned ? 'currentColor' : 'none'} />
+                </button>
+                <button
+                  className="ai-history-action-btn danger"
+                  title="Xóa cuộc hội thoại"
+                  onClick={(e) => { e.stopPropagation(); setConfirmDelete(conv); }}
+                >
+                  <Trash2 size={13} />
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

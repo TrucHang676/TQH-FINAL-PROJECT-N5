@@ -137,6 +137,22 @@ const AiService = {
   },
 
   /**
+   * Đổi tên cuộc hội thoại
+   * @param {string} conversationId
+   * @param {string} title
+   * @returns {Promise<{conversationId: string, title: string}>}
+   */
+  renameConversation: async (conversationId, title) => {
+    try {
+      const response = await axios.put(`${BASE_URL}/history/${conversationId}/title`, { title });
+      return response.data;
+    } catch (error) {
+      console.error('Error in AiService.renameConversation:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Lấy danh sách lịch sử tương tác AI
    * @returns {Promise<Array>}
    */
