@@ -9,13 +9,13 @@
 ## 📑 Mục lục
 
 1. [Phân công & Timeline](#1-phân-công--timeline)
-2. [Phần 1 — Giới thiệu đề tài (KY)](#2-phần-1--giới-thiệu-đề-tài-ky--00001-30)
+2. [Phần 1 — Giới thiệu đề tài (NV)](#2-phần-1--giới-thiệu-đề-tài-ky--00001-30)
 3. [Phần 2 — Demo Dashboard: 4 Mục tiêu](#3-phần-2--demo-dashboard)
    - [Trang 1 — Xu hướng & Địa lý (TH)](#31-trang-1--xu-hướng--địa-lý-th--14050)
    - [Trang 2 — Kỹ năng Công nghệ (KY)](#32-trang-2--kỹ-năng-công-nghệ-ky--510700)
    - [Trang 3 — Mức lương & Phúc lợi (NV)](#33-trang-3--mức-lương--phúc-lợi-nv--710920)
    - [Trang 4 — Nhân sự trẻ (TA)](#34-trang-4--nhân-sự-trẻ-ta--9301230)
-4. [Phần 3 — Demo AI Analyst (TH)](#4-phần-3--demo-ai-analyst-th--12401800)
+4. [Phần 3 — Demo AI Analyst (KY)](#4-phần-3--demo-ai-analyst-th--12401800)
 5. [Phụ lục — Q&A](#5-phụ-lục--qa)
 
 ---
