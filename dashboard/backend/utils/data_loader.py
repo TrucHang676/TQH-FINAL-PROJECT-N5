@@ -49,6 +49,9 @@ def get_df() -> pd.DataFrame:
     if _cached_df is None:
         if _csv_path.exists():
             raw_df = pd.read_csv(_csv_path)
+            # Lọc bỏ các dữ liệu rác/cũ từ năm 2022 trở về trước (Dashboard chỉ phân tích 2023-2026)
+            if 'thang_dang' in raw_df.columns:
+                raw_df = raw_df[raw_df['thang_dang'] >= '2023-01']
             _cached_df = _enrich_provinces(raw_df)
         else:
             _cached_df = pd.DataFrame(columns=[
