@@ -188,30 +188,30 @@
 
 | Hành động | Lời nói |
 |:---|:---|
-| Chỉ vào 4 KPI cards | *"Trang 4 nhóm thiết kế đặc biệt hướng đến sinh viên và người mới vào nghề. 4 KPI: **Tổng 8.452 tin**; **32% cơ hội dành cho nhân sự trẻ** — trong số tin ghi rõ cấp bậc; **IT Support/ERP là nhóm cởi mở nhất** (gần 60% tin dành cho người mới); và **Lương khởi điểm Fresher trung bình**. Đây là những con số mà sinh viên cần biết trước khi đi phỏng vấn."* |
+| Chỉ vào 4 KPI cards | *"Trang 4 nhóm thiết kế hướng đến sinh viên và người mới vào nghề, nhìn thị trường IT từ góc độ Intern, Fresher, Junior. Có 4 KPI đầu trang cho biết: tổng **8.452 tin** tuyển dụng; tỷ lệ cơ hội dành cho nhân sự trẻ; **nhóm vị trí cởi mở nhất**; và **lương khởi điểm Fresher trung bình**. Đây là những con số mà sinh viên có thể cần biết trước khi đi phỏng vấn một công việc nào đó."* |
 
 #### 🍩 Biểu đồ 1 — Donut cơ cấu cấp bậc `(~45")`
 
 | Hành động | Lời nói |
 |:---|:---|
-| Chỉ vào donut, hover từng lát theo thứ tự | *"Donut thể hiện cơ cấu trong số tin **ghi rõ cấp bậc kinh nghiệm** (3.626 trong tổng 8.452 tin). Cấu trúc tăng dần rất rõ: **Intern 5,3%** (193 tin) — **Fresher 10,2%** (370 tin) — **Junior 16,4%** (596 tin) — **Middle 28,2%** — **Senior 39,8%** (1.444 tin)."* |
-| Chỉ vào phần Intern+Fresher+Junior gộp lại | *"Nhóm nhân sự trẻ — Intern, Fresher, Junior gộp lại — chiếm **32%**, tức 1.159 tin. Con số này thoạt nghe nhỏ, nhưng trong tuyệt đối là hàng nghìn vị trí mở mỗi năm. Không có điểm thắt cổ chai bất thường ở bậc nào — thị trường tăng dần đều từ Intern lên Senior, không có 'bẫy' nào chặn đường thăng tiến."* |
+| Chỉ vào donut, hover từng lát theo thứ tự | *"Biểu đồ Donut thể hiện cơ cấu trong số tin ghi rõ cấp bậc kinh nghiệm, biểu đồ được dựng trên **43%** tin tuyển dụng có ghi rõ thông tin này. Cấu trúc tăng dần rất rõ theo thứ bậc lần lượt là: **Intern 5,3%** — **Fresher 10,2%** — **Junior 16,4%** — **Middle 28,2%** — **Senior 39,8%**."* |
+| Chỉ vào phần Intern+Fresher+Junior gộp lại | *"Nhóm nhân sự trẻ — Intern, Fresher, Junior gộp lại — chỉ chiếm **32%**, tức cứ 3 tin tuyển dụng thì có tới 2 tin đòi hỏi người đã có kinh nghiệm. Và ngay trong nhóm trẻ, Intern — người hoàn toàn chưa có kinh nghiệm — lại là nhóm ít cơ hội nhất. Biểu đồ cũng thể hiện không có điểm thắt cổ chai bất thường ở bậc nào — thị trường tăng dần đều từ Intern lên Senior."* |
 
 #### 🗂️ Biểu đồ 2 — Treemap 2 chiều `(~65")`
 
 | Hành động | Lời nói |
 |:---|:---|
-| Chỉ vào treemap, giải thích 2 chiều dữ liệu | *"Treemap là biểu đồ đặc biệt nhất trang này — mã hóa **2 chiều dữ liệu cùng lúc trên một hình**: **kích thước ô = tổng số tin tuyển dụng của nhóm vị trí** (quy mô thị trường); **màu sắc ô = tỷ lệ % tin dành cho Intern/Fresher/Junior** (mức độ cởi mở). Ô vừa to vừa đậm màu là nhóm vị trí lý tưởng nhất cho người mới — vừa có nhiều việc vừa chào đón người chưa có kinh nghiệm."* |
-| Chỉ vào ô **IT Support/ERP** — đậm màu nhất | *"**IT Support/ERP** — màu đậm nhất biểu đồ — **cởi mở nhất với 59,2%** tin dành cho nhân sự trẻ. Gần 6 trong 10 tin nhóm này tuyển Intern hoặc Fresher. Lý do rất dễ hiểu: đây là vai trò hỗ trợ và vận hành hệ thống — phù hợp với người mới học việc thực tế."* |
-| Chỉ vào ô **Software Development** — to nhất | *"**Software Development** — ô to nhất với 2.503 tin — vừa là nhóm lớn nhất thị trường vừa có mức độ cởi mở khá tốt ở 33,4%. Đây là **'cánh cửa rộng nhất' cho nhân sự trẻ**: số lượng vị trí lớn và tỷ lệ chấp nhận người mới ở mức khá — cơ hội tuyệt đối cao nhất trong 10 nhóm vị trí."* |
-| Chỉ vào ô **Management/Architecture** — nhạt nhất | *"Ngược lại, **Management/Architecture** — ô màu nhạt nhất với chỉ 5% — gần như không tuyển người mới. Đây là nhóm đòi hỏi kinh nghiệm quản lý và thiết kế hệ thống — hoàn toàn hợp lý về mặt thực tế."* |
+| Chỉ vào treemap, giải thích 2 chiều dữ liệu | *"Treemap là biểu đồ mã hóa 2 chiều dữ liệu cùng lúc trên một hình: kích thước ô tương ứng tổng số tin tuyển dụng của nhóm vị trí, còn màu sắc ô là tỷ lệ % tin dành cho Intern/Fresher/Junior, thể hiện mức độ cởi mở. Ô vừa to vừa đậm màu là nhóm vị trí lý tưởng nhất cho người mới — vừa có nhiều việc vừa chào đón người chưa có kinh nghiệm."* |
+| Chỉ vào ô **IT Support/ERP** — đậm màu nhất | *"**IT Support/ERP** — màu đậm nhất biểu đồ — cởi mở nhất với gần **60%** tin dành cho nhân sự trẻ. Lý do rất dễ hiểu: đây là vai trò hỗ trợ và vận hành hệ thống — phù hợp với người mới học việc thực tế."* |
+| Chỉ vào ô **Software Development** — to nhất | *"**Software Development** — ô to nhất với 2.503 tin — vừa là nhóm lớn nhất thị trường vừa có mức độ cởi mở khá tốt, nên đây là nơi vừa có nhiều cơ hội nhất về số lượng, vừa khá đón nhận người trẻ so với mặt bằng chung."* |
+| Chỉ vào ô **Management/Architecture** — nhạt nhất | *"Ngược lại, **Management/Architecture** — ô màu nhạt nhất — gần như rất hiếm đón nhận người trẻ khi chỉ khoảng **5%** số tin liên quan đến nhân sự trẻ. Đây là nhóm đòi hỏi kinh nghiệm quản lý và thiết kế hệ thống, điều này hoàn toàn hợp lý về mặt thực tế."* |
 
 #### 📦 Biểu đồ 3 — Box Plot lương Intern vs Fresher `(~45")`
 
 | Hành động | Lời nói |
 |:---|:---|
-| Chỉ vào box plot, giải thích cách đọc | *"Box plot so sánh **phân phối lương** — không chỉ một con số trung bình — của Intern và Fresher tại 4 nhóm vị trí có đủ mẫu: Software Development, IT Support/ERP, AI/ML/Data Science và Mobile/Game/Embedded. Hộp thể hiện khoảng tứ phân vị, đường giữa là trung vị, các chấm là từng tin tuyển dụng thực tế."* |
-| Hover vào trung vị từng cặp box, nhấn mạnh khoảng cách | *"Điểm nổi bật: **Fresher luôn cao hơn Intern trên 2,6 lần ở tất cả 4 nhóm** — Software Development: Intern 3,8 triệu → Fresher 13,75 triệu (gấp 3,6 lần); Mobile/Game/Embedded: 4,25 → 15,62 triệu (gấp 3,7 lần). **Mốc tham chiếu 10 triệu/tháng** trên biểu đồ nằm gọn giữa hai dải Intern và Fresher — không chồng lấn ở bất kỳ nhóm vị trí nào. Đây là con số thực tế mà các bạn sinh viên có thể dùng làm mốc khi thương lượng lương khởi điểm. Xin mời **Trúc Hằng** demo phần AI."* |
+| Chỉ vào box plot, giải thích cách đọc | *"Biểu đồ hộp cuối cùng cho biết lương khởi điểm thực tế. Biểu đồ chỉ giữ lại các nhóm ngành có từ 20 tin Intern và Fresher trở lên, bỏ qua những nhóm chỉ có vài tin rải rác, vì với mẫu quá nhỏ thì chỉ cần một tin lương ghi sai hoặc bất thường cũng đủ làm lệch cả kết luận. Hộp thể hiện khoảng tứ phân vị, đường giữa là trung vị, các chấm là từng tin tuyển dụng thực tế."* |
+| Hover vào trung vị từng cặp box, nhấn mạnh khoảng cách | *"Điểm nổi bật: Fresher luôn cao hơn Intern rõ rệt ở tất cả 4 nhóm, có nơi gấp gần 4 lần — Software Development: Intern 3,8 triệu → Fresher 13,75 triệu. **Mốc tham chiếu 10 triệu/tháng** trên biểu đồ nằm gọn giữa hai dải Intern và Fresher — không chồng lấn ở bất kỳ nhóm vị trí nào, là con số thực tế các bạn sinh viên có thể dùng khi thương lượng lương khởi điểm. Điều đáng chú ý, AI là ngành đang được xem là hot nhất về nhu cầu tuyển dụng nhưng lại không phải nơi trả lương khởi điểm cao nhất cho Fresher, cho thấy một ngành hot về nhu cầu tuyển không đồng nghĩa lương khởi điểm cũng cao nhất. Tiếp theo, xin mời **Kim Yến** demo phần AI."* |
 
 ---
 
